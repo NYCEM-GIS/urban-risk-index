@@ -66,6 +66,10 @@ Located in {}
 path_readme = os.path.dirname(path_results)
 utils.write_readme(path_readme, text)
 
+#%% output complete message
+print("Finished calculating EXH death rate.")
+
+
 
 
 
