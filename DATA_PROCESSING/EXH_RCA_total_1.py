@@ -22,12 +22,15 @@ path_results = params.PATHNAMES.at['EXH_RCA_composite_score', 'Value']
 gdf_RCA.to_file(path_results)
 
 #%%  document result with readme
-text = """ 
-The data was produced by {}
-Located in {}
-""".format(os.path.basename(__file__), os.path.dirname(__file__))
-path_readme = os.path.dirname(path_results)
-utils.write_readme(path_readme, text)
+try:
+    text = """ 
+    The data was produced by {}
+    Located in {}
+    """.format(os.path.basename(__file__), os.path.dirname(__file__))
+    path_readme = os.path.dirname(path_results)
+    utils.write_readme(path_readme, text)
+except:
+    pass
 
 #%% output complete message
 print("Finished calculating EXH RCA composite score.")
