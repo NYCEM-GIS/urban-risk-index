@@ -42,7 +42,7 @@ path_block = params.PATHNAMES.at['census_blocks', 'Value']
 gdf_block = gpd.read_file(path_block)
 gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 
-#%%find id for join on popualtion
+#%%find id for join on population
 df_population['BCT_ID'] = [str(int(df_population['2010 DCP Borough Code'].iloc[i])) + \
                            str(int(df_population['2010 Census Tract'].iloc[i])).zfill(6) for i in np.arange(len(df_population))]
 

@@ -10,6 +10,7 @@ import geopandas as gpd
 #%% set home directory
 def set_home():
     os.chdir(params.PATHNAMES.at['home', 'Value'])
+set_home()
 
 #%% create readme
 def write_readme(path_readme, readme_text):
@@ -76,6 +77,41 @@ def convert_to_tract_average(path_data, column_name, column_name_out,
                                               weights=this_gdf_union['area_ft2'].values)
             gdf_tract.at[idx, column_name_out] = DATA_VALUE_tract_ave
     return gdf_tract
+
+#%% convert value to 2018 dollars using consumer price index (CPI)
+def convert_USD(base_value, base_year: int):
+    #get target year from parameters
+    target_year = params.SETTINGS.at['target_year', 'Value']
+    #load CPI index
+    path_CPI = params.PATHNAMES.at['CPI_table', 'Value']
+    df_CPI = pd.read_excel(path_CPI, skiprows=10,
+                           index_col=0, parse_dates=True)
+    #get the yearly average
+    df_CPI_year = df_CPI.resample('Y').mean()
+    df_CPI_year.index = df_CPI_year.index.year
+    index_factor = df_CPI_year.at[target_year, 'CPIAUCNS' ] / df_CPI_year.at[base_year, 'CPIAUCNS' ]
+    target_value = base_value * index_factor
+    return target_value
+
+#%% calculate RCA using pre-processed factors
+#all factors should be census tract level results
+#list_factors_gdf is a list of the factors as geodataframes
+#list_factors_columns is a list of the column names with the relevant scor
+#dict_buckets is a coding for the RCA bucket for each factor.  It is blank for now.
+def calculate_RCA(list_factor_gdfs, list_factor_columns, dict_buckets={}):
+    # get data to convert
+    epsg = params.SETTINGS.at['epsg', 'Value']
+    path_block = params.PATHNAMES.at['census_blocks', 'Value']
+    gdf_block = gpd.read_file(path_block)
+    gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
+    gdf_tract = gdf_tract.to_crs(epsg=epsg)
+    #open each gdf and take average of all factor columns (for now)
+    for i, gdf in enumerate(list_factor_gdfs):
+        gdf_tract = gdf_tract.merge(gdf.drop(columns='geometry'), on='BCT_txt')
+    #no nan handling for now
+    gdf_tract['Composite_Score'] = gdf_tract[list_factor_columns].mean(axis=1)
+    return gdf_tract
+
 
 
 
