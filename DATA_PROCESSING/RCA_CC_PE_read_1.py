@@ -60,7 +60,7 @@ for i, idx in enumerate(gdf_tract.index):
     gdf_tract.at[idx, 'Score'] = this_score
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_CC_PA_score', 'Value']
+path_output = params.PATHNAMES.at['RCA_CC_PE_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%%  document result with readme

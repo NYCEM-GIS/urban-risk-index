@@ -106,10 +106,15 @@ def calculate_RCA(list_factor_gdfs, list_factor_columns, dict_buckets={}):
     gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
     gdf_tract = gdf_tract.to_crs(epsg=epsg)
     #open each gdf and take average of all factor columns (for now)
+    list_factor_columns_adj = []
     for i, gdf in enumerate(list_factor_gdfs):
+        this_score_column = list_factor_columns[i]
+        this_score_column_adj = this_score_column + "_{}".format(i)
+        list_factor_columns_adj.append(this_score_column_adj)
+        gdf[this_score_column_adj] = gdf[this_score_column]
         gdf_tract = gdf_tract.merge(gdf.drop(columns='geometry'), on='BCT_txt')
     #no nan handling for now
-    gdf_tract['Composite_Score'] = gdf_tract[list_factor_columns].mean(axis=1)
+    gdf_tract['Score'] = gdf_tract[list_factor_columns_adj].sum(axis=1)
     return gdf_tract
 
 #%% calculate kmeans score and label
@@ -123,7 +128,7 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5):
     df_label.sort_values('Cluster_Center', inplace=True)
     df_label[score_column] = np.arange(1, n_cluster+1)
     #assign score to each cluster
-    df_result = df.merge(df_label[['Cluster_ID', 'Score']], on='Cluster_ID', how='left')
+    df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
     return df_result
 
 #%% count number of points (or fraction of) within 1/2 mile of tract

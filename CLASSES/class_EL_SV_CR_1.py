@@ -22,6 +22,7 @@ import geopandas as gpd
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+from MISC import utils_1 as utils
 
 
 # %% define class ESL
@@ -79,6 +80,35 @@ class RCA:
         self.hazard_name = hazard_name
         self.RCA_map = map_tract
         pass
+
+#%% define URI class
+class URI:
+
+    def __init__(self, hazard_name: str, ESL, SOV, RCA):
+        self.hazard_name = hazard_name
+        self.ESL = ESL
+        self.SOV = SOV
+        self.RCA = RCA
+        pass
+
+    def calc_URI(self):
+        #calculate raw URI
+        self.URI_map = self.ESL.ESL_map.copy()
+        self.URI_map['URI_Score_Raw'] = self.ESL.ESL_map['Loss_USD']*self.SOV.SOV_map['Score'] / self.RCA.RCA_map['Score']
+        # for i, idx in enumerate(self.URI_map.index):
+        #     this_BCT = self.URI_map.at[idx, 'BCT_txt']
+        #     this_ESL = self.URI_map.at[idx, 'Loss_USD']
+        #     this_SOV = self.SOV.SOV_map.loc[self.SOV.SOV_map['BCT_txt']==this_BCT, 'Score']
+        #     this_RCA = self.RCA.RCA_map.loc[self.RCA.RCA_map['BCT_txt']==this_BCT, 'Score']
+        #     this_URI_raw = this_ESL * this_SOV / this_RCA
+        #     self.URI_map.at[idx, 'URI_Score_Raw'] = this_URI_raw
+
+        #calculate score 1-5
+        self.URI_map = utils.calculate_kmeans(self.URI_map, data_column = 'URI_Score_Raw', score_column='URI_Score',
+                                              n_cluster = 5)
+        pass
+
+
 
 
 

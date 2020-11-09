@@ -48,7 +48,7 @@ for i, idx in enumerate(gdf_buffer.index):
     #add to df_fill
     df_fill = df_fill.append(this_intersect[['BCT_txt', 'Fraction_Covered']])
     if i % 50 == 0:
-        print("."),
+        print(".")
 print('.')
 
 #%% get the sum  by tract and join
