@@ -37,7 +37,7 @@ gdf_tract = gdf_tract.merge(df_FIPS, left_on='BoroCode_Int', right_on='Bor_ID', 
 gdf_tract['FIPS_CT'] = [str(gdf_tract.at[idx, 'FIPS']) + str(gdf_tract.at[idx, 'BCT_txt'])[1:] for idx in gdf_tract.index]
 gdf_tract = gdf_tract.merge(gdf_sovi[['FIPS', 'RPL_THEMES']], left_on='FIPS_CT', right_on='FIPS', how='left')
 
-#%% normalize result to scale of 1 to 99
+#%% normalize result to scale of 0.01 to 0.99
 gdf_tract['SOV_rank'] = utils.normalize_rank_percentile(gdf_tract['RPL_THEMES'].values,
                                                         list_input_null_values=[0, -999],
                                                         output_null_value=-999)
@@ -47,9 +47,15 @@ path_results = params.PATHNAMES.at['SOV_results_raw', 'Value']
 gdf_tract.to_file(path_results)
 
 #%%  document result with readme
-text = """ 
-The data was produced by {}
-Located in {}
-""".format(os.path.basename(__file__), os.path.dirname(__file__))
-path_readme = os.path.dirname(path_results)
-utils.write_readme(path_readme, text)
+try:
+    text = """ 
+    The data was produced by {}
+    Located in {}
+    """.format(os.path.basename(__file__), os.path.dirname(__file__))
+    path_readme = os.path.dirname(path_results)
+    utils.write_readme(path_readme, text)
+except:
+    pass
+
+#%% output complete message
+print("Finished calculating SOV score.")
