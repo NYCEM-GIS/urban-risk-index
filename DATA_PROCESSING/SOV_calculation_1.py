@@ -42,6 +42,13 @@ gdf_tract['SOV_rank'] = utils.normalize_rank_percentile(gdf_tract['RPL_THEMES'].
                                                         list_input_null_values=[0, -999],
                                                         output_null_value=-999)
 
+#%% use clustering to score 1,2,3,4,5
+#assign median values to null data
+gdf_tract['RPL_THEMES_ADJ'] = gdf_tract['RPL_THEMES']
+gdf_tract.loc[gdf_tract['RPL_THEMES']==-999, 'RPL_THEMES_ADJ'] = gdf_tract.loc[gdf_tract['RPL_THEMES']!=-999, 'RPL_THEMES_ADJ'].median()
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='RPL_THEMES_ADJ', score_column='Score',
+                                   n_cluster=5)
+
 #%% save results in
 path_results = params.PATHNAMES.at['SOV_results_raw', 'Value']
 gdf_tract.to_file(path_results)
