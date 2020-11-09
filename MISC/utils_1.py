@@ -6,6 +6,8 @@ from MISC import params_1 as params
 import os
 import scipy.stats as stats
 import geopandas as gpd
+from sklearn.cluster import KMeans
+
 
 #%% set home directory
 def set_home():
@@ -46,11 +48,9 @@ def convert_to_tract_average(path_data, column_name, column_name_out,
     gdf_block = gpd.read_file(path_block)
     gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
     gdf_tract = gdf_tract.to_crs(epsg=epsg)
-
     #get spatial union, drop areas with no tract
     gdf_union = gpd.overlay(gdf_tract, gdf_data, how='union')
     gdf_union.dropna(subset=['BCT_txt'], inplace=True)
-
     #calculate area of each union slice
     gdf_union['area_ft2'] = gdf_union['geometry'].area
     # for each tract, calculate area weighted average of contributions
@@ -110,6 +110,57 @@ def calculate_RCA(list_factor_gdfs, list_factor_columns, dict_buckets={}):
         gdf_tract = gdf_tract.merge(gdf.drop(columns='geometry'), on='BCT_txt')
     #no nan handling for now
     gdf_tract['Composite_Score'] = gdf_tract[list_factor_columns].mean(axis=1)
+    return gdf_tract
+
+#%% calculate kmeans score and label
+def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5):
+    kmeans = KMeans(n_clusters=5)
+    df['Cluster_ID'] = kmeans.fit_predict(df[[data_column]])
+    #make lookup for class label
+    df_label = pd.DataFrame()
+    df_label['Cluster_ID'] = np.arange(n_cluster)
+    df_label['Cluster_Center'] = kmeans.cluster_centers_.flatten()
+    df_label.sort_values('Cluster_Center', inplace=True)
+    df_label[score_column] = np.arange(1, n_cluster+1)
+    #assign score to each cluster
+    df_result = df.merge(df_label[['Cluster_ID', 'Score']], on='Cluster_ID', how='left')
+    return df_result
+
+#%% count number of points (or fraction of) within 1/2 mile of tract
+#gdf_data is point layer, column_key is unique id for each point
+def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
+    #load gdf_tract
+    epsg = params.SETTINGS.at['epsg', 'Value']
+    gdf_data = gdf_data.to_crs(epsg=epsg)
+    path_block = params.PATHNAMES.at['census_blocks', 'Value']
+    gdf_block = gpd.read_file(path_block)
+    gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
+    gdf_tract = gdf_tract.to_crs(epsg=epsg)
+    gdf_tract['area_ft2'] = gdf_tract['geometry'].area
+    #make shapefile with 1/2 mile radius
+    gdf_buffer = gdf_data.copy()
+    gdf_buffer['geometry'] = gdf_data['geometry'].buffer(distance=buffer_distance_ft)
+    #create empty df to fill
+    df_fill = pd.DataFrame()
+    df_fill['BCT_txt'] = []
+    df_fill['Fraction_Covered'] = []
+    # loop through each buffer, and add BCT_txt and area filled to list
+    print("Calculating.", end='')
+    for i, idx in enumerate(gdf_buffer.index):
+        this_buffer = gdf_buffer.loc[[idx]]
+        this_intersect = gpd.overlay(gdf_tract, this_buffer[[column_key, 'geometry']], how='intersection')
+        this_intersect['area_intersect_ft2'] = this_intersect['geometry'].area
+        this_intersect['Fraction_Covered'] = np.minimum(this_intersect['area_intersect_ft2'] / this_intersect['area_ft2'], 1.0)
+        #add to df_fill
+        df_fill = df_fill.append(this_intersect[['BCT_txt', 'Fraction_Covered']])
+        if i % 500 == 0:
+            print(".", end=''),
+    print('Done')
+    #get the sum  by tract and join
+    df_sum = df_fill.groupby(by='BCT_txt').sum()
+    gdf_tract = gdf_tract.merge(df_sum, on='BCT_txt', how='left')
+    #fill nan with value 0
+    gdf_tract.fillna(0, inplace=True)
     return gdf_tract
 
 

@@ -26,7 +26,7 @@ value_life = utils.convert_USD(value_life_2018, 2018)
 #%% mere into single dataframe and calculate
 gdf_loss = gdf_events_per_year.merge(gdf_deaths_per_event.drop(columns='geometry'), on='BCT_txt', how='left')
 gdf_loss['deaths_year'] = gdf_loss['Heat_Event'] * gdf_loss['deaths_per']
-gdf_loss['deaths_loss'] = gdf_loss['deaths_year'] * value_life
+gdf_loss['Loss_USD'] = gdf_loss['deaths_year'] * value_life
 
 #%% save results in
 path_results = params.PATHNAMES.at['EXH_ESL_deaths_per_year_tract', 'Value']

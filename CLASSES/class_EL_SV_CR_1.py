@@ -31,7 +31,6 @@ class ESL:
     def __init__(self, hazard_name: str):
         self.hazard_name = hazard_name
         self.consequence = {}
-        self.ESL_total = 0
         self.list_consequences = []
         pass
 
@@ -52,10 +51,11 @@ class ESL:
             # loop and add each consequence
             for i, cons in enumerate(self.list_consequences):
                 if i == 0:
-                    ESL_total = self.consequence[cons]["map_tract"]["Loss_USD"]
+                    Loss_USD_Total = self.consequence[cons]["map_tract"]["Loss_USD"]
+                    self.ESL_map = self.consequence[cons]["map_tract"]
                 else:
-                    ESL_total += self.consequence[cons]["map_tract"]["Loss_USD"]
-        self.ESL_total = ESL_total
+                    Loss_USD_Total += self.consequence[cons]["map_tract"]["Loss_USD"]
+        self.ESL_map['Loss_USD'] = Loss_USD_Total
         pass
 
 
@@ -64,8 +64,9 @@ class ESL:
 
 class SOV:
 
-    def __init__(self, map_tract):
-        self.SOV_total = map_tract
+    def __init__(self, hazard_name, map_tract):
+        self.hazard_name = hazard_name
+        self.SOV_map = map_tract
         pass
 
 #%% define class for RCA
@@ -76,7 +77,7 @@ class RCA:
 
     def __init__(self, hazard_name: str, map_tract):
         self.hazard_name = hazard_name
-        self.RCA_total = map_tract
+        self.RCA_map = map_tract
         pass
 
 
