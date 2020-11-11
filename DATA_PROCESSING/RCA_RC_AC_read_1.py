@@ -15,7 +15,7 @@ from MISC import utils_1 as utils
 utils.set_home()
 
 #%% load AC data and convert to track average
-path_ac = params.PATHNAMES.at['RCA_EXT_ac_raw', 'Value']
+path_ac = params.PATHNAMES.at['RCA_RC_ACH_raw', 'Value']
 column_ac = "DATA_VALUE"
 column_ac_out = "ac_per"
 
@@ -26,9 +26,10 @@ gdf_tract = utils.convert_to_tract_average(path_ac, column_ac,column_ac_out,
 gdf_tract['ac_per_rnk'] = utils.normalize_rank_percentile(gdf_tract['ac_per'].values,
                                                           list_input_null_values=[-999],
                                                           output_null_value=-999)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='ac_per_rnk')
 
 #%% save results in
-path_results = params.PATHNAMES.at['RCA_EXT_AC', 'Value']
+path_results = params.PATHNAMES.at['RCA_RC_ACH_score', 'Value']
 gdf_tract.to_file(path_results)
 
 #%%  document result with readme
@@ -41,4 +42,7 @@ try:
     utils.write_readme(path_readme, text)
 except:
     pass
+
+#%% output complete message
+print("Finished calculating RC factor ac.")
 

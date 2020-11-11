@@ -37,11 +37,15 @@ def normalize_rank_percentile(values, list_input_null_values=[-999], output_null
     return values_out
 
 #%% zonal statistics with input shapefile into output shapefile
+#path data can either be string or actual data gdf file
 #handle null values.
 def convert_to_tract_average(path_data, column_name, column_name_out,
                              list_input_null_values=[-999], output_null_value=-999):
     #get data to convert
-    gdf_data = gpd.read_file(path_data)
+    if type(path_data)==str:
+        gdf_data = gpd.read_file(path_data)
+    else:
+        gdf_data = path_data.copy()
     epsg = params.SETTINGS.at['epsg', 'Value']
     gdf_data = gdf_data.to_crs(epsg=epsg)
     path_block = params.PATHNAMES.at['census_blocks', 'Value']
@@ -167,6 +171,11 @@ def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
     #fill nan with value 0
     gdf_tract.fillna(0, inplace=True)
     return gdf_tract
+
+def project_gdf(gdf):
+    epsg = epsg = params.SETTINGS.at['epsg', 'Value']
+    gdf = gdf.to_crs(epsg = epsg)
+    return gdf
 
 
 

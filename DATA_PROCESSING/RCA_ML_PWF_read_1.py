@@ -1,0 +1,42 @@
+""" get parks with water features cover data"""
+
+#%% read packages
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+import os
+import matplotlib.pyplot as plt
+
+from MISC import params_1 as params
+from MISC import utils_1 as utils
+utils.set_home()
+
+#%% load data
+path_pwf = params.PATHNAMES.at['RCA_ML_PWF_raw', 'Value']
+gdf_pwf = gpd.read_file(path_pwf)
+gdf_pwf = utils.project_gdf(gdf_pwf)
+gdf_pwf['OBJECTID'] = np.arange(len(gdf_pwf))
+
+#%% calculate radial count, 1/2 mile
+gdf_tract = utils.calculate_radial_count(gdf_pwf, column_key= 'OBJECTID', buffer_distance_ft=2640)
+
+#%% xconvert to score 1-5
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Fraction_Covered', score_column='Score', n_cluster=5)
+
+#%% save as output
+path_output = params.PATHNAMES.at['RCA_ML_PWF_score', 'Value']
+gdf_tract.to_file(path_output)
+
+#%%  document result with readme
+try:
+    text = """ 
+    The data was produced by {}
+    Located in {}
+    """.format(os.path.basename(__file__), os.path.dirname(__file__))
+    path_readme = os.path.dirname(path_output)
+    utils.write_readme(path_readme, text)
+except:
+    pass
+
+#%% output complete message
+print("Finished calculating RCA factor: park water feature.")

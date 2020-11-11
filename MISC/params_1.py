@@ -16,5 +16,5 @@ PARAMS = pd.read_excel(path_params, sheet_name='PARAMS', index_col=0)
 WEIGHTS = pd.read_excel(path_params, sheet_name='WEIGHTS', index_col=0)
 SETTINGS = pd.read_excel(path_params, sheet_name='SETTINGS', index_col=0)
 HARDCODED = pd.read_excel(path_params, sheet_name='HARDCODED', index_col=0)
-
-
+ABBREVIATIONS = pd.read_excel(path_params, sheet_name='ABBREVIATIONS', header=None)
+MITIGATION = pd.read_excel(path_params, sheet_name='MITIGATION', skiprows=1)
