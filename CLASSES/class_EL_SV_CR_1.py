@@ -94,17 +94,10 @@ class URI:
     def calc_URI(self):
         #calculate raw URI
         self.URI_map = self.ESL.ESL_map.copy()
-        self.URI_map['URI_Score_Raw'] = self.ESL.ESL_map['Loss_USD']*self.SOV.SOV_map['Score'] / self.RCA.RCA_map['Score']
-        # for i, idx in enumerate(self.URI_map.index):
-        #     this_BCT = self.URI_map.at[idx, 'BCT_txt']
-        #     this_ESL = self.URI_map.at[idx, 'Loss_USD']
-        #     this_SOV = self.SOV.SOV_map.loc[self.SOV.SOV_map['BCT_txt']==this_BCT, 'Score']
-        #     this_RCA = self.RCA.RCA_map.loc[self.RCA.RCA_map['BCT_txt']==this_BCT, 'Score']
-        #     this_URI_raw = this_ESL * this_SOV / this_RCA
-        #     self.URI_map.at[idx, 'URI_Score_Raw'] = this_URI_raw
+        self.URI_map['URI_Raw'] = self.ESL.ESL_map['Loss_USD']*self.SOV.SOV_map['SOV'] / self.RCA.RCA_map['RCA']
 
         #calculate score 1-5
-        self.URI_map = utils.calculate_kmeans(self.URI_map, data_column = 'URI_Score_Raw', score_column='URI_Score',
+        self.URI_map = utils.calculate_kmeans(self.URI_map, data_column = 'URI_Raw', score_column='URI',
                                               n_cluster = 5)
         pass
 

@@ -18,15 +18,15 @@ utils.set_home()
 folder_outputs = params.PATHNAMES.at['OUTPUTS_folder', 'Value']
 list_abbrev = params.ABBREVIATIONS.iloc[0:11, 0].values
 
-#%% open tract
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
-gdf_tract.index = np.arange(len(gdf_tract))
-
 #%% calculate RCA
 for i, haz in enumerate(list_abbrev):
+
+    # %% open tract
+    path_block = params.PATHNAMES.at['census_blocks', 'Value']
+    gdf_block = gpd.read_file(path_block)
+    gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
+    gdf_tract = utils.project_gdf(gdf_tract)
+    gdf_tract.index = np.arange(len(gdf_tract))
 
     #find codes and their components with valid data
     list_code = params.MITIGATION.loc[:, 'Factor Code'].values
@@ -73,10 +73,13 @@ for i, haz in enumerate(list_abbrev):
             gdf_tract['{}'.format(component)] = gdf_tract.loc[:, this_code].sum(axis=1)/len(this_code)
 
     #calculate final RCA
-    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/4.0
+    #CHANGE TO divede by 4.0 when RC data is available
+    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/3.0
+    print(gdf_tract['RCA'].min())
+    print(gdf_tract['RCA'].max())
 
     # save as output
-    path_output = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\{}\\{}_RCA_tract.shp'.format(haz, haz)
+    path_output = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\RCA\\RCA_{}_tract.shp'.format(haz)
     gdf_tract.to_file(path_output)
 
     #  document result with readme
