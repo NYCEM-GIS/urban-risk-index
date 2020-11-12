@@ -74,7 +74,7 @@ for i, haz in enumerate(list_abbrev):
 
     #calculate final RCA
     #CHANGE TO divede by 4.0 when RC data is available
-    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/3.0
+    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/4.0
     print(gdf_tract['RCA'].min())
     print(gdf_tract['RCA'].max())
 
