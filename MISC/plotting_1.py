@@ -67,8 +67,10 @@ def plot_SOV_nb(gdf_data):
 if __name__ == '__main__':
 
     #%% plot URI
-    list_haz = ['EXH']
-    for haz in list_haz:
+    list_haz = ['EXH', 'WIW', 'CST', 'CER', 'HIW']
+    list_haz_name = ['Extreme Heat', 'Winter Weather', 'Coastal Storm',
+           'Coastal Erosion', 'High Winds']
+    for i, haz in enumerate(list_haz):
         path_save = params.PATHNAMES.at['FIGURES_folder', 'Value'] + r'\\URI\\URI_{}_1.pdf'.format(haz)
         path_data = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\URI_{}_tract.shp'.format(haz, haz)
         gdf_data = gpd.read_file(path_data)
@@ -81,12 +83,12 @@ if __name__ == '__main__':
                       legend_kwds={'title': 'Value', 'bbox_to_anchor':(.2, .9),
                                    'frameon':False})
         gdf_data.boundary.plot(ax=ax, color='k', lw=0.1)
-        plt.title('Urban Risk Index - Extreme Heat', fontsize=20)
+        plt.title('Urban Risk Index - {}'.format(list_haz_name[i]), fontsize=20)
         if bool_save: plt.savefig(path_save)
         plt.show()
 
     #%% plot ESL
-    for haz in list_haz:
+    for i, haz in enumerate(list_haz):
         path_save = params.PATHNAMES.at['FIGURES_folder', 'Value'] + r'\\ESL\\ESL_{}_1.pdf'.format(haz)
         path_data = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\ESL\ESL_{}_tract.shp'.format(haz, haz)
         gdf_data = gpd.read_file(path_data)
@@ -102,7 +104,7 @@ if __name__ == '__main__':
             gdf_data.plot(ax=ax, column='Loss_USD', legend=True, cmap='Greens', categorical=False,
                           legend_kwds={'label': 'Loss [USD]'})
         gdf_data.boundary.plot(ax=ax, color='k', lw=0.1)
-        plt.title('Expected Annual Loss - Extreme Heat', fontsize=20)
+        plt.title('Expected Annual Loss - {}'.format(list_haz_name[i]), fontsize=20)
         if bool_save: plt.savefig(path_save)
         plt.show()
 

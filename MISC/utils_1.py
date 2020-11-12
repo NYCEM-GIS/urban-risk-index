@@ -197,6 +197,19 @@ def distribute_loss_by_pop(USD_loss_2019):
     gdf_tract['Loss_USD'] = USD_loss_2019 * gdf_tract['pop_2010'] / pop_total
     return gdf_tract
 
+#assumes gdf_tract has "Loss_USD field to normalize by pop
+def normalize_loss_by_population(gdf_tract):
+    # open population and join
+    path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
+    df_pop = pd.read_excel(path_population_tract, skiprows=5)
+    df_pop.dropna(inplace=True)
+    df_pop.rename(columns={2010:'pop_2010'}, inplace=True)
+    df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2010 DCP Borough Code'])) + str(int(df_pop.at[x,'2010 Census Tract'])).zfill(6) for x in df_pop.index]
+    gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')
+    # distribute cost to each tract by population
+    gdf_tract['Loss_USD'] = gdf_tract['Loss_USD'] / (gdf_tract['pop_2010'])
+    gdf_tract.fillna(0, inplace=True)
+    return gdf_tract
 
 
 
