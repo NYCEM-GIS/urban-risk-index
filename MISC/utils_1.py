@@ -208,9 +208,10 @@ def normalize_loss_by_population(gdf_tract):
     gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')
     # distribute cost to each tract by population
     gdf_tract['Loss_USD'] = gdf_tract['Loss_USD'] / (gdf_tract['pop_2010'])
+    gdf_tract.replace([np.inf, -np.inf], np.nan, inplace=True)
     gdf_tract.fillna(0, inplace=True)
+    gdf_tract.to_file(r'C:\temp\gdf_tract.shp')
     return gdf_tract
-
 
 
 
