@@ -11,8 +11,7 @@ These scripts perform the calculations for the New York City Emergency Managemen
 - High winds (HIW)
 - Respiratory disease pandemic (RES)
 - Winter weather (WIW)
-The URI score for each hazard takes into account three factors:  estimated annualized loss (ESL), social vulnerability (SOV), and resilience capacity (RCA).  The repository contents are described below.  
-
+The URI score for each hazard takes into account three factors:  estimated annualized loss (ESL), social vulnerability (SOV), and resilience capacity (RCA).  The repository contents are described below.  Note this repository is under development.  Code and comments are regularly modified and added.
 
 ## CALCS
 This folder is not currently used.
