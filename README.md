@@ -27,8 +27,8 @@ Naming convention: The first three letters of each script reference the relevant
 
 ## MISC
 This folder contains miscellaneous scripts used in the URI calculation.  Here is a brief description of each:
-- utils_1.py: defines utility functions that are used by the scripts in the DATA_PROCESSING folder.  The utility scripts perform commonly-needed operations such as loading and projecting the census tract shapefile, putting an shapefile into the desired projection, or performing a dasymetric transformation between tract, neighborhood, and community levels.  
-- params_1.py: loads the parameters for the URI calculation from an excel spreadsheet.  The spreadsheet is saved outside the repository in ../5_PARAMES/.
+- utils_1.py: defines utility functions that are used by the scripts in the DATA_PROCESSING folder.  The utility scripts perform commonly-needed operations such as loading and projecting the census tract shapefile, putting a shapefile into the desired projection, or performing a dasymetric transformation between tract, neighborhood, and community levels.  
+- params_1.py: loads the parameters for the URI calculation from an excel spreadsheet.  The spreadsheet is saved outside the repository in ../5_PARAMS/.
 - folder_setup_1.py: creates the folder structure to store outputs from the URI calculation.
 - plotting_1.py: creates plots and maps of the URI calculation results.
 - read_nri_1.py: reads and plots data downloaded from the National Risk Index (NRI) for comparative anaysis.  This data was not used in the NRI calculation.
