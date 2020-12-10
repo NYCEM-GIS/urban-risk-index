@@ -13,6 +13,7 @@ These scripts perform the calculations for the New York City Emergency Managemen
 - Winter weather (WIW)
 The URI score for each hazard take into account three factors:  estimated annualized loss (ESL), social vulnerability (SOV), and resilience capacity (RCA).  The repository contents are described below.  
 
+
 ## CALCS
 This folder is not currently used.
 
@@ -35,6 +36,7 @@ This folder contains miscellaneous scripts used in the URI calculation.  Here is
 ## NOTEBOOKS
 This folder contains jupyter notebooks that perform the URI calculations for specific hazards.  The hazard acronym is in the notebook title.  
 
-*Contact: Dano Wilusz at dwilusz@dewberry.com
+For more infommation, contact Dano Wilusz at dwilusz@dewberry.com.
+
 
 
