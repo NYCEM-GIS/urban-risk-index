@@ -18,7 +18,7 @@ The URI score for each hazard takes into account three factors:  estimated annua
 This folder is not currently used.
 
 ## CLASSES
-This folder contains the class_EL_SV_CR python script that defines the object constructor for the EL, SV, CR, and URI objects.  The python notebooks use the EL, SV, CR, and URI objects to store data about each subcomponent for each hazard, to perform simple operations on that data such as plot.
+This folder contains the class_EL_SV_CR python script that defines the object constructor for the EL, SV, CR, and URI objects.  The python notebooks use the EL, SV, CR, and URI objects to store data about each subcomponent for each hazard, as well as to perform simple operations on the stored data.
 
 ## DATA_PROCESSING
 This folder contains python scripts that process raw data into processed data.  The raw data inputs are stored outside of the repository in ../1_RAW_INPUTS.  In general, the raw data files were provided by NYCEM or downloaded from public web sites. The processing includes projection, null-data handling, resampling to census tracts, and conversion of consequences to estimated losses.  The outputs produced by the script are saved in ../2_PROCESSED_INPUTS.
