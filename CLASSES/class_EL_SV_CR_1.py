@@ -1,21 +1,3 @@
-"""
-Define class ESL that contains information about estimated loss.
-Note the class does not include functions for preprocessing
-specific hazard information. This is done by scripts.
-ESL class variables:
-- hazard name
-- tract dictionary with item for each consequence:
--- receptor string
--- value (tract level cost shapefile)
-- total dictionary with total
--- value
-- similar dictionaries for neighborhood, community, borough
-- inputs dictionary - other inputs such as liklihood
-ESL class functions
--- add consequence (specifying resolution, receptor, cost)
---
-"""
-
 # %% import packages
 import pandas as pd
 import geopandas as gpd
@@ -24,8 +6,11 @@ import os
 import matplotlib.pyplot as plt
 from MISC import utils_1 as utils
 
-
-# %% define class ESL
+"""
+Define class ESL that contains information about estimated loss.
+Note the class does not include functions for preprocessing
+specific hazard information. 
+"""
 
 class ESL:
 
