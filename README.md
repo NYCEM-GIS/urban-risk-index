@@ -1,7 +1,7 @@
 # NYCEM_URI
 These scripts perform the calculations for the New York City Emergency Management (NYCEM) Urban Risk Index (URI) project. The URI scores the relative risk in each NYC census tract for 11 different hazards:  
 - Coastal erosion (CER)
-- Chemical, biological, radiation, and nuclear threats (CBRN)
+- Chemical, biological, radiation, and nuclear threats (CRN)
 - Coastal storms (CST)
 - Cyber threats (CYB)
 - Emerging diseases epidemic (EMG)
