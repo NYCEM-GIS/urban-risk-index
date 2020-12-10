@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 #%%
-path_params = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\5_PARAMS\URI_PARAMS_RUN1.xlsx'
+path_params = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\5_PARAMS\URI_PARAMS_RUN2.xlsx'
 
 #%% create params variable
 

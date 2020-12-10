@@ -12,6 +12,7 @@ import requests
 
 from MISC import params_1 as params
 from MISC import utils_1 as utils
+from MISC import plotting_1 as plotting
 utils.set_home()
 
 #%% open event types - note 6 is coastal storm
@@ -45,12 +46,32 @@ n_injuries = df_storms_cst['Injuries'].sum() / n_years
 loss_deaths_2015 = params.PARAMS.at['value_of_stat_life_2015', 'Value'] * n_deaths
 loss_deaths_total = utils.convert_USD(loss_deaths_2015, 2015)
 
-#%%  distribute loss by population
-gdf_tract = utils.distribute_loss_by_pop(loss_deaths_total)
+#%%  distribute loss by population and total losses from coastal flooding and hurricane wind
+gdf_tract = utils.get_blank_tract()
+path_FLD_loss = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
+gdf_FLD = gpd.read_file(path_FLD_loss)
+path_HIW_loss = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
+gdf_HIW = gpd.read_file(path_HIW_loss)
+#join losses
+gdf_tract = gdf_tract.merge(gdf_FLD[['BCT_txt', 'Loss_USD']], on='BCT_txt', how='left')
+gdf_tract.rename(columns={'Loss_USD':'Loss_USD_FLD'}, inplace=True)
+gdf_tract = gdf_tract.merge(gdf_HIW[['BCT_txt', 'Loss_USD']], on='BCT_txt', how='left')
+gdf_tract.rename(columns={'Loss_USD':'Loss_USD_HIW'}, inplace=True)
+#join population
+path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
+df_pop = pd.read_excel(path_population_tract, skiprows=5)
+df_pop.dropna(inplace=True)
+df_pop.rename(columns={2010:'pop_2010'}, inplace=True)
+df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2010 DCP Borough Code'])) + str(int(df_pop.at[x,'2010 Census Tract'])).zfill(6) for x in df_pop.index]
+gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')
+gdf_tract['weight'] = gdf_tract['pop_2010'] * (gdf_tract['Loss_USD_FLD']+gdf_tract['Loss_USD_HIW'])
+gdf_tract['Loss_USD'] = loss_deaths_total * gdf_tract['weight'] / gdf_tract['weight'].sum()
+
 
 #%% save as output
 path_output = params.PATHNAMES.at['ESL_CST_deaths_loss', 'Value']
 gdf_tract.to_file(path_output)
+
 
 #%%  document result with readme
 try:

@@ -213,6 +213,18 @@ def normalize_loss_by_population(gdf_tract):
     gdf_tract.to_file(r'C:\temp\gdf_tract.shp')
     return gdf_tract
 
+#%% open NYC tract
+def get_blank_tract():
+    path_tract = params.PATHNAMES.at['BOUNDARY_tract', 'Value']
+    list_exclude = params.HARDCODED.at['list_excluded_tracts', 'Value']
+    gdf_tract = gpd.read_file(path_tract)
+    bool_keep = [x not in list_exclude for x in gdf_tract['BOROCT']]
+    gdf_tract = gdf_tract.loc[bool_keep, :].copy()
+    gdf_tract['BCT_txt'] = gdf_tract['BOROCT'].values
+    gdf_tract = project_gdf(gdf_tract)
+    gdf_tract.index = np.arange(len(gdf_tract))
+    return gdf_tract
+
 
 
 

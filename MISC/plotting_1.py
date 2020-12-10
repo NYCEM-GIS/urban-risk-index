@@ -64,6 +64,16 @@ def plot_SOV_nb(gdf_data):
     plt.title('Social Vulnerability Score - All Hazards', fontsize=20)
     plt.show()
 
+def plot_inline(gdf_data, column, scheme='equal_interval'):
+    fig = plt.figure(figsize=(9, 6.5))
+    ax = fig.add_subplot(111)
+    if scheme=='equal_interval':
+        gdf_data.plot(ax=ax, column=column, categorical=False, legend=True)
+    else:
+        gdf_data.plot(ax=ax, column=column, categorical=False, legend=True,
+                      scheme=scheme)
+    plt.show()
+
 if __name__ == '__main__':
 
     #%% plot URI
