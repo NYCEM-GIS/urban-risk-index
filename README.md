@@ -31,7 +31,7 @@ This folder contains miscellaneous scripts used in the URI calculation.  Here is
 - params_1.py: loads the parameters for the URI calculation from an excel spreadsheet.  The spreadsheet is saved outside the repository in ../5_PARAMS/.
 - folder_setup_1.py: creates the folder structure to store outputs from the URI calculation.
 - plotting_1.py: creates plots and maps of the URI calculation results.
-- read_nri_1.py: reads and plots data downloaded from the National Risk Index (NRI) for comparative anaysis.  This data was not used in the NRI calculation.
+- read_nri_1.py: reads and plots data downloaded from the National Risk Index (NRI) for comparative anaysis.  This data was not used in the URI calculation.
 
 ## NOTEBOOKS
 This folder contains jupyter notebooks that perform the URI calculations for specific hazards.  The hazard acronym is in the notebook title.  
