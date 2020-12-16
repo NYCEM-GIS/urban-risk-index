@@ -10,65 +10,55 @@ import matplotlib.pyplot as plt
 
 from MISC import params_1 as params
 from MISC import utils_1 as utils
+from MISC import plotting_1 as plotting
 utils.set_home()
 
-#%% load data
-path_sc = params.PATHNAMES.at['RCA_RC_SC_raw', 'Value']
-df_sc = pd.read_excel(path_sc, sheet_name='AC Capacity')
-df_nta2ac = pd.read_excel(path_sc, sheet_name='NTA to AC')
-
-#%% load population data
-path_pop = params.PATHNAMES.at['population_by_tract', 'Value']
-df_pop = pd.read_excel(path_pop, skiprows=5)
-df_pop = df_pop.iloc[1:, :]
-df_pop.index=np.arange(len(df_pop))
-df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2010 DCP Borough Code'])) + str(int(df_pop.at[x,'2010 Census Tract'])).zfill(6) for x in df_pop.index]
-
-#%%load neighborhood data
-path_nta = params.PATHNAMES.at['BOUNDARY_neighborhood', 'Value']
-gdf_nta = gpd.read_file(path_nta)
-gdf_nta = utils.project_gdf(gdf_nta)
-
 #%% load tract
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
-gdf_tract.index = np.arange(len(gdf_tract))
+gdf_tract = utils.get_blank_tract(add_pop=True)
+gdf_tract['area_ft2'] = gdf_tract.geometry.area
+gdf_tract['pop_2010_density'] = gdf_tract['pop_2010'] / gdf_tract['area_ft2']
 
-#%% load neighborhood to track
-path_nta2ct = params.PATHNAMES.at['BOUNDARY_tract_to_neighborhood', 'Value']
-df_nta2ct = pd.read_excel(path_nta2ct)
-df_nta2ct['BCT_txt'] = [str(int(df_nta2ct.at[x, '2010 NYC Borough Code'])) + str(int(df_nta2ct.at[x,'2010 Census Tract'])).zfill(6) for x in df_nta2ct.index]
+#%% load shelter capacity data
+path_sc_gbd = params.PATHNAMES.at['RCA_RC_SC_raw', 'Value']
+layer_sc = params.PATHNAMES.at['RCA_RC_SC_layer', 'Value']
+gdf_sc = gpd.read_file(path_sc_gbd, driver='FileGBD', layer=layer_sc)
+gdf_sc = gdf_sc.to_crs(crs=gdf_tract.crs)
+#convert null to 0 values
+gdf_sc.fillna(value={'Long_term_capacity':0}, inplace=True)
 
+#%% allocate shelter beds to tracts based on population.
+#add column to count allocated shelter beds
+gdf_tract['LT_capacity_count'] = np.zeros(len(gdf_tract))
+#loop through each shelter and assign capacity to tracts
+buffer_radius = params.PARAMS.at['search_buffer_for_shelter_capacity_ft', 'Value']
+for i, idx in enumerate(gdf_sc.index):
+    this_shelter = gdf_sc.loc[idx:idx, :].copy()
+    this_capacity = this_shelter.at[idx, 'Long_term_capacity']
+    this_shelter.loc[idx, 'geometry'] = this_shelter.loc[idx, 'geometry'].buffer(distance=buffer_radius)
+    this_shelter.loc[idx, 'geometry'] = this_shelter.loc[idx, 'geometry']
+    #get intersecting tracts
+    gdf_intersect = gpd.overlay(gdf_tract, this_shelter, how='intersection')
+    #eliminate
+    #get_intersection_areas
+    gdf_intersect['area_ft2'] = gdf_intersect.geometry.area
+    gdf_intersect['population'] = gdf_intersect['area_ft2'] * gdf_intersect['pop_2010_density']
+    gdf_intersect['capacity_allocation'] = this_capacity * gdf_intersect['population'] / gdf_intersect['population'].sum()
+    #loop through and add allocation to each tract
+    for j, jdx in enumerate(gdf_intersect.index):
+        this_Stfid = gdf_intersect.at[jdx, 'Stfid']
+        gdf_tract.loc[gdf_tract['Stfid']==this_Stfid, 'LT_capacity_count'] += gdf_intersect.at[jdx, 'capacity_allocation']
+    #if i % 10 == 0: print("{}".format(i))
 
-#%% get population of each area command and pop density of shelter
-#add nta code to tract number
-df_pop = df_pop.merge(df_nta2ct[['Neighborhood Tabulation Area (NTA)Code', 'BCT_txt']], on='BCT_txt', how='left')
-#add AC to nta code
-df_pop = df_pop.merge(df_nta2ac[['NTA Code', 'Area Command']], left_on='Neighborhood Tabulation Area (NTA)Code',
-                      right_on='NTA Code', how='left')
-#eliminate nan values.  These are parks, cemetarys, airports with <0.1% of population
-df_pop.dropna(subset=['Area Command'], inplace=True)
-#sum result
-df_pop_ac = df_pop.groupby(by='Area Command').sum()[[2010]]
-#merge with AC capacity numbers
-df_sc = df_sc.merge(df_pop_ac, left_on='Area Command', right_index=True, how='left')
-df_sc['Shelter Capacity per 1000 residents'] = df_sc['Tot Long-Term Capacity'] * 1000 / df_sc[2010]
-
-#%% merge back to the tracts
-df_pop = df_pop.merge(df_sc[['Area Command', 'Shelter Capacity per 1000 residents']], on='Area Command', how='left')
-gdf_tract = gdf_tract.merge(df_pop, on='BCT_txt', how='left')
-
-#%%assign -999 to null values
-gdf_tract.fillna(value={'Shelter Capacity per 1000 residents': -999}, inplace=True)
+#%% calculate capacity per 1000
+gdf_tract['capacity_allocation_per_1000'] = gdf_tract['LT_capacity_count'] * 1000. / gdf_tract['pop_2010']
+#set null values (with 0 population ) to 0
+gdf_tract.fillna(value={'capacity_allocation_per_1000':0}, inplace=True)
 
 #%% calculate score
 #need to handle missing data
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Shelter Capacity per 1000 residents')
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='capacity_allocation_per_1000')
 
 #%% save as output
-gdf_tract.rename(columns={2010:'2010 Pop', 2000:'2000 Pop'}, inplace=True)
 path_output = params.PATHNAMES.at['RCA_RC_SC_score', 'Value']
 gdf_tract.to_file(path_output)
 

@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 from MISC import params_1 as params
 from MISC import utils_1 as utils
+from MISC import plotting_1 as plotting
 utils.set_home()
 
 #%% open mitigation geopackages
@@ -30,20 +31,23 @@ df_table = df_table.loc[df_table['Cost Estimate']>0, :]
 df_table.dropna(subset=['Cost Estimate'], inplace=True)
 df_table = df_table.loc[df_table['Mapped'] != 'Not Mapped', :]
 
+#%% remove everything but "completed"
+df_table = df_table.loc[df_table['Schedule']=='Completed', :]
+
 #%% create single geodatabase with buffered area of all remaining points, lines, polygons
 #get line features from table
 gdf_points_valid = gdf_points[['HMP_Index_1', 'geometry']].merge(df_table[['HMP Index',
-                                                'HMP Hazard Addressed', 'Cost Per Haz Addressed']],
+                                                'HMP Hazard Addressed', 'Cost Estimate', "Impact Buffer (miles)"]],
                                                 left_on='HMP_Index_1', right_on='HMP Index', how='inner')
-gdf_points_valid['geometry'] = gdf_points_valid['geometry'].buffer(distance = 2640)
+gdf_points_valid['geometry'] = gdf_points_valid['geometry'].buffer(distance = gdf_points_valid['Impact Buffer (miles)'].values * 5280.)
 gdf_lines_valid = gdf_lines[['HMP_Index_1', 'geometry']].merge(df_table[['HMP Index',
-                                                'HMP Hazard Addressed', 'Cost Per Haz Addressed']],
+                                                'HMP Hazard Addressed', 'Cost Estimate', "Impact Buffer (miles)"]],
                                                 left_on='HMP_Index_1', right_on='HMP Index', how='inner')
-gdf_lines_valid['geometry'] = gdf_lines_valid['geometry'].buffer(distance = 2640)
+gdf_lines_valid['geometry'] = gdf_lines_valid['geometry'].buffer(distance = gdf_lines_valid['Impact Buffer (miles)'].values * 5280.)
 gdf_polygons_valid = gdf_polygons[['HMP_Index_1', 'geometry']].merge(df_table[['HMP Index',
-                                                'HMP Hazard Addressed', 'Cost Per Haz Addressed']],
+                                                'HMP Hazard Addressed', 'Cost Estimate', "Impact Buffer (miles)"]],
                                                 left_on='HMP_Index_1', right_on='HMP Index', how='inner')
-gdf_polygons_valid['geometry'] = gdf_polygons_valid['geometry'].buffer(distance = 2640)
+gdf_polygons_valid['geometry'] = gdf_polygons_valid['geometry'].buffer(distance = gdf_polygons_valid['Impact Buffer (miles)'].values * 5280.)
 
 #combine into one
 gdf_buffer = pd.concat([gdf_points_valid, gdf_lines_valid, gdf_polygons_valid]).reset_index(drop=True)
@@ -77,7 +81,7 @@ for i, idx in enumerate(gdf_buffer.index):
         if hazard in this_hazard_list:
             for BCT in this_intersect['BCT_txt']:
                 this_fraction = this_intersect.loc[this_intersect['BCT_txt']==BCT, 'fraction_share'].iloc[0]
-                df_value.at[BCT, hazard] += this_intersect.loc[this_intersect['BCT_txt']==BCT, 'Cost Per Haz Addressed'].iloc[0] * this_fraction
+                df_value.at[BCT, hazard] += this_intersect.loc[this_intersect['BCT_txt']==BCT, 'Cost Estimate'].iloc[0] * this_fraction
     if i % 50 == 0:
         print(".", end=''),
 print('Done')
