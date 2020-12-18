@@ -47,7 +47,7 @@ for i, idx in enumerate(gdf_tract_buffer.index):
 gdf_tract.fillna(value={'per_SL':0}, inplace=True)
 
 #%% xconvert to score 1-5
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='per_SL', score_column='Score', n_cluster=5)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='per_SL', n_cluster=5)
 
 #%% save as output
 path_output = params.PATHNAMES.at['RCA_ML_NS_score', 'Value']

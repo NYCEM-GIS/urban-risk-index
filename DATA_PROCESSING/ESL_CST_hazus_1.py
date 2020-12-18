@@ -14,33 +14,18 @@ from MISC import utils_1 as utils
 utils.set_home()
 
 # %% open tract
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
-gdf_tract.index = np.arange(len(gdf_tract))
+gdf_tract = utils.get_blank_tract()
 
 #%% open hazus data
-path_gdb = params.PATHNAMES.at['ESL_CST_hazus', 'Value']
-gdf_hazus = gpd.read_file(path_gdb, driver='FileGDB', layer='HAZUS_Hurricane_Annualized_Loss')
-gdf_hazus.index = np.arange(len(gdf_hazus))
-gdf_hazus = utils.project_gdf(gdf_hazus)
+path_gdb = params.PATHNAMES.at['ESL_CST_hazus_gdb', 'Value']
+gdb_layer = params.PATHNAMES.at['ESL_CST_hazus_layer', 'Value']
+df_hazus = gpd.read_file(path_gdb, driver='FileGDB', layer=gdb_layer)
 
-#%% open FIPS code
-path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-df_fips = pd.read_excel(path_fips)
+#%% convert from 2007 to URI dollars, multiply by 1000
+df_hazus['Loss_USD'] = utils.convert_USD(df_hazus.Hurricane_AnnualizedLoss , 2007) * 1000.
 
-#%% create BCT_txt index in the hazus dataset
-gdf_hazus['fips'] = [gdf_hazus.at[idx, 'tract'][0:5] for idx in gdf_hazus.index]
-gdf_hazus['borocode'] = [df_fips.loc[df_fips['FIPS']==int(gdf_hazus.at[idx, 'fips']), 'Bor_ID'].values[0] for idx in gdf_hazus.index]
-gdf_hazus['BCT_txt'] = [str(gdf_hazus.at[idx, 'borocode']) + str(gdf_hazus.at[idx, 'tract'][5:]) for idx in gdf_hazus.index]
-
-#%% merge costs to tract
-gdf_tract = gdf_tract.merge(gdf_hazus[['BCT_txt', 'Total']], on='BCT_txt', how='left')
-gdf_tract['Loss_USD'] = gdf_tract['Total'] * 1000.0 #assume 1000 per
-
-#drop nan values and set to 0, for now
-gdf_tract.fillna(value={'Loss_USD':0}, inplace=True)
+#%% merge to tract
+gdf_tract = gdf_tract.merge(df_hazus[['Tract2010_STFID', 'Loss_USD']], left_on='Stfid', right_on='Tract2010_STFID', how='left')
 
 #%% save as output
 path_output = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']

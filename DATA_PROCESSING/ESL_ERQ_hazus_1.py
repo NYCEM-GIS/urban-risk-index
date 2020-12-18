@@ -17,21 +17,22 @@ utils.set_home()
 #%% get tract
 gdf_tract = utils.get_blank_tract()
 
-#%% load hazus data
-path_flood = params.PATHNAMES.at['ESL_FLD_hazus', 'Value']
-gdf_flood = gpd.read_file(path_flood)
+#%% load hazus
+path_gbd = params.PATHNAMES.at['ESL_ERQ_hazus_gbd', 'Value']
+layer_gbd = params.PATHNAMES.at['ESL_ERQ_hazus_layer', 'Value']
+df_hazus = gpd.read_file(path_gbd, driver='FileGBD', layer=layer_gbd)
 
-#%% get flood loss total
-gdf_flood['Loss_USD'] = gdf_flood['Sum_BldgLo'] + gdf_flood['Sum_Cont_1'] + gdf_flood['Sum_Invent']
+#%% use tract to merge hazus data to tract
+gdf_tract = gdf_tract.merge(df_hazus[['Tract', 'TotalLoss']], left_on='Stfid', right_on='Tract', how='left')
 
-##%% convert from 2018 dollars
-gdf_flood.Loss_USD = utils.convert_USD(gdf_flood.Loss_USD.values, 2018)
+#%% convert to current USD
+gdf_tract.TotalLoss = utils.convert_USD(gdf_tract.TotalLoss.values, 2018)
 
-#%% merge with tracts
-gdf_tract = gdf_tract.merge(gdf_flood[['Stfid', 'Loss_USD']], left_on='Stfid', right_on=['Stfid'], how='left')
+#%% total loss is in USD 1000.... convert
+gdf_tract['Loss_USD'] = gdf_tract['TotalLoss'] * 1000.
 
 #%% save as output
-path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
+path_output = params.PATHNAMES.at['ESL_ERQ_hazus_loss', 'Value']
 gdf_tract.to_file(path_output)
 
 #%%  document result with readme
@@ -46,4 +47,4 @@ except:
     pass
 
 #%% output complete message
-print("Finished calculating FLD Hazus loss.")
+print("Finished calculating ERQ Hazus loss.")
