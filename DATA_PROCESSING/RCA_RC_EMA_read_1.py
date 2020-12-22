@@ -12,7 +12,6 @@ from MISC import params_1 as params
 from MISC import utils_1 as utils
 utils.set_home()
 
-
 #%% load data
 path_hospital = params.PATHNAMES.at['RCA_RC_EMA_raw', 'Value']
 gdf_hospital = gpd.read_file(path_hospital)
@@ -64,6 +63,7 @@ gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_HYPO', score
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_EXH')
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_RES')
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_EMG')
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_CRN')
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CST')
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CER')
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_HIW')

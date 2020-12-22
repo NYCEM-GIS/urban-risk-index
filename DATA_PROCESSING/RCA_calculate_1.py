@@ -22,11 +22,7 @@ list_abbrev = params.ABBREVIATIONS.iloc[0:11, 0].values
 for i, haz in enumerate(list_abbrev):
 
     # %% open tract
-    path_block = params.PATHNAMES.at['census_blocks', 'Value']
-    gdf_block = gpd.read_file(path_block)
-    gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-    gdf_tract = utils.project_gdf(gdf_tract)
-    gdf_tract.index = np.arange(len(gdf_tract))
+    gdf_tract = utils.get_blank_tract()
 
     #find codes and their components with valid data
     list_code = params.MITIGATION.loc[:, 'Factor Code'].values
@@ -74,7 +70,7 @@ for i, haz in enumerate(list_abbrev):
 
     #calculate final RCA
     #CHANGE TO divede by 4.0 when RC data is available
-    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/4.0
+    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/len(np.unique(list_component_valid))
     print(gdf_tract['RCA'].min())
     print(gdf_tract['RCA'].max())
 

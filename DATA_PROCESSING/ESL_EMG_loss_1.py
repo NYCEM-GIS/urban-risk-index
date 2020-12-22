@@ -18,7 +18,6 @@ gdf_tract = utils.get_blank_tract(add_pop=True)
 #%% define parameters
 path_loss = params.PATHNAMES.at['ESL_EMG_loss', 'Value']
 
-target_year = params.SETTINGS.at['target_year', 'Value']
 loss_per_death_2015 = params.PARAMS.at['value_of_stat_life_2015', 'Value']
 loss_per_death = utils.convert_USD(loss_per_death_2015, 2015)
 
