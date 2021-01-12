@@ -11,16 +11,51 @@ import requests
 
 from MISC import params_1 as params
 from MISC import utils_1 as utils
+from MISC import plotting_1 as plotting
 utils.set_home()
 
+#%% load tract
+gdf_tract = utils.get_blank_tract(add_pop=True)
 
-#%% count fatalities and injuries
-deaths_per_year = params.PARAMS.at['WIW_deaths_per_year', 'Value']
-loss_per_death_2015 = params.PARAMS.at['value_of_stat_life_2015', 'Value'] * deaths_per_year
+#%% load deaths and get average number per year across NYC
+path_deaths = params.PATHNAMES.at['ESL_WIW_deaths_data', 'Value']
+df_deaths = pd.read_csv(path_deaths, skiprows=9, skipfooter = 5, engine='python')
+N_deaths_year_NYC = df_deaths['Y Value'].mean()
+
+#%% load hospitalizations.  assume that deaths are by borough same as the age-adjusted hospitalziation rate
+#note it would be better to use unadjusted hospitalization rate, but that is available for only one year
+#so may be too noisy
+path_hosp = params.PATHNAMES.at['ESL_WIW_hosp_data', 'Value']
+df_hosp = pd.read_csv(path_hosp, skiprows=12, skipfooter=5, engine='python')
+#remove
+df_hosp = df_hosp.loc[df_hosp['Geography Name'] != 'New York City', :]
+
+#%% add borough code to hosp data
+path_borid = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+df_borid = pd.read_excel(path_borid)
+df_hosp['Bor_ID'] = [df_borid.loc[df_borid.Borough==x, 'Bor_ID'].iloc[0] for x in df_hosp['Geography Name']]
+
+#%% get borough specific average
+df_bor = df_hosp[['Bor_ID', 'Y Value']].groupby('Bor_ID').mean()
+
+#%% distribute deaths using rate as weight
+df_bor['N_deaths_yr'] = N_deaths_year_NYC * df_bor['Y Value'] / df_bor['Y Value'].sum()
+
+#%% distribute deaths by population within each borough
+def calc_tract_deaths(BCT_txt):
+    idx = gdf_tract.index[gdf_tract.BCT_txt==BCT_txt][0]
+    this_bor = gdf_tract.at[idx, 'BOROCODE']
+    this_pop = gdf_tract.at[idx, 'pop_2010']
+    this_bor_pop = gdf_tract.loc[gdf_tract.BOROCODE==this_bor, 'pop_2010'].sum()
+    this_N_deaths = df_bor.at[int(this_bor), 'N_deaths_yr']
+    return this_N_deaths * this_pop / this_bor_pop
+gdf_tract['N_deaths'] = gdf_tract.apply(lambda x: calc_tract_deaths(x['BCT_txt']), axis=1)
+
+
+#%% convert to loss
+loss_per_death_2015 = params.PARAMS.at['value_of_stat_life_2015', 'Value']
 loss_deaths_total = utils.convert_USD(loss_per_death_2015, 2015)
-
-#%%  distribute loss by population
-gdf_tract = utils.distribute_loss_by_pop(loss_deaths_total)
+gdf_tract['Loss_USD'] = gdf_tract['N_deaths'] * loss_deaths_total
 
 #%% save as output
 path_output = params.PATHNAMES.at['ESL_WIW_loss_deaths', 'Value']
