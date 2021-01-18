@@ -11,6 +11,7 @@ import requests
 
 from MISC import params_1 as params
 from MISC import utils_1 as utils
+from MISC import plotting_1 as plotting
 utils.set_home()
 
 # %% open tract

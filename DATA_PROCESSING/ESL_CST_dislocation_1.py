@@ -53,6 +53,7 @@ else:
 
 #%% paramaters
 floor_height = params.PARAMS.at['building_floor_height_ft', 'Value']  #assume floor displocated every 10 ft
+flood_disp_height = params.PARAMS.at['building_floor_height_flood_threshold_ft', 'Value']  #assume displacement after 1 ft flooding
 ave_displacement_days = params.PARAMS.at['average_duration_CST_displacement_days', 'Value']
 
 #%%  get probabilities of coastal storm events
@@ -78,7 +79,8 @@ def N_floors_flooded(N_floors, depth_flooding):
     if N_floors == 0:
         results = 0
     else:
-        results = np.minimum(N_floors, np.floor(depth_flooding/floor_height))
+        max_n_floors_flooded = (depth_flooding // floor_height) + np.where( depth_flooding % floor_height >= 1.0, 1, 0)
+        results = np.minimum(N_floors, max_n_floors_flooded )
     return results
 gdf_depths['C1_N_floors_flooded'] = gdf_depths.apply(lambda row : N_floors_flooded(row['NumFloors'],
                                                                                 row['C1_depth']), axis=1)

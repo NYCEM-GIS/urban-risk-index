@@ -82,8 +82,8 @@ gdf_union = gpd.overlay(gdf_tracts, gdf_zcta, how='union')
 gdf_union.dropna(subset=['BCT_txt'], inplace=True)
 
 #%% get na
-plotting.plot_inline(gdf_tracts, column='pop_2010')
-plotting.plot_inline(gdf_union.loc[gdf_union['COVID_DEATH_COUNT'].isna(), :], column='pop_2010')
+#plotting.plot_inline(gdf_tracts, column='pop_2010')
+#plotting.plot_inline(gdf_union.loc[gdf_union['COVID_DEATH_COUNT'].isna(), :], column='pop_2010')
 
 #%%
 #assume areas of tracts not covered by PVI have zero vulnerable opo
@@ -109,7 +109,7 @@ gdf_tracts['pct_total_burden_deaths'] = gdf_tracts['union_death_count'] / gdf_tr
 gdf_tracts['pct_burden_average'] = (gdf_tracts[['pct_total_burden_deaths',
                                                'pct_total_burden_PVI']].mean(axis=1))/(gdf_tracts[['pct_total_burden_deaths',
                                                'pct_total_burden_PVI']].mean(axis=1)).sum()
-plotting.plot_inline(gdf_tracts, column='pct_burden_average')
+#plotting.plot_inline(gdf_tracts, column='pct_burden_average')
 
 # %% define parameters (move to spreadsheet)
 P_mild = 0.049
@@ -169,10 +169,10 @@ gdf_tract_econ['Loss_USD'] = annual_econ_loss * gdf_tracts['pop_2010'] / gdf_tra
 gdf_tract_econ[['Stfid', 'BCT_txt', 'Loss_USD', 'geometry']].to_file(path_loss_economy)
 
 #%% check results
-plotting.plot_inline(gdf_tract_death, 'Loss_USD')
-plotting.plot_inline(gdf_tract_injury, 'Loss_USD')
-plotting.plot_inline(gdf_tract_wages, 'Loss_USD')
-plotting.plot_inline(gdf_tract_econ, 'Loss_USD')
+# plotting.plot_inline(gdf_tract_death, 'Loss_USD')
+# plotting.plot_inline(gdf_tract_injury, 'Loss_USD')
+# plotting.plot_inline(gdf_tract_wages, 'Loss_USD')
+# plotting.plot_inline(gdf_tract_econ, 'Loss_USD')
 
 #%%  document result with readme
 try:

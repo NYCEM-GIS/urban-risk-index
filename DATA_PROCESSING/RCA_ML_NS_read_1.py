@@ -41,7 +41,7 @@ for i, idx in enumerate(gdf_tract_buffer.index):
         length_natural = this_shoreline.loc[this_shoreline['Type']=='3', 'Length_ft'].sum()
         length_total = this_shoreline['Length_ft'].sum()
         gdf_tract.at[idx, 'per_SL'] = (length_natural / length_total) * 100.
-        print('{} {}'.format(i, (length_natural / length_total) * 100.))
+        #print('{} {}'.format(i, (length_natural / length_total) * 100.))
 
 #%%fill with na values
 gdf_tract.fillna(value={'per_SL':0}, inplace=True)

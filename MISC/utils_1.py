@@ -135,6 +135,23 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5):
     df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
     return df_result
 
+#%% calculate quintile score 1 to 5
+# def calculate_quantile(df, data_column, score_column='Score_QT', n_cluster=5):
+#     percentile = [stats.percentileofscore(df[data_column], x, kind='rank') for x in df[data_column]]
+#     df[score_column] = percentile//20 + 1
+#     return df
+
+def calculate_quantile(df, data_column, score_column='Score_QT', n_cluster=5):
+    print("UPDATE MIN")
+    percentile = [stats.percentileofscore(df[data_column], x, kind='rank') for x in df[data_column]]
+    df[score_column] = [np.minimum(x//20 + 1, 5) for x in np.array(percentile)]
+    return df
+
+#%% calculate equal interval score 1 to 5
+def calculate_equal_interval(df, data_column, score_column='Score_EI', n_cluster=5):
+    df[score_column] = pd.cut(df[data_column], n_cluster, labels=np.arange(1, 1 + n_cluster), duplicates='drop').astype(int)
+    return df
+
 #%% count number of points (or fraction of) within 1/2 mile of tract
 #gdf_data is point layer, column_key is unique id for each point
 def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):

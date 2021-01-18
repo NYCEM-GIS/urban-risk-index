@@ -27,14 +27,24 @@ gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['BIN'], aggfunc=len)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
 gdf_tract.fillna(value={'BIN': 0}, inplace=True)
-path_count = params.PATHNAMES.at['RCA_RR_FP_building_count_csv', "Value"]
 gdf_tract.rename(columns={"BIN":"Building_Count"}, inplace=True)
+
+#%% estimate floor area
+#note this is conservatively high because num_floors is largest # in building group
+#ex: in co-op city, all buildings are marked as 33 floors, but some are only 4.
+gdf_footprint['Floor_sqft'] = gdf_footprint['Shape_Area'] * gdf_footprint['NumFloors']
+gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', op='within')
+gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
+df_count = gdf_join.pivot_table(index='BCT_txt', values=['Floor_sqft'], aggfunc=sum)
+gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
+gdf_tract.fillna(value={'Floor_sqft': 0}, inplace=True)
+
 
 #%% add square miles
 gdf_tract['Sq_miles'] = gdf_tract.geometry.area / (5280.**2)
 
 #%% trim to only necessary
-gdf_tract = gdf_tract[['BCT_txt', 'Sq_miles', 'Building_Count', 'pop_2010', 'geometry']]
+gdf_tract = gdf_tract[['BCT_txt', 'Sq_miles', 'Building_Count', 'Floor_sqft', 'pop_2010', 'geometry']]
 
 #%% save to other
 path_norm = params.PATHNAMES.at['OTH_normalize_values', 'Value']

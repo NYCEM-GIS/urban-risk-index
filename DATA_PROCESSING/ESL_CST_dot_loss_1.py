@@ -41,14 +41,6 @@ gdf_tract['Loss_USD'] = dot_loss_ave * gdf_tract['weight'] / gdf_tract['weight']
 path_output = params.PATHNAMES.at['ESL_CST_loss_dot', 'Value']
 gdf_tract.to_file(path_output)
 
-#%%
-#%%count number of policies by tract
-gdf_join = gpd.sjoin(gdf_fp, gdf_tract, how='left', op='within')
-gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
-df_count = gdf_join.pivot_table(index='BCT_txt', values=['Type'], aggfunc=len)
-gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
-gdf_tract.fillna(value={'Type': 0}, inplace=True)
-gdf_tract.rename(columns={"Type":"Policy_Count"}, inplace=True)
 
 
 #%%  document result with readme

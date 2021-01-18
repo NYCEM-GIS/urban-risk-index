@@ -34,11 +34,10 @@ gdf_buffer['geometry'] = gdf_data['geometry'].buffer(distance=5280/2)
 gdf_buffer.to_file(path_radius)
 
 #%% create empty df to fill
-df_fill = pd.DataFrame()
-df_fill.columns = ['BCT_txt', 'Fraction_Covered']
+df_fill = pd.DataFrame(columns=['BCT_txt', 'Fraction_Covered'])
 
 #%% loop through each buffer, and add BCT_txt and area filled to list
-print("Calculating.")
+#print("Calculating.")
 for i, idx in enumerate(gdf_buffer.index):
     this_buffer = gdf_buffer.loc[[idx]]
     #take intersection
@@ -47,9 +46,9 @@ for i, idx in enumerate(gdf_buffer.index):
     this_intersect['Fraction_Covered'] = np.minimum(this_intersect['area_intersect_ft2'] / this_intersect['area_ft2'], 1.0)
     #add to df_fill
     df_fill = df_fill.append(this_intersect[['BCT_txt', 'Fraction_Covered']])
-    if i % 50 == 0:
-        print(".")
-print('.')
+    #if i % 50 == 0:
+     #   print(".")
+#print('.')
 
 #%% get the sum  by tract and join
 df_sum = df_fill.groupby(by='BCT_txt').sum()

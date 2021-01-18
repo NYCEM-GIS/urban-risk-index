@@ -30,7 +30,13 @@ class ESL:
         if len(self.list_consequences) == 1:
             self.ESL_map = map_tract
         elif len(self.list_consequences) > 1:
-            self.ESL_map['Loss_USD'] = self.ESL_map['Loss_USD'].values + map_tract['Loss_USD'].values
+            #rename loss on incoming tract
+            map_tract.rename(columns={'Loss_USD':"Loss_USD_2"}, inplace=True)
+            #addd to ESL_map
+            self.ESL_map = self.ESL_map.merge(map_tract[['BCT_txt', 'Loss_USD_2']], on='BCT_txt', how='left')
+            self.ESL_map['Loss_USD'] = self.ESL_map['Loss_USD'] + self.ESL_map['Loss_USD_2']
+            #remove
+            self.ESL_map.drop(columns=['Loss_USD_2'], inplace=True)
         pass
 
     # calculate total ESL based on all consequences
@@ -90,17 +96,23 @@ class URI:
     def calc_URI(self):
         #calculate raw URI
         self.URI_map = self.ESL.ESL_map.copy()
-        self.URI_map['URI_Raw'] = self.ESL.ESL_map['Loss_USD']*self.SOV.SOV_map['SOV'] / self.RCA.RCA_map['RCA']
+        self.URI_map = self.URI_map.merge(self.RCA.RCA_map[['BCT_txt', 'RCA']], on='BCT_txt', how='left')
+        self.URI_map = self.URI_map.merge(self.SOV.SOV_map[['BCT_txt', 'SOV']], on='BCT_txt', how='left')
+        self.URI_map['URI_Raw'] = self.URI_map['Loss_USD']*self.URI_map['SOV'] / self.URI_map['RCA']
 
         #calculate score 1-5
         self.URI_map = utils.calculate_kmeans(self.URI_map, data_column = 'URI_Raw', score_column='URI',
                                               n_cluster = 5)
+        self.URI_map = utils.calculate_quantile(self.URI_map, data_column = 'URI_Raw', score_column='URI_QT',
+                                              n_cluster = 5)
+        self.URI_map = utils.calculate_equal_interval(self.URI_map, data_column = 'URI_Raw', score_column='URI_EI',
+                                              n_cluster = 5)
         pass
 
     def save_URI_FULL(self):
-        URI_full_map = self.URI_map[['BCT_txt', 'URI_Raw', 'URI', 'Loss_USD', 'geometry']].copy()
-        URI_full_map = URI_full_map.merge(self.RCA.RCA_map[['BCT_txt', 'RCA']], on='BCT_txt', how='left')
-        URI_full_map = URI_full_map.merge(self.SOV.SOV_map[['BCT_txt', 'SOV']], on='BCT_txt', how='left')
+        URI_full_map = self.URI_map[['BCT_txt', 'URI_Raw', 'URI', 'URI_QT', 'URI_EI',  'Loss_USD', 'SOV', 'RCA', 'geometry']].copy()
+        # URI_full_map = URI_full_map.merge(self.RCA.RCA_map[['BCT_txt', 'RCA']], on='BCT_txt', how='left')
+        # URI_full_map = URI_full_map.merge(self.SOV.SOV_map[['BCT_txt', 'SOV']], on='BCT_txt', how='left')
         URI_full_map.rename(columns={'Loss_USD': 'ESL'}, inplace=True)
         # add all consequences
         for con in self.ESL.list_consequences:
@@ -111,7 +123,7 @@ class URI:
         # add normalization factors: population, area, buildings
         path_norm = params.PATHNAMES.at['OTH_normalize_values', 'Value']
         gdf_norm = gpd.read_file(path_norm)
-        URI_full_map = URI_full_map.merge(gdf_norm[['BCT_txt', 'Sq_miles', 'Building_C', 'pop_2010']], on='BCT_txt',
+        URI_full_map = URI_full_map.merge(gdf_norm[['BCT_txt', 'Sq_miles', 'Building_C', 'Floor_sqft', 'pop_2010']], on='BCT_txt',
                                           how='left')
         #add neighborhoods, PUMAs, boroughs
         # merge with tracts
@@ -134,7 +146,11 @@ class URI:
         df_NEIGHBORHO['NEIGHBORHO'] = df_NEIGHBORHO.index
         df_NEIGHBORHO = utils.calculate_kmeans(df_NEIGHBORHO, data_column='N_URI_Raw', score_column='N_URI',
                                                n_cluster=5)
-        gdf_URI = gdf_URI.merge(df_NEIGHBORHO[['N_ESL', 'N_SOV', 'N_RCA', 'N_URI_Raw', 'N_URI', "NEIGHBORHO"]],
+        df_NEIGHBORHO = utils.calculate_quantile(df_NEIGHBORHO, data_column='N_URI_Raw', score_column='N_URI_QT',
+                                               n_cluster=5)
+        df_NEIGHBORHO = utils.calculate_equal_interval(df_NEIGHBORHO, data_column='N_URI_Raw', score_column='N_URI_EI',
+                                               n_cluster=5)
+        gdf_URI = gdf_URI.merge(df_NEIGHBORHO[['N_ESL', 'N_SOV', 'N_RCA', 'N_URI_Raw', 'N_URI', 'N_URI_QT', 'N_URI_EI',"NEIGHBORHO"]],
                                 left_on='NEIGHBORHO', right_on='NEIGHBORHO', how='left')
         #run for PUMA
         df_PUMA = gdf_URI.groupby(["PUMA"]).agg(P_SOV=("SOV", wm),
@@ -146,7 +162,11 @@ class URI:
         df_PUMA['PUMA'] = df_PUMA.index
         df_PUMA = utils.calculate_kmeans(df_PUMA, data_column='P_URI_Raw', score_column='P_URI',
                                          n_cluster=5)
-        gdf_URI = gdf_URI.merge(df_PUMA[['P_ESL', 'P_SOV', 'P_RCA', 'P_URI_Raw', 'P_URI', 'PUMA']], left_on='PUMA',
+        df_PUMA = utils.calculate_quantile(df_PUMA, data_column='P_URI_Raw', score_column='P_URI_QT',
+                                         n_cluster=5)
+        df_PUMA = utils.calculate_equal_interval(df_PUMA, data_column='P_URI_Raw', score_column='P_URI_EI',
+                                         n_cluster=5)
+        gdf_URI = gdf_URI.merge(df_PUMA[['P_ESL', 'P_SOV', 'P_RCA', 'P_URI_Raw', 'P_URI', 'P_URI_QT', 'P_URI_EI', 'PUMA']], left_on='PUMA',
                                 right_on='PUMA', how='left')
         #repeat for boros
         df_boro = gdf_URI.groupby(["BOROCODE"]).agg(B_SOV=("SOV", wm),
@@ -158,7 +178,11 @@ class URI:
         df_boro['BOROCODE'] = df_boro.index
         df_boro = utils.calculate_kmeans(df_boro, data_column='B_URI_Raw', score_column='B_URI',
                                          n_cluster=5)
-        gdf_URI = gdf_URI.merge(df_boro[['B_ESL', 'B_SOV', 'B_RCA', 'B_URI_Raw', 'B_URI', "BOROCODE"]],
+        df_boro = utils.calculate_quantile(df_boro, data_column='B_URI_Raw', score_column='B_URI_QT',
+                                         n_cluster=5)
+        df_boro = utils.calculate_equal_interval(df_boro, data_column='B_URI_Raw', score_column='B_URI_EI',
+                                         n_cluster=5)
+        gdf_URI = gdf_URI.merge(df_boro[['B_ESL', 'B_SOV', 'B_RCA', 'B_URI_Raw', 'B_URI', 'B_URI_QT', 'B_URI_EI', "BOROCODE"]],
                                 left_on='BOROCODE', right_on='BOROCODE', how='left')
         path_save = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI_FULL\URI_FULL_{}_tract.shp'.format(
             self.hazard_name, self.hazard_name)

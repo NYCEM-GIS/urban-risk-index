@@ -18,7 +18,7 @@ utils.set_home()
 gdf_tract = utils.get_blank_tract(add_pop=True)
 
 #%% convert value of lost life to 2019 value
-value_loss_2019 = 6.639662 * 1000000   #from spreadsheet
+value_loss_2019 = 663.966 * 1000000   #from spreadsheet
 value_loss = utils.convert_USD(value_loss_2019, 2019)
 
 #%%distribute by population
