@@ -15,7 +15,7 @@ from MISC import plotting_1 as plotting
 utils.set_home()
 
 #%% get tract
-gdf_tract = utils.get_blank_tract()
+gdf_tract = utils.get_blank_tract(add_pop=True)
 
 #%% load hazus
 path_gbd = params.PATHNAMES.at['ESL_ERQ_hazus_gbd', 'Value']

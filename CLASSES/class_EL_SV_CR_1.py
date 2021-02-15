@@ -39,28 +39,6 @@ class ESL:
             self.ESL_map.drop(columns=['Loss_USD_2'], inplace=True)
         pass
 
-    # calculate total ESL based on all consequences
-    # def calc_ESL_total(self):
-    #     print("FIXED11!")
-    #     # if no consequences, total ESL is zero
-    #     if len(self.list_consequences) == 0:
-    #         #ESL_total = 0
-    #         Loss_USD_Total = 0
-    #     else:
-    #         # loop and add each consequence
-    #         for i, cons in enumerate(self.list_consequences):
-    #             print(cons)
-    #             if i == 0:
-    #                 Loss_USD_Total = self.consequence[cons]["map_tract"]["Loss_USD"].values
-    #                 self.ESL_map = self.consequence[cons]["map_tract"].copy(deep=True)
-    #                 print(self.ESL_map.sum())
-    #             else:
-    #                 Loss_USD_Total = Loss_USD_Total + self.consequence[cons]["map_tract"]["Loss_USD"].values
-    #                 self.ESL_map['Loss_USD'] = Loss_USD_Total
-    #             print("HERE! {}".format(i))
-    #             print(self.ESL_map.sum())
-    #     pass
-
 
 #%% define class for SOV
 #not hazard specific, so there's only one input

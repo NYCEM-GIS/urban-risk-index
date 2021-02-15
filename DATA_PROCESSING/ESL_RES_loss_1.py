@@ -111,6 +111,10 @@ gdf_tracts['pct_burden_average'] = (gdf_tracts[['pct_total_burden_deaths',
                                                'pct_total_burden_PVI']].mean(axis=1)).sum()
 #plotting.plot_inline(gdf_tracts, column='pct_burden_average')
 
+#%% plot result for visualization
+
+fig = plt.figure()
+
 # %% define parameters (move to spreadsheet)
 P_mild = 0.049
 P_severe = 0.01

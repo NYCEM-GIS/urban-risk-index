@@ -36,7 +36,7 @@ def near(point, pts=pts3):
     nearest = gdf_hospital_subset.geometry == nearest_points(point, pts)[1]
     distance = point.distance(gdf_hospital_subset[nearest]['geometry'].iloc[0])
     return distance
-gdf_tract['Distance_HYPO'] = gdf_tract.apply(lambda row: near(row.geometry), axis=1)
+gdf_tract['Distance_HYPO'] = gdf_centroid.apply(lambda row: near(row.geometry), axis=1)
 
 #%% repeat for distance to trauma
 gdf_hospital_subset = gdf_hospital.loc[gdf_hospital['TRAUMA']==1, :]
@@ -46,7 +46,7 @@ def near(point, pts=pts3):
     nearest = gdf_hospital_subset.geometry == nearest_points(point, pts)[1]
     distance = point.distance(gdf_hospital_subset[nearest]['geometry'].iloc[0])
     return distance
-gdf_tract['Distance_TRAUMA'] = gdf_tract.apply(lambda row: near(row.geometry), axis=1)
+gdf_tract['Distance_TRAUMA'] = gdf_centroid.apply(lambda row: near(row.geometry), axis=1)
 
 #%% repeat for distance to trauma
 gdf_hospital_subset = gdf_hospital.loc[gdf_hospital['RECEIVING']==1, :]
@@ -56,19 +56,19 @@ def near(point, pts=pts3):
     nearest = gdf_hospital_subset.geometry == nearest_points(point, pts)[1]
     distance = point.distance(gdf_hospital_subset[nearest]['geometry'].iloc[0])
     return distance
-gdf_tract['Distance_RECEIVING'] = gdf_tract.apply(lambda row: near(row.geometry), axis=1)
+gdf_tract['Distance_RECEIVING'] = gdf_centroid.apply(lambda row: near(row.geometry), axis=1)
 
-#%% write scores
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_HYPO', score_column='Score_WIW')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_EXH')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_RES')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_EMG')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_CRN')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CST')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CER')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_HIW')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_ERQ')
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_FLD')
+#%% write scores.  Set reverse=True because low distance values are better
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_HYPO', score_column='Score_WIW', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_EXH', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_RES', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_EMG', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_CRN', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CST', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CER', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_HIW', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_ERQ', reverse=True)
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_FLD', reverse=True)
 
 #%% save as output
 path_output = params.PATHNAMES.at['RCA_RC_EMA_score', 'Value']

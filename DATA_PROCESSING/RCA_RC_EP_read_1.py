@@ -33,10 +33,28 @@ def near(point, pts=pts3):
     nearest = gdf_center.geometry == nearest_points(point, pts)[1]
     distance = point.distance(gdf_center[nearest]['geometry'].iloc[0])
     return distance
-gdf_tract['Distance_Center'] = gdf_tract.apply(lambda row: near(row.geometry), axis=1)
+gdf_tract['Distance_Center'] = gdf_centroid.apply(lambda row: near(row.geometry), axis=1)
 
 #%% write scores
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_Center', score_column='Score')
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_Center', score_column='Score', reverse=True)
+
+#%%assign 5 to everything in zone X of hurrican evac zone
+path_zone = params.PATHNAMES.at['RCA_RC_EP_evac_zones', 'Value']
+gdf_zone = gpd.read_file(path_zone)
+gdf_zone = gdf_zone.to_crs(gdf_tract.crs)
+gdf_zone = gdf_zone.loc[gdf_zone.hurricane=='X']
+gdf_tract_sjoin = gpd.sjoin(gdf_tract, gdf_zone, how='inner', op='within')
+gdf_tract_sjoin['Is_inland'] = 1
+gdf_tract= gdf_tract.merge(gdf_tract_sjoin[['BCT_txt', 'Is_inland']], how='left', on='BCT_txt')
+gdf_tract.loc[gdf_tract.Is_inland==1, 'Score'] = 5
+
+#%%
+fig = plt.figure()
+ax = fig.add_subplot(111)
+gdf_tract.plot(ax=ax)
+gdf_zone.plot(ax=ax, color='red')
+plt.show()
+
 
 #%% save as output
 path_output = params.PATHNAMES.at['RCA_RC_EP_score', 'Value']

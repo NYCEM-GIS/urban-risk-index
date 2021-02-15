@@ -122,17 +122,24 @@ def calculate_RCA(list_factor_gdfs, list_factor_columns, dict_buckets={}):
     return gdf_tract
 
 #%% calculate kmeans score and label
-def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5):
-    kmeans = KMeans(n_clusters=5)
-    df['Cluster_ID'] = kmeans.fit_predict(df[[data_column]])
-    #make lookup for class label
-    df_label = pd.DataFrame()
-    df_label['Cluster_ID'] = np.arange(n_cluster)
-    df_label['Cluster_Center'] = kmeans.cluster_centers_.flatten()
-    df_label.sort_values('Cluster_Center', inplace=True)
-    df_label[score_column] = np.arange(1, n_cluster+1)
-    #assign score to each cluster
-    df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
+def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse=False):
+    if len(df)<5:
+        df_result = df.copy()
+        df_result[score_column] = np.ones(len(df))*3
+    else:
+        kmeans = KMeans(n_clusters=5)
+        df['Cluster_ID'] = kmeans.fit_predict(np.round(df[[data_column]], 6))
+        #make lookup for class label
+        df_label = pd.DataFrame()
+        df_label['Cluster_ID'] = np.arange(n_cluster)
+        df_label['Cluster_Center'] = kmeans.cluster_centers_.flatten()
+        df_label.sort_values('Cluster_Center', inplace=True)
+        if reverse==False:
+            df_label[score_column] = np.arange(1, n_cluster+1)
+        else:
+            df_label[score_column] = np.arange(n_cluster, 0, -1)
+        #assign score to each cluster
+        df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
     return df_result
 
 #%% calculate quintile score 1 to 5
@@ -142,7 +149,6 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5):
 #     return df
 
 def calculate_quantile(df, data_column, score_column='Score_QT', n_cluster=5):
-    print("UPDATE MIN")
     percentile = [stats.percentileofscore(df[data_column], x, kind='rank') for x in df[data_column]]
     df[score_column] = [np.minimum(x//20 + 1, 5) for x in np.array(percentile)]
     return df

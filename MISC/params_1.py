@@ -16,7 +16,8 @@ PARAMS = pd.read_excel(path_params, sheet_name='PARAMS', index_col=0)
 SETTINGS = pd.read_excel(path_params, sheet_name='SETTINGS', index_col=0)
 HARDCODED = pd.read_excel(path_params, sheet_name='HARDCODED', index_col=0)
 ABBREVIATIONS = pd.read_excel(path_params, sheet_name='ABBREVIATIONS', header=None)
-MITIGATION = pd.read_excel(path_params, sheet_name='MITIGATION', skiprows=1)
+MITIGATION = pd.read_excel(path_params, sheet_name='RESILIENCE', skiprows=1)
+CONSEQUENCES = pd.read_excel(path_params, sheet_name='CONSEQUENCES', skiprows=1, usecols='C:BE')
 
 #%% create names
 

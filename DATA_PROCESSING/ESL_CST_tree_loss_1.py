@@ -42,17 +42,17 @@ df_EventsIds = df_Events.copy()
 df_EventIds = df_StormEventTypes.loc[df_StormEventTypes.EventTypeId==type_id,:]
 df_EventIds.index = df_EventIds.StormEventId
 
-#%% get storm events with this id after 2000
+#%% get storm events with this id after 2009
 df_Events.index = df_Events.Id
 df_Events = df_Events.loc[df_EventIds.index, :]
 df_Events = df_Events.loc[df_Events.StartDate >= '2009-01-01', :]
-df_Events = df_Events.loc[df_Events.StartDate < '2020-01-01', :]
+df_Events = df_Events.loc[df_Events.StartDate < '2019-01-01', :]
 
 #%% get tree service calls in this range
 df_tree['Is_Event'] = np.zeros(len(df_tree))
 for i, idx in enumerate(df_Events.index):
     start_date = df_Events.at[idx, 'StartDate']
-    end_date = df_Events.at[idx, 'EndDate'] + datetime.timedelta(days=3)
+    end_date = df_Events.at[idx, 'EndDate'] + datetime.timedelta(days=2)
     df_tree.loc[ ( (df_tree.DateInitiated >= start_date) & (df_tree.DateInitiated <= end_date)), 'Is_Event'] = 1
 
 #%%

@@ -94,8 +94,11 @@ def N_residents_displaced(N_floors_flooded, N_floors, N_res_units):
     if np.isnan(N_res_units) == True: N_res_units = 0
     if N_floors==0:
         results = 0
+    elif N_floors_flooded==0:
+        results = 0
     else:
-        results = (N_floors_flooded/N_floors) * N_res_units * N_persons_per_residence
+        #results = (N_floors_flooded/N_floors) * N_res_units * N_persons_per_residence
+        results = N_res_units * N_persons_per_residence
     return results
 gdf_depths['C1_N_residents_displaced'] = gdf_depths.apply(lambda row : N_residents_displaced(row['C1_N_floors_flooded'],
                                                                                 row['NumFloors'], row['Units_Res_Per_Building']), axis=1)
