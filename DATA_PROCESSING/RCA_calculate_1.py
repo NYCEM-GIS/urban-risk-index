@@ -20,10 +20,11 @@ list_abbrev = params.ABBREVIATIONS.iloc[0:11, 0].values
 
 #%% calculate RCA
 for i, haz in enumerate(list_abbrev):
+    print('Calculating {}'.format(haz))
 
     # %% open tract
     gdf_tract = utils.get_blank_tract()
-
+    list_col_keep = ['BCT_txt', 'geometry']
     #find codes and their components with valid data
     list_code = params.MITIGATION.loc[:, 'Factor Code'].values
     list_component = params.MITIGATION.loc[:, 'Component Code'].values
@@ -57,6 +58,7 @@ for i, haz in enumerate(list_abbrev):
         gdf_score = gpd.read_file(path_score)
         gdf_tract = gdf_tract.merge(gdf_score[['BCT_txt', source_column_name]], on='BCT_txt', how='left' )
         gdf_tract.rename(columns={source_column_name:target_column_name}, inplace=True)
+        list_col_keep.append(target_column_name)
 
     # calculate subcomponents
     list_component_uniq = np.unique(list_component)
@@ -67,15 +69,38 @@ for i, haz in enumerate(list_abbrev):
             gdf_tract['{}'.format(component)] = np.zeros(len(gdf_tract))
         else:
             gdf_tract['{}'.format(component)] = gdf_tract.loc[:, this_code].sum(axis=1)/len(this_code)
+        list_col_keep.append('{}'.format(component))
 
     #calculate final RCA
     #CHANGE TO divede by 4.0 when RC data is available
     gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/len(np.unique(list_component_valid))
-    print(gdf_tract['RCA'].min())
-    print(gdf_tract['RCA'].max())
+    list_col_keep.append('RCA')
+    # print('.....min:{}'.format(gdf_tract['RCA'].min()))
+    # print('.....max:{}'.format(gdf_tract['RCA'].max()))
+
+    #%% rename columns
+    gdf_tract = gdf_tract[list_col_keep].copy()
+    for col in gdf_tract.columns:
+        if len(col)==2:
+            gdf_tract.rename(columns={col:haz+'R_R'+col + 'TT'}, inplace=True)
+        elif len(col)==3:
+            gdf_tract.rename(columns={col: haz + 'R_R' + 'TTTT'}, inplace=True)
+        elif len(col)==5:
+            gdf_tract.rename(columns={col: haz + 'R_R' + col.replace('_', '')}, inplace=True)
+
+    #%% calculate score and percentile
+    list_R_col = [col for col in gdf_tract.columns if 'R_R' in col]
+    for col in list_R_col:
+        score_col = col[0:5] + 'S' + col[6:]
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column=col, score_column=score_col)
+        percentile_col = col[0:5] + 'P' + col[6:]
+        gdf_tract = utils.calculate_percentile(gdf_tract, data_column=col, score_column=percentile_col)
+
+
+    #%%
 
     # save as output
-    path_output = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\RCA\\RCA_{}_tract.shp'.format(haz)
+    path_output = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\RCA\\Tract\\RCA_{}_tract.shp'.format(haz)
     gdf_tract.to_file(path_output)
 
     #  document result with readme

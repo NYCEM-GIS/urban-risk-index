@@ -45,6 +45,7 @@ gdf_tract['Sq_miles'] = gdf_tract.geometry.area / (5280.**2)
 
 #%% trim to only necessary
 gdf_tract = gdf_tract[['BCT_txt', 'Sq_miles', 'Building_Count', 'Floor_sqft', 'pop_2010', 'geometry']]
+gdf_tract.rename(columns={"Sq_miles":"AREA_SQMI", "Building_Count":"BLD_CNT", "Floor_sqft":'FLOOR_SQFT', 'pop_2010':'POP'}, inplace=True)
 
 #%% save to other
 path_norm = params.PATHNAMES.at['OTH_normalize_values', 'Value']

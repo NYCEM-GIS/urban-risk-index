@@ -28,15 +28,15 @@ class ESL:
         self.consequence[consequence_name]["map_tract"] = map_tract.copy(deep=True)
         self.list_consequences.append(consequence_name)
         if len(self.list_consequences) == 1:
-            self.ESL_map = map_tract
+            map_tract.rename(columns={'Loss_USD': consequence_name}, inplace=True)
+            map_tract['ESL_RAW'] = map_tract[consequence_name].copy()
+            self.ESL_map = map_tract.copy()
         elif len(self.list_consequences) > 1:
             #rename loss on incoming tract
-            map_tract.rename(columns={'Loss_USD':"Loss_USD_2"}, inplace=True)
+            map_tract.rename(columns={'Loss_USD':consequence_name}, inplace=True)
             #addd to ESL_map
-            self.ESL_map = self.ESL_map.merge(map_tract[['BCT_txt', 'Loss_USD_2']], on='BCT_txt', how='left')
-            self.ESL_map['Loss_USD'] = self.ESL_map['Loss_USD'] + self.ESL_map['Loss_USD_2']
-            #remove
-            self.ESL_map.drop(columns=['Loss_USD_2'], inplace=True)
+            self.ESL_map = self.ESL_map.merge(map_tract[['BCT_txt', consequence_name]], on='BCT_txt', how='left')
+            self.ESL_map['ESL_RAW'] = self.ESL_map['ESL_RAW'] + self.ESL_map[consequence_name]
         pass
 
 
@@ -71,37 +71,37 @@ class URI:
         self.RCA = RCA
         pass
 
-    def calc_URI(self):
+    def calc_URI_census_tract(self):
         #calculate raw URI
         self.URI_map = self.ESL.ESL_map.copy()
         self.URI_map = self.URI_map.merge(self.RCA.RCA_map[['BCT_txt', 'RCA']], on='BCT_txt', how='left')
         self.URI_map = self.URI_map.merge(self.SOV.SOV_map[['BCT_txt', 'SOV']], on='BCT_txt', how='left')
-        self.URI_map['URI_Raw'] = self.URI_map['Loss_USD']*self.URI_map['SOV'] / self.URI_map['RCA']
+        self.URI_map['URI_Raw'] = self.URI_map['ESL']*self.URI_map['SOV'] / self.URI_map['RCA']
 
         #calculate score 1-5
-        self.URI_map = utils.calculate_kmeans(self.URI_map, data_column = 'URI_Raw', score_column='URI',
-                                              n_cluster = 5)
-        self.URI_map = utils.calculate_quantile(self.URI_map, data_column = 'URI_Raw', score_column='URI_QT',
-                                              n_cluster = 5)
+        # self.URI_map = utils.calculate_kmeans(self.URI_map, data_column = 'URI_Raw', score_column='URI',
+        #                                       n_cluster = 5)
+        # self.URI_map = utils.calculate_quantile(self.URI_map, data_column = 'URI_Raw', score_column='URI_QT',
+        #                                       n_cluster = 5)
         self.URI_map = utils.calculate_equal_interval(self.URI_map, data_column = 'URI_Raw', score_column='URI_EI',
                                               n_cluster = 5)
         pass
 
     def save_URI_FULL(self):
-        URI_full_map = self.URI_map[['BCT_txt', 'URI_Raw', 'URI', 'URI_QT', 'URI_EI',  'Loss_USD', 'SOV', 'RCA', 'geometry']].copy()
+        URI_full_map = self.URI_map[['BCT_txt', 'URI_Raw',  'ESL', 'SOV', 'RCA', 'geometry']].copy()
         # URI_full_map = URI_full_map.merge(self.RCA.RCA_map[['BCT_txt', 'RCA']], on='BCT_txt', how='left')
         # URI_full_map = URI_full_map.merge(self.SOV.SOV_map[['BCT_txt', 'SOV']], on='BCT_txt', how='left')
-        URI_full_map.rename(columns={'Loss_USD': 'ESL'}, inplace=True)
+        # URI_full_map.rename(columns={'Loss_USD': 'ESL'}, inplace=True)
         # add all consequences
-        for con in self.ESL.list_consequences:
-            con_label = 'ESL_' + con.replace(" ", "_")
-            con_map = self.ESL.consequence[con]["map_tract"]
-            con_map.rename(columns={'Loss_USD': con_label}, inplace=True)
-            URI_full_map = URI_full_map.merge(con_map[['BCT_txt', con_label]], on='BCT_txt', how='left')
-        # add normalization factors: population, area, buildings
+        # for con in self.ESL.list_consequences:
+        #     con_label = 'ESL_' + con.replace(" ", "_")
+        #     con_map = self.ESL.consequence[con]["map_tract"]
+        #     con_map.rename(columns={'Loss_USD': con_label}, inplace=True)
+        #     URI_full_map = URI_full_map.merge(con_map[['BCT_txt', con_label]], on='BCT_txt', how='left')
+        # # add normalization factors: population, area, buildings
         path_norm = params.PATHNAMES.at['OTH_normalize_values', 'Value']
         gdf_norm = gpd.read_file(path_norm)
-        URI_full_map = URI_full_map.merge(gdf_norm[['BCT_txt', 'Sq_miles', 'Building_C', 'Floor_sqft', 'pop_2010']], on='BCT_txt',
+        URI_full_map = URI_full_map.merge(gdf_norm[['BCT_txt', 'AREA_SQMI', 'BLD_CNT', 'FLOOR_SQFT', 'POP_2010']], on='BCT_txt',
                                           how='left')
         #add neighborhoods, PUMAs, boroughs
         # merge with tracts

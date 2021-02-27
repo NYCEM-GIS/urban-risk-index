@@ -140,6 +140,7 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse
             df_label[score_column] = np.arange(n_cluster, 0, -1)
         #assign score to each cluster
         df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
+        df_result.drop(columns={'Cluster_ID'}, inplace=True)
     return df_result
 
 #%% calculate quintile score 1 to 5
@@ -151,6 +152,11 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse
 def calculate_quantile(df, data_column, score_column='Score_QT', n_cluster=5):
     percentile = [stats.percentileofscore(df[data_column], x, kind='rank') for x in df[data_column]]
     df[score_column] = [np.minimum(x//20 + 1, 5) for x in np.array(percentile)]
+    return df
+
+def calculate_percentile(df, data_column, score_column='Percentile'):
+    percentile = np.round([stats.percentileofscore(df[data_column].values, x, kind='rank') for x in np.round(df[data_column].values, 6)], 2)
+    df[score_column] = percentile
     return df
 
 #%% calculate equal interval score 1 to 5
@@ -257,6 +263,12 @@ def get_blank_tract(add_pop=False):
         gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')
     return gdf_tract
 
+#%% divide by zero and set to 0 if denominator is 0
+def divide_zero(x, y):
+    if y == 0:
+        return 0
+    else:
+        return x / y
 
 
 

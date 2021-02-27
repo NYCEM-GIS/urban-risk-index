@@ -2,7 +2,6 @@
 get CDC SOVI score for each tract.
 Normalize for NEW to scale between 0 and 100 using percent ranking
 
-
 """
 
 #%%% import packages
@@ -41,7 +40,12 @@ gdf_tract = gdf_tract.merge(gdf_sovi[['FIPS', 'RPL_THEMES']], left_on='FIPS_CT',
 gdf_tract['SOV_rank'] = utils.normalize_rank_percentile(gdf_tract['RPL_THEMES'].values,
                                                         list_input_null_values=[0, -999],
                                                         output_null_value=0)
-gdf_tract['SOV'] = 1 + gdf_tract['SOV_rank'] / 0.25
+gdf_tract['S_R'] = 1 + gdf_tract['SOV_rank'] / 0.25
+
+#%% calculate percentile and score
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='S_R', score_column='S_S')
+gdf_tract = utils.calculate_percentile(gdf_tract, data_column='S_R', score_column='S_P')
+
 
 #%% use clustering to score 1,2,3,4,5
 #assign median values to null data
@@ -51,8 +55,8 @@ gdf_tract['SOV'] = 1 + gdf_tract['SOV_rank'] / 0.25
 #                                    n_cluster=5)
 
 #%% save results in every folder (same for all)
-path_results = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\SOV\SOV_tract.shp'
-gdf_tract.to_file(path_results)
+path_results = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\SOV\Tract\\SOV_tract.shp'
+gdf_tract[['BCT_txt', 'S_R', 'S_S', 'S_P', 'geometry']].to_file(path_results)
 
 #%%  document result with readme
 try:
