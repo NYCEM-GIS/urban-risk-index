@@ -7,6 +7,7 @@ import os
 import scipy.stats as stats
 import geopandas as gpd
 from sklearn.cluster import KMeans
+import warnings
 
 
 #%% set home directory
@@ -123,25 +124,31 @@ def calculate_RCA(list_factor_gdfs, list_factor_columns, dict_buckets={}):
 
 #%% calculate kmeans score and label
 def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse=False):
-    if len(df)<5:
-        df_result = df.copy()
-        df_result[score_column] = np.ones(len(df))*3
+    if score_column in df.columns:
+        print("warning: kmeans score already exists.")
+        pass
     else:
-        kmeans = KMeans(n_clusters=5)
-        df['Cluster_ID'] = kmeans.fit_predict(np.round(df[[data_column]], 6))
-        #make lookup for class label
-        df_label = pd.DataFrame()
-        df_label['Cluster_ID'] = np.arange(n_cluster)
-        df_label['Cluster_Center'] = kmeans.cluster_centers_.flatten()
-        df_label.sort_values('Cluster_Center', inplace=True)
-        if reverse==False:
-            df_label[score_column] = np.arange(1, n_cluster+1)
+        if len(df)<5:
+            df_result = df.copy()
+            df_result[score_column] = np.ones(len(df))*3
         else:
-            df_label[score_column] = np.arange(n_cluster, 0, -1)
-        #assign score to each cluster
-        df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
-        df_result.drop(columns={'Cluster_ID'}, inplace=True)
-    return df_result
+            kmeans = KMeans(n_clusters=5)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                df['Cluster_ID'] = kmeans.fit_predict(np.round(df[[data_column]], 6))
+            #make lookup for class label
+            df_label = pd.DataFrame()
+            df_label['Cluster_ID'] = np.arange(n_cluster)
+            df_label['Cluster_Center'] = kmeans.cluster_centers_.flatten()
+            df_label.sort_values('Cluster_Center', inplace=True)
+            if reverse==False:
+                df_label[score_column] = np.arange(1, n_cluster+1)
+            else:
+                df_label[score_column] = np.arange(n_cluster, 0, -1)
+            #assign score to each cluster
+            df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
+            df_result.drop(columns={'Cluster_ID'}, inplace=True)
+        return df_result
 
 #%% calculate quintile score 1 to 5
 # def calculate_quantile(df, data_column, score_column='Score_QT', n_cluster=5):
@@ -155,9 +162,13 @@ def calculate_quantile(df, data_column, score_column='Score_QT', n_cluster=5):
     return df
 
 def calculate_percentile(df, data_column, score_column='Percentile'):
-    percentile = np.round([stats.percentileofscore(df[data_column].values, x, kind='rank') for x in np.round(df[data_column].values, 6)], 2)
-    df[score_column] = percentile
-    return df
+    if score_column in df.columns:
+        print("warning: kmeans score already exists.")
+        pass
+    else:
+        percentile = np.round([stats.percentileofscore(df[data_column].values, x, kind='rank') for x in np.round(df[data_column].values, 6)], 2)
+        df[score_column] = percentile
+        return df
 
 #%% calculate equal interval score 1 to 5
 def calculate_equal_interval(df, data_column, score_column='Score_EI', n_cluster=5):
