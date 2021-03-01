@@ -187,7 +187,7 @@ def calculate_csv(list_geo, path_output):
         else: df_master = df_master.append(df_csv[key])
     print('Saving master csv.')
     path_output = os.path.join(path_output, 'TBL_master.csv')
-    df_csv[geo_id].to_csv(path_tracts)
+    df_master.to_csv(path_output)
     print('Done.')
 
 #%%
