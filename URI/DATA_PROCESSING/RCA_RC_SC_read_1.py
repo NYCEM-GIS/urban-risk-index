@@ -64,7 +64,7 @@ path_output = params.PATHNAMES.at['RCA_RC_SC_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Score', title='RCA_RR_HI: Median Household Income',
+plotting.plot_notebook(gdf_tract, column='Score', title='RCA_RR_SC: Shelter Capacity',
                        legend='Score', cmap='Blues', type='score')
 
 #%%  document result with readme
@@ -79,4 +79,4 @@ except:
     pass
 
 #%% output complete message
-print("Finished calculating RCA factor: Median Household Income")
+print("Finished calculating RCA factor: Shelter Caacicity")

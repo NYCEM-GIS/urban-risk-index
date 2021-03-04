@@ -118,6 +118,10 @@ for i, bor in enumerate(gdf_tract.BOROCODE.unique()):
 path_results = params.PATHNAMES.at['ESL_CST_loss_power', 'Value']
 gdf_tract.to_file(path_results)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: Power Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

@@ -30,6 +30,10 @@ gdf_tract['Loss_USD'] = value_loss * gdf_tract['pop_2010'] / gdf_tract['pop_2010
 path_results = params.PATHNAMES.at['ESL_CRN_death_loss', 'Value']
 gdf_tract.to_file(path_results)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CRN: Deaths Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

@@ -33,6 +33,10 @@ gdf_tract = gdf_tract.merge(df_hazus[['Tract2010_STFID', 'Loss_USD']], left_on='
 path_output = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
 gdf_tract.to_file(path_output)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: HAZUS Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

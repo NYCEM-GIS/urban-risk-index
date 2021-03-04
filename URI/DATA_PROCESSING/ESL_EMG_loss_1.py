@@ -37,6 +37,10 @@ gdf_tract['Loss_USD'] = loss_per_year * gdf_tract['pop_2010']/gdf_tract['pop_201
 #%% save
 gdf_tract[['Stfid', 'BCT_txt', 'Loss_USD', 'geometry']].to_file(path_loss)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='EMG: Deaths Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

@@ -46,6 +46,10 @@ gdf_tract['Loss_USD'] = utils.convert_USD(gdf_tract['Loss_2016'], 2016).values
 path_output = params.PATHNAMES.at['ESL_EXH_loss_power', 'Value']
 gdf_tract.to_file(path_output)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='EXH: Power Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

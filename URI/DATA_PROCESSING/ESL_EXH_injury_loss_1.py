@@ -92,6 +92,10 @@ gdf_tract['Loss_USD'] = gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_
 path_output = params.PATHNAMES.at['ESL_EXT_loss_injury', 'Value']
 gdf_tract.to_file(path_output)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='EXH: Injuries Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

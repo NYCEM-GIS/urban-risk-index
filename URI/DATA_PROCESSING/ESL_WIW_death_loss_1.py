@@ -62,6 +62,10 @@ gdf_tract['Loss_USD'] = gdf_tract['N_deaths'] * loss_deaths_total
 path_output = params.PATHNAMES.at['ESL_WIW_loss_deaths', 'Value']
 gdf_tract.to_file(path_output)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='WIW: Death Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

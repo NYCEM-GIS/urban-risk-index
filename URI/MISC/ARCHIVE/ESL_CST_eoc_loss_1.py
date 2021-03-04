@@ -57,6 +57,10 @@ for abbrv in list_abbrv:
 path_output = params.PATHNAMES.at['RCA_RC_INE_score', 'Value']
 gdf_tract.to_file(path_output)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CRN: Injuries Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

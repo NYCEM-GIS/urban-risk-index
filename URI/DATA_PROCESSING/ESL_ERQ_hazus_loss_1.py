@@ -36,6 +36,10 @@ gdf_tract['Loss_USD'] = gdf_tract['TotalLoss'] * 1000.
 path_output = params.PATHNAMES.at['ESL_ERQ_hazus_loss', 'Value']
 gdf_tract.to_file(path_output)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='ERQ: HAZUS Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

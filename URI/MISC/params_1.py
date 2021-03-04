@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #%%
-path_params = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\5_PARAMS\URI_PARAMS_RUN2.xlsx'
+path_params = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\5_PARAMS\URI_PARAMS_v_1_0.xlsx'
 
 #%% create params variable
 

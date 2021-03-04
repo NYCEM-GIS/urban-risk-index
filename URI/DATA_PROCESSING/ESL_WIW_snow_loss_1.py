@@ -48,6 +48,10 @@ gdf_tract['Loss_USD'] = ave_cost_year * gdf_tract['road_area_ft2'] / gdf_tract['
 path_output = params.PATHNAMES.at['ESL_WIW_loss_snow', 'Value']
 gdf_tract.to_file(path_output)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='WIW: Snow Removal Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 
@@ -60,4 +64,4 @@ except:
     pass
 
 #%% output complete message
-print("Finished calculating  ESL WIW snow loss.")
+print("Finished calculating  ESL WIW snow removal loss.")

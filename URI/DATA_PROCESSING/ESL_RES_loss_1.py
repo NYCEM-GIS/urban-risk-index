@@ -173,11 +173,9 @@ gdf_tract_econ = gdf_tracts.copy()
 gdf_tract_econ['Loss_USD'] = annual_econ_loss * gdf_tracts['pop_2010'] / gdf_tracts['pop_2010'].sum()
 gdf_tract_econ[['Stfid', 'BCT_txt', 'Loss_USD', 'geometry']].to_file(path_loss_economy)
 
-#%% check results
-# plotting.plot_inline(gdf_tract_death, 'Loss_USD')
-# plotting.plot_inline(gdf_tract_injury, 'Loss_USD')
-# plotting.plot_inline(gdf_tract_wages, 'Loss_USD')
-# plotting.plot_inline(gdf_tract_econ, 'Loss_USD')
+#%% plot
+plotting.plot_notebook(gdf_tract_econ, column='Loss_USD', title='RES: Death Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme
 try:

@@ -86,6 +86,10 @@ gdf_tract['Loss_USD'] = Loss_USD * gdf_tract['Tree_Service_Count'] / gdf_tract['
 path_results = params.PATHNAMES.at['ESL_CST_loss_tree', 'Value']
 gdf_tract.to_file(path_results)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: Tree Servicing Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

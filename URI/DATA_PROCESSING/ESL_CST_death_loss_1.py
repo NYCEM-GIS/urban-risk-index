@@ -73,6 +73,10 @@ gdf_tract['Loss_USD'] = loss_deaths_total * gdf_tract['weight'] / gdf_tract['wei
 path_output = params.PATHNAMES.at['ESL_CST_deaths_loss', 'Value']
 gdf_tract.to_file(path_output)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: Deaths Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 
 #%%  document result with readme
 try:

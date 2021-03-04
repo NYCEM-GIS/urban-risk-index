@@ -83,7 +83,7 @@ gdf_tract['N_emerg_uniq'] = gdf_tract['N_emerg'] - gdf_tract['N_hosp']
 #%% convert to loss.   Asssume emergency room visits with no hospitalization are "moderate" injuries.
 #Assume hospitalizations are "serious" injuries
 loss_per_moderate_injury_2016 = params.PARAMS.at['value_moderate_injury_2016', 'Value']
-loss_moderate_total = utils.convert_USD(loss_per_moderate_injury_2016, 2016
+loss_moderate_total = utils.convert_USD(loss_per_moderate_injury_2016, 2016)
 loss_per_serious_injury_2016 = params.PARAMS.at['value_serious_injury_2016', 'Value']
 loss_serious_total = utils.convert_USD(loss_per_serious_injury_2016, 2016)
 gdf_tract['Loss_USD'] = gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_emerg_uniq'] * loss_moderate_total
@@ -91,6 +91,10 @@ gdf_tract['Loss_USD'] = gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_
 #%% save as output
 path_output = params.PATHNAMES.at['ESL_WIW_loss_injury', 'Value']
 gdf_tract.to_file(path_output)
+
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='WIW: Injury Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme
 try:

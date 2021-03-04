@@ -3,7 +3,6 @@
 #calculate all URI and ESL values
 
 #%% read packages
-import pandas as pd
 import numpy as np
 import geopandas as gpd
 import URI.MISC.params_1 as params

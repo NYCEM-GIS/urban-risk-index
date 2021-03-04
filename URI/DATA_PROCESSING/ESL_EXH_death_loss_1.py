@@ -139,6 +139,10 @@ gdf_loss['Loss_USD'] = gdf_loss['deaths_year'] * value_life
 path_results = params.PATHNAMES.at['EXH_ESL_deaths_per_year_tract', 'Value']
 gdf_loss.to_file(path_results)
 
+#%% plot
+plotting.plot_notebook(gdf_loss, column='Loss_USD', title='EXH: Deaths Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 

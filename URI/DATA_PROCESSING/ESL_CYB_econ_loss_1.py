@@ -30,6 +30,10 @@ gdf_tract['Loss_USD'] = value_loss / len(gdf_tract)
 path_results = params.PATHNAMES.at['ESL_CYB_econ_loss', 'Value']
 gdf_tract.to_file(path_results)
 
+#%% plot
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CYB: Economic Loss',
+                       legend='Loss USD', cmap='Greens', type='raw')
+
 #%%  document result with readme
 try:
     text = """ 
