@@ -1,0 +1,26 @@
+1. Download and install Miniconda with python v3.8.
+--- Go to https://docs.conda.io/en/latest/miniconda.html
+--- Download Miniconda3 Windows 64-bit *.exe file
+--- Open *.exe file.
+--- Use default options except Register Miniconda3 as the system python 3.8.
+
+2. Set up python environment called "URI" in Miniconda
+--- Open Anaconda Prompt (Miniconda3) from Windows start menu
+--- Use "cd" command to navigate to unzipped Installation folder 
+--- Run the following commands.
+--- Note the *.whl file for rtree was downloaded from https://www.lfd.uci.edu/~gohlke/pythonlibs/
+conda create --name URI python=3.7.7
+conda activate URI
+conda install -c conda-forge geopandas=0.7.0 xlrd=1.2.0 scipy=1.4.1 scikit-learn=0.23.1 matplotlib=3.2.1 requests=2.23.0 rasterio=1.1.3 rasterstats=0.14.0 census notebook=6.0.3 descartes
+pip uninstall rtree
+pip install Rtree-0.9.7-cp37-cp37m-win_amd64.whl
+pip install us
+
+
+3.  Open Test_URI_Install notebook and test install.
+--- run the command "jupyter notebook" in the Miniconda command prompt
+--- notebook should open in web browser
+--- Run the notebook.  Message and map should indicate successful install
+--- Any error messaages should be fixed before the URI Calculator can run
+ 
+
