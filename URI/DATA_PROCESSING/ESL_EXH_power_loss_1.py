@@ -32,7 +32,7 @@ gdf_tract = utils.project_gdf(gdf_tract)
 #%% open population and join
 path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
 df_pop = pd.read_excel(path_population_tract, skiprows=5)
-df_pop.dropna(inplace=True)
+df_pop.dropna(inplace=True, subset=['2010 DCP Borough Code', '2010 Census Tract'])
 df_pop.rename(columns={2010:'pop_2010'}, inplace=True)
 df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2010 DCP Borough Code'])) + str(int(df_pop.at[x,'2010 Census Tract'])).zfill(6) for x in df_pop.index]
 gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')

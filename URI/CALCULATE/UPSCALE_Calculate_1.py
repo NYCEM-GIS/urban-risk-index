@@ -29,6 +29,24 @@ def calculate_UPSCALE(haz):
     path_uri = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\Tract\URI_{}_tract.shp'.format(haz)
     gdf_uri = gpd.read_file(path_uri)
 
+    #%% create tract and master
+    gdf_tract = utils.get_blank_tract()
+    path_norm = params.PATHNAMES.at['OTH_normalize_values', 'Value']
+    df_norm = gpd.read_file(path_norm)
+    df_norm.drop(columns={'geometry'}, inplace=True)
+    gdf_tract = gdf_tract.merge(df_norm, on='BCT_txt', how='left')
+    #add borough name
+    path_boro = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+    df_boro = pd.read_excel(path_boro)
+    df_boro['BOROCODE'] = [str(x) for x in df_boro['Bor_ID']]
+    gdf_tract = gdf_tract.merge(df_boro[['Borough', 'BOROCODE']], left_on='BOROCODE', right_on='BOROCODE', how='left' )
+    gdf_master = gdf_tract.copy()[['BCT_txt', 'POP', 'BLD_CNT', 'AREA_SQMI', 'FLOOR_SQFT', 'Borough',
+                                   'BOROCODE', 'PUMA', 'NEIGHBORHO','geometry']]
+    gdf_master.rename(columns={'BCT_txt':'GeoID', 'POP':'Pop_2010', 'BLD_CNT':'Bld_Count',
+                               'AREA_SQMI':'Land_Area', 'FLOOR_SQFT':'Bldg_Area', 'Borough':'Boro_Name',
+                               'BOROCODE':'Boro_Code', 'NEIGHBORHO':'NTA_Name'}, inplace=True)
+    gdf_master['Geography'] = np.repeat('Tract', len(gdf_master))
+
     #%% select upscale key
     list_geo = ['CITYWIDE', 'BOROCODE', 'PUMA', 'NTA', ]
     list_geo_folder = ['CITYWIDE', 'Borough', 'PUMA', 'NTA']
@@ -45,8 +63,20 @@ def calculate_UPSCALE(haz):
         gdf_new  = gdf_new[list_geo_keep + ['geometry']].dissolve(by=geo_id)
         gdf_new[geo_id] = gdf_new.index
         gdf_new.index.name = 'Index'
-        path_new = params.PATHNAMES.at['TBL_B_shp', 'Value']
+        path_new = params.PATHNAMES.at['TBL_{}_shp'.format(geo_id), 'Value']
         gdf_new.to_file(path_new)
+
+        #add normalization to master
+        df_norm = gdf_uri.copy()[[geo_id, 'AREA_SQMI', 'BLD_CNT', 'FLOOR_SQFT', 'POP']]
+        df_agg = df_norm.groupby(by=geo_id).sum()
+        gdf_temp = gdf_new.merge(df_agg, left_on=geo_id, right_index=True, how='left')
+        gdf_temp['GeoID'] = gdf_temp[geo_id]
+        gdf_temp.rename(columns={'POP':'Pop_2010', 'BLD_CNT':'Bld_Count', 'BOROCODE':'Boro_Code', 'NTA':'NTA_Name',
+                               'AREA_SQMI':'Land_Area', 'FLOOR_SQFT':'Bldg_Area'}, inplace=True)
+        gdf_temp['Geography'] = np.repeat(geo_name, len(gdf_temp))
+        gdf_temp['Boro_Name'] = np.repeat(np.nan, len(gdf_temp))
+        gdf_temp.drop(columns={'CITYWIDE'}, inplace=True)
+        gdf_master = gdf_master.append(gdf_temp)
 
         #%% get sum of losses, risk scores, and normalization factors and merge
         list_col_norm = ['AREA_SQMI', 'FLOOR_SQFT', 'POP', 'BLD_CNT']
@@ -100,6 +130,10 @@ def calculate_UPSCALE(haz):
         if geo_name != 'CITYWIDE':
             plotting.plot_notebook(gdf_new, column=haz+'U_SN', title=haz + ': Urban Risk Index ({})'.format(geo_name),
                                    legend='Score', cmap='Purples', type='score')
+
+        #%% save master shapefile for tableau
+        path_master = params.PATHNAMES.at['TBL_MASTER_shp', 'Value']
+        gdf_master.to_file(path_master)
 
 
         #%%  document result with readme

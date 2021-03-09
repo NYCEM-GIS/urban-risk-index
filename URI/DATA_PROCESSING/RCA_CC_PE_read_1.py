@@ -17,7 +17,7 @@ utils.set_home()
 #%% load place attachment data
 path_data = params.PATHNAMES.at['RCA_CC_PE_data', 'Value']
 df_data = pd.read_excel(path_data)
-df_data.dropna(inplace=True) #due to missing census tract number in data
+df_data.dropna(inplace=True, subset=['Census Tract', 'Avg. Participation Score 2018']) #due to missing census tract number in data
 df_data['FIPS_CT_txt'] = [str(int(df_data.at[idx, 'Census Tract'])) for idx in df_data.index]
 
 #%% load tract data

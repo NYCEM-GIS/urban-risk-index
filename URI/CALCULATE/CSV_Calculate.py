@@ -114,8 +114,8 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                     # get columns for this hazard
                     haz_columns = [col for col in df_cons.columns if haz in col]
                     df_cons = df_cons[haz_columns]
-                    list_esl_factor_code = df_cons[haz + '_Abbrv'].dropna().values
-                    list_esl__factor_name = df_cons[haz + '_Factor'].dropna().values
+                    list_esl_factor_code = df_cons[haz + '_Abbrv'].dropna(how='all', axis=0).values
+                    list_esl__factor_name = df_cons[haz + '_Factor'].dropna(how='all', axis=0).values
                     dct_esl_factor = {list_esl_factor_code[x]: list_esl__factor_name[x] for x in range(len(list_esl_factor_code))}
 
                 #%%add Factor
@@ -190,6 +190,6 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
 #%%
 if __name__ == '__main__':
     list_abbrev_haz = ['EXH', 'WIW']
-    list_geo_tot = ['CITYWIDE', 'BOROCODE', 'PUMA', 'NTA', 'BCT_txt']
+    list_geo = ['CITYWIDE', 'BOROCODE', 'PUMA', 'NTA', 'BCT_txt']
     path_output = r'C://temp//'
-    calculate_csv(list_abbrev_haz, list_geo_tot, path_output)
+    calculate_csv(list_abbrev_haz, list_geo, path_output)

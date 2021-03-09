@@ -42,7 +42,9 @@ def calculate_URI(haz):
     gdf_URI = gdf_URI.merge(df_SOV, on='BCT_txt', how='left')
 
     #%% calculate URI
-    gdf_URI[haz + 'U_RN'] = gdf_URI[haz+'E_RNTT'] * gdf_URI['S_R'] / gdf_URI[haz+'R_RTTTT']
+    coeff_a = 0
+    coeff_b = 0
+    gdf_URI[haz + 'U_RN'] = gdf_URI[haz+'E_RNTT'] * (gdf_URI['S_R'])**coeff_a / (gdf_URI[haz+'R_RTTTT'])**coeff_b
 
     #%% calculate normalization
     def divide_zero(x, y):

@@ -27,7 +27,7 @@ def calculate_ESL(haz):
     haz_columns = [col for col in df_cons.columns if haz in col]
     df_cons = df_cons[haz_columns]
     df_cons.index = range(len(df_cons))
-    df_cons.dropna(inplace=True)
+    df_cons.dropna(inplace=True, how='all', axis=0)
 
     print(".....Importing {} expected annual losses.....".format(haz))
     print(" ")
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     list_abbrev_haz = params.ABBREVIATIONS.iloc[0:11, 0].values.tolist()
 
     #run script
-    for haz in list_abbrev_haz[0:2]:
+    for haz in list_abbrev_haz[2:]:
         calculate_ESL(haz)
 
 

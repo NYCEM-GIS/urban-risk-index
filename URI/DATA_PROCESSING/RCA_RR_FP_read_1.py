@@ -31,7 +31,6 @@ if not os.path.exists(folder_scratch):
 path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
 gdf_footprint = gpd.read_file(path_footprint, driver='FileGBD', layer='NYC_Buildings_composite_20200110')
 #spatial join to get count
-print("Begin Join")
 gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', op='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['BIN'], aggfunc=len)

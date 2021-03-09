@@ -13,24 +13,23 @@ import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
 #%% load gree service data
-path_tree = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\TreeServices.xlsx'
+path_tree = params.PATHNAMES.at['HHC_TreeServices', 'Value']
 df_tree = pd.read_excel(path_tree, parse_dates=['DateInitiated', 'DateCreated'])
-
 
 #%%% visualize the results
 gdf_tract = utils.get_blank_tract()
 
-
 #%% get list of events
-path_Events = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\StormEvents.xlsx'
-path_EventTypes =  r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\EventTypes.xlsx'
-path_CriticalIssues =  r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\CriticalIssues.xlsx'
-path_EventTypeCriticalIssues = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\EventTypeCriticalIssues.xlsx'
-path_StormEventTypes = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\StormEventsTypes.xlsx'
+path_Events = params.PATHNAMES.at['stormevents_table', 'Value']
+path_EventTypes = params.PATHNAMES.at['HHC_eventtypes', 'Value']
+path_CriticalIssues =  params.PATHNAMES.at['HHC_critical_issues', 'Value']
+path_EventTypeCriticalIssues = params.PATHNAMES.at['HHC_EventTypeCriticalIssues', 'Value']
+path_StormEventTypes = params.PATHNAMES.at['HHC_stormeventtypes', 'Value']
 df_Events = pd.read_excel(path_Events, parse_dates=['StartDate', 'EndDate'])
 df_EventTypes = pd.read_excel(path_EventTypes)
 df_CriticalIssues = pd.read_excel(path_CriticalIssues)
 df_EventTypeCriticalIssues = pd.read_excel(path_EventTypeCriticalIssues)
+df_StormEventTypes = pd.read_excel(path_StormEventTypes)
 df_StormEventTypes = pd.read_excel(path_StormEventTypes)
 
 #%%  get hazard type id
@@ -49,10 +48,11 @@ df_Events = df_Events.loc[df_Events.StartDate >= '2009-01-01', :]
 df_Events = df_Events.loc[df_Events.StartDate < '2019-01-01', :]
 
 #%% get tree service calls in this range
+service_buffer = params.PARAMS.at['buffer_period_tree_servicing_days', 'Value']
 df_tree['Is_Event'] = np.zeros(len(df_tree))
 for i, idx in enumerate(df_Events.index):
     start_date = df_Events.at[idx, 'StartDate']
-    end_date = df_Events.at[idx, 'EndDate'] + datetime.timedelta(days=2)
+    end_date = df_Events.at[idx, 'EndDate'] + datetime.timedelta(days=service_buffer)
     df_tree.loc[ ( (df_tree.DateInitiated >= start_date) & (df_tree.DateInitiated <= end_date)), 'Is_Event'] = 1
 
 #%%

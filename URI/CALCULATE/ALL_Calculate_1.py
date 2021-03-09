@@ -44,7 +44,7 @@ def calculate_ALL(list_abbrev_haz):
         haz_columns = [col for col in df_cons.columns if haz in col]
         df_cons = df_cons[haz_columns]
         df_cons.index = range(len(df_cons))
-        df_cons.dropna(inplace=True)
+        df_cons.dropna(inplace=True, how='all', axis=0)
         for idx in df_cons.index:
             this_duplicate =  df_cons.at[idx, '{}_Duplicate'.format(haz)]
             if this_duplicate.lower() == 'yes':

@@ -58,10 +58,11 @@ path_outages = params.PATHNAMES.at['ESL_CST_outages_data', 'Value']
 df_outages = pd.read_excel(path_outages)
 
 #%% get power outages during these events
+outage_buffer  = params.PARAMS.at['buffer_period_power_outage_days', 'Value']
 df_outages['Is_Event'] = np.zeros(len(df_outages))
 for i, idx in enumerate(df_Events.index):
     start_date = df_Events.at[idx, 'StartDate']
-    end_date = df_Events.at[idx, 'EndDate'] + datetime.timedelta(days=2)
+    end_date = df_Events.at[idx, 'EndDate'] + datetime.timedelta(days=outage_buffer)
     df_outages.loc[ ( (df_outages.Timestamp >= start_date) & (df_outages.Timestamp <= end_date)), 'Is_Event'] = 1
 
 #%% get outages

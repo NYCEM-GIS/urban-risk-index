@@ -27,6 +27,7 @@ def calculate_RCA(haz):
     list_component_name = params.MITIGATION.loc[:, 'RC Component'].values
     list_haz_specific = params.MITIGATION.loc[:, 'Hazard Specific'].values
     list_code_valid = []
+    list_code_weight = []
     list_component_valid = []
     list_haz_specific_valid = []
     for j, code in enumerate(list_code):
@@ -34,8 +35,10 @@ def calculate_RCA(haz):
         haz_specific = list_haz_specific[j]
         try:
             path_score = params.PATHNAMES.at['RCA_{}_{}_score'.format(component, code), 'Value']
-            if params.MITIGATION.loc[params.MITIGATION['Factor Code']==code, haz].values[0]==1:
+            factor_weight = params.MITIGATION.loc[params.MITIGATION['Factor Code'] == code, haz].values[0]
+            if factor_weight > 0:
                 list_code_valid.append(code)
+                list_code_weight.append(factor_weight)
                 list_component_valid.append(component)
                 list_haz_specific_valid.append(haz_specific)
         except:
@@ -58,16 +61,17 @@ def calculate_RCA(haz):
         list_col_keep.append(target_column_name)
 
     # calculate subcomponents
-    list_component_uniq = np.unique(list_component)
-    list_component_name_uniq = np.unique(list_component_name)
+    list_component_uniq = list(dict.fromkeys(list_component))
+    list_component_name_uniq = list(dict.fromkeys(list_component_name))
     dct_component = {list_component_uniq[x]: list_component_name_uniq[x] for x in range(len(list_component_uniq))}
     for j, component in enumerate(list_component_uniq):
         output = [idx for idx, comp in enumerate(list_component_valid) if comp==component]
         this_code = ['{}_'.format(component) + list_code_valid[x] for x in output]
+        this_code_weight = [list_code_weight[x] for x in output]
         if len(this_code)==0:
             gdf_tract['{}'.format(component)] = np.zeros(len(gdf_tract))
         else:
-            gdf_tract['{}'.format(component)] = gdf_tract.loc[:, this_code].sum(axis=1)/len(this_code)
+            gdf_tract['{}'.format(component)] = np.average(gdf_tract.loc[:, this_code], weights=this_code_weight, axis=1)
         list_col_keep.append('{}'.format(component))
 
     #calculate final RCA
@@ -133,9 +137,10 @@ if __name__ == '__main__':
     list_abbrev_haz = params.ABBREVIATIONS.iloc[0:11, 0].values.tolist()
 
     #run script
-    for haz in list_abbrev_haz[0:2]:
-        calculate_RCA(haz)
-
+    #for haz in list_abbrev_haz[0:2]:
+    #    calculate_RCA(haz)
+    haz='FLD'
+    calculate_RCA(haz)
 
 
 

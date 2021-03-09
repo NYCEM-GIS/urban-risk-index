@@ -160,7 +160,7 @@ def get_blank_tract(add_pop=False):
     if add_pop==True:
         path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
         df_pop = pd.read_excel(path_population_tract, skiprows=5)
-        df_pop.dropna(inplace=True)
+        df_pop.dropna(inplace=True, subset=['2010 DCP Borough Code', '2010 Census Tract'])
         df_pop.rename(columns={2010: 'pop_2010'}, inplace=True)
         df_pop['BCT_txt'] = [
             str(int(df_pop.at[x, '2010 DCP Borough Code'])) + str(int(df_pop.at[x, '2010 Census Tract'])).zfill(6) for x

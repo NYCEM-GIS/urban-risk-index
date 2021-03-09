@@ -84,7 +84,7 @@ df_borrate = pd.read_csv(path_borough_event_rate)
 #%% load population
 path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
 df_population = pd.read_excel(path_population_tract, skiprows=5)
-df_population.dropna(inplace=True)
+df_population.dropna(inplace=True, subset=['2010 DCP Borough Code', '2010 Census Tract'])
 
 #%% get population for each borough
 #get borough population
