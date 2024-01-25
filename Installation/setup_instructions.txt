@@ -15,6 +15,7 @@ conda install -c conda-forge geopandas=0.7.0 xlrd=1.2.0 scipy=1.4.1 scikit-learn
 pip uninstall rtree
 pip install Rtree-0.9.7-cp37-cp37m-win_amd64.whl
 pip install us
+pip install openpyxl
 
 
 3.  Open Test_URI_Install notebook and test install.
@@ -24,3 +25,5 @@ pip install us
 --- Any error messaages should be fixed before the URI Calculator can run
  
 
+OneDrive - NYCEM\Risk Index\Final Deliverables\URI_Calculator_v1_0\4_CODE\Installation
+OneDrive - NYCEM\Risk Index\Final Deliverables\Archive\URI_v2.0_drafts\URI_Calculator_v1_2\URI_Calculator_v1_2\4_CODE\Installation

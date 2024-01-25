@@ -48,7 +48,8 @@ def calculate_SOV():
     gdf_tract['S_R'] = 1 + gdf_tract['SOV_rank'] / 0.25
 
     #%% calculate percentile and score
-    gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='S_R', score_column='S_S')
+    #gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='S_R', score_column='S_S')
+    gdf_tract['S_S'] = [np.round(x, 0) for x in gdf_tract['S_R']]
     gdf_tract = utils.calculate_percentile(gdf_tract, data_column='S_R', score_column='S_P')
 
     #%% plot results

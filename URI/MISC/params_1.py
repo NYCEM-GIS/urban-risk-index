@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #%%
-path_params = r'C:\\URI_v1_0\URI_Calculator_v1_0\URI_Calculator_v1_0\5_PARAMS\URI_PARAMS_v_1_0.xlsx'
+path_params = r'W:\Common\Mitigation\Risk Index\Final Deliverables\URI_Calculator_v1_0\5_PARAMS\URI_PARAMS_v_1_0.xlsx'
 
 #%% create params variable
 

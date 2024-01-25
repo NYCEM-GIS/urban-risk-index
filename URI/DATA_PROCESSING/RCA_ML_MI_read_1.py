@@ -16,11 +16,11 @@ utils.set_home()
 #%% open mitigation geopackages
 path_gdb = params.PATHNAMES.at['RCA_ML_MI_gdb', 'Value']
 epsg = params.SETTINGS.at['epsg', 'Value']
-gdf_points = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_Actions_Points_20190401')
+gdf_points = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_lines_update_20211027')
 gdf_points = gdf_points.to_crs(epsg = epsg)
-gdf_lines = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_Actions_Lines_20190401')
+gdf_lines = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_lines_update_20211027')
 gdf_lines = gdf_lines.to_crs(epsg = epsg)
-gdf_polygons = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_Actions_Polygons_20190401')
+gdf_polygons = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_polygons_update_20211213')
 gdf_polygons = gdf_polygons.to_crs(epsg = epsg)
 
 #%% open mitigation dataset table

@@ -114,10 +114,21 @@ def calculate_UPSCALE(haz):
         # %% calculate scores
         list_col = ['S_R'] + [col for col in gdf_new.columns if haz in col[0:3]]
         for col in list_col:
-            score_col = col[0:5] + 'S' + col[6:]
-            gdf_new = utils.calculate_kmeans(gdf_new, data_column=col, score_column=score_col)
-            percentile_col = col[0:5] + 'P' + col[6:]
-            gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
+            if col == 'S_R':
+                score_col = 'S_S'
+                percentile_col = 'S_P'
+                gdf_new[score_col] = [np.round(x, 0) for x in gdf_new[col]]
+                gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
+            elif col[3:5]=='R_':
+                score_col = col[0:5] + 'S' + col[6:]
+                percentile_col = col[0:5] + 'P' + col[6:]
+                gdf_new[score_col] = [np.round(x, 0) for x in gdf_new[col]]
+                gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
+            else:
+                score_col = col[0:5] + 'S' + col[6:]
+                percentile_col = col[0:5] + 'P' + col[6:]
+                gdf_new = utils.calculate_kmeans(gdf_new, data_column=col, score_column=score_col)
+                gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
 
         #%% delete CITYWIDE
         if geo_id=='CITYWIDE': gdf_new.drop(columns={'CITYWIDE'}, inplace=True)

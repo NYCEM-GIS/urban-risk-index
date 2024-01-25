@@ -1,4 +1,4 @@
-""" get parks with water features cover data"""
+""" get walkability data"""
 
 #%% read packages
 import numpy as np

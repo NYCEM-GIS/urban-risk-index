@@ -35,7 +35,14 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
             if geo_id == 'CITYWIDE':gdf_haz['CITYWIDE'] = np.repeat(int(1), len(gdf_haz))
 
             #loop through each column and add based on title
-            list_col_add = [col for col in gdf_haz.columns if haz in col[0:3]]
+            list_col_add = [col for col in gdf_haz.columns if ((haz in col[0:3]) or ('S_' in col[0:2]))]
+            # #add haz to the front of the social vulnereability score
+            # for i, col in enumerate(list_col_add):
+            #     if col[0]=='S':
+            #         update_col = haz + col
+            #         list_col_add[i] = update_col
+            #         print(update_col)
+
             for col in list_col_add:
 
                 #%% add base to df_temp
@@ -44,7 +51,7 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                 df = gdf_haz[list_col_keep].copy()
 
                 df.rename(columns={geo_id:'GeoID', 'AREA_SQMI': 'Land_Area', 'FLOOR_SQFT':'Bldg_Area', 'POP':'Pop_2010',
-                                            'BLD_CNT':'Bldg_Area', col:'Value'}, inplace=True)
+                                            'BLD_CNT':'Bldg_Count', col:'Value'}, inplace=True)
 
                 # add hazard
                 list_hazards = ['CYB', 'EXH', 'WIW', 'CST', 'CER', 'HIW', 'ERQ', 'FLD', 'EMG', 'RES', 'CRN', 'ALL' ]
@@ -52,7 +59,10 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                               'High Winds', 'Earthquake', 'Flooding', 'Emerging Disease', 'Respiratory Illness',
                               'CBRN', 'All']
                 dct_haz = {list_hazards[x]: list_names[x] for x in range(len(list_hazards))}
-                label_hazard = dct_haz[col[0:3]]
+                if col[0:2]=='S_':
+                    label_hazard='All'
+                else:
+                    label_hazard = dct_haz[haz]
                 df['Hazard'] = np.repeat(label_hazard, len(df))
 
 
@@ -60,13 +70,13 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                 df['Geography'] = np.repeat(geo_name, len(df))
 
                 # add component
-                if col[3] == 'E':
+                if col[0] == 'S':
+                    label_Component = 'Social Vulnerability'
+                elif col[3] == 'E':
                     if ((col[5]=='A') or (col[5]=='Q')):
                         label_Component = 'Absolute Expected Loss'
                     else:
                         label_Component = 'Expected Loss'
-                elif col[3] == 'S':
-                    label_Component = 'Social Vulnerability'
                 elif col[3] == 'R':
                     label_Component = 'Resilience Capacity'
                 elif col[3] == 'U':
@@ -174,6 +184,8 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                 count += 1
 
         df_csv[geo_id].replace(nan_value, np.nan, inplace=True)
+        #drop duplicates SOV scores
+        df_csv[geo_id].drop_duplicates(keep='first', inplace=True)
         path_tracts = os.path.join(path_output, 'TBL_{}.csv'.format(geo_name))
         df_csv[geo_id].to_csv(path_tracts)
         print("")
