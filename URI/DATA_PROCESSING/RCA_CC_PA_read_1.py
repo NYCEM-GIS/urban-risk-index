@@ -13,13 +13,16 @@ import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
+import requests
 utils.set_home()
 
 #%% load tract
 gdf_tract = utils.get_blank_tract()
 
 #%% load place attachment data
-c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8")
+session = requests.Session()
+session.verify = False
+c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8", session=session)
 response_pop_older_1yr = c.acs5.state_county_tract('B07204_001E', states.NY.fips, '*', Census.ALL)
 response_same_house_1yr_ago  = c.acs5.state_county_tract('B07204_002E', states.NY.fips, '*', Census.ALL)
 response_diff_house_same_city_1yr_ago  = c.acs5.state_county_tract('B07204_005E', states.NY.fips, '*', Census.ALL)

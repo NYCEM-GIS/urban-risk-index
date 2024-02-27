@@ -8,6 +8,7 @@ import os
 import matplotlib.pyplot as plt
 from census import Census
 from us import states
+import requests
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -18,7 +19,9 @@ utils.set_home()
 gdf_tract = utils.get_blank_tract()
 
 #%% load place attachment data
-c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8")
+session = requests.Session()
+session.verify = False
+c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8", session=session)
 response_total = c.acs5.state_county_tract('B25026_001E', states.NY.fips, '*', Census.ALL)
 response_owners = c.acs5.state_county_tract('B25026_002E', states.NY.fips, '*', Census.ALL)
 list_tract1 = [x['tract'] for x in response_total]
