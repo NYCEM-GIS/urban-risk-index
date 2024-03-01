@@ -152,20 +152,20 @@ def get_blank_tract(add_pop=False):
     path_tract = params.PATHNAMES.at['BOUNDARY_tract', 'Value']
     list_exclude = params.HARDCODED.at['list_excluded_tracts', 'Value']
     gdf_tract = gpd.read_file(path_tract)
-    bool_keep = [x not in list_exclude for x in gdf_tract['BOROCT']]
+    bool_keep = [x not in list_exclude for x in gdf_tract['boroct2020']]
     gdf_tract = gdf_tract.loc[bool_keep, :].copy()
-    gdf_tract['BCT_txt'] = gdf_tract['BOROCT'].values
+    gdf_tract['BCT_txt'] = gdf_tract['boroct2020'].values
     gdf_tract = project_gdf(gdf_tract)
     gdf_tract.index = np.arange(len(gdf_tract))
     if add_pop==True:
         path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
         df_pop = pd.read_excel(path_population_tract, skiprows=5)
-        df_pop.dropna(inplace=True, subset=['2010 DCP Borough Code', '2010 Census Tract'])
-        df_pop.rename(columns={2010: 'pop_2010'}, inplace=True)
+        df_pop.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
+        df_pop.rename(columns={2020: 'pop_2020'}, inplace=True)
         df_pop['BCT_txt'] = [
-            str(int(df_pop.at[x, '2010 DCP Borough Code'])) + str(int(df_pop.at[x, '2010 Census Tract'])).zfill(6) for x
+            str(int(df_pop.at[x, '2020 DCP Borough Code'])) + str(int(df_pop.at[x, '2020 Census Tract'])).zfill(6) for x
             in df_pop.index]
-        gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')
+        gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2020']], on='BCT_txt', how='left')
     return gdf_tract
 
 #%% divide by zero and set to 0 if denominator is 0

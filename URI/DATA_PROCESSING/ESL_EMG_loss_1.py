@@ -19,8 +19,8 @@ gdf_tract = utils.get_blank_tract(add_pop=True)
 #%% define parameters
 path_loss = params.PATHNAMES.at['ESL_EMG_loss', 'Value']
 
-loss_per_death_2016 = params.PARAMS.at['value_of_stat_life_2016', 'Value']
-loss_per_death = utils.convert_USD(loss_per_death_2016, 2016)
+loss_per_death = params.PARAMS.at['value_of_stat_life', 'Value']
+loss_per_death = utils.convert_USD(loss_per_death, 2022)
 
 N_outbreaks = 7.
 start_year = 1981
@@ -32,10 +32,10 @@ deaths_per_year = deaths_per_outbreak * P_outbreak_yr
 loss_per_year = deaths_per_year * loss_per_death
 
 #%% assign to populations
-gdf_tract['Loss_USD'] = loss_per_year * gdf_tract['pop_2010']/gdf_tract['pop_2010'].sum()
+gdf_tract['Loss_USD'] = loss_per_year * gdf_tract['pop_2020']/gdf_tract['pop_2020'].sum()
 
 #%% save
-gdf_tract[['Stfid', 'BCT_txt', 'Loss_USD', 'geometry']].to_file(path_loss)
+gdf_tract[['geoid', 'BCT_txt', 'Loss_USD', 'geometry']].to_file(path_loss)
 
 #%% plot
 plotting.plot_notebook(gdf_tract, column='Loss_USD', title='EMG: Deaths Loss',

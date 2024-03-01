@@ -44,8 +44,8 @@ n_years = (end_date - start_date).days / 365.25
 n_deaths = df_storms_cst['Fatalities'].sum() / n_years
 n_injuries = df_storms_cst['Injuries'].sum() / n_years
 #no injuries
-loss_deaths_2016 = params.PARAMS.at['value_of_stat_life_2016', 'Value'] * n_deaths
-loss_deaths_total = utils.convert_USD(loss_deaths_2016, 2016)
+loss_deaths = params.PARAMS.at['value_of_stat_life', 'Value'] * n_deaths
+loss_deaths_total = utils.convert_USD(loss_deaths, 2022)
 
 #%%  distribute loss by population and total losses from coastal flooding and hurricane wind
 gdf_tract = utils.get_blank_tract()
@@ -61,11 +61,11 @@ gdf_tract.rename(columns={'Loss_USD':'Loss_USD_HIW'}, inplace=True)
 #join population
 path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
 df_pop = pd.read_excel(path_population_tract, skiprows=5)
-df_pop.dropna(inplace=True, subset=['2010 DCP Borough Code', '2010 Census Tract'])
-df_pop.rename(columns={2010:'pop_2010'}, inplace=True)
-df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2010 DCP Borough Code'])) + str(int(df_pop.at[x,'2010 Census Tract'])).zfill(6) for x in df_pop.index]
-gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')
-gdf_tract['weight'] = gdf_tract['pop_2010'] * (gdf_tract['Loss_USD_FLD']+gdf_tract['Loss_USD_HIW'])
+df_pop.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
+df_pop.rename(columns={2020:'pop_2020'}, inplace=True)
+df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2020 DCP Borough Code'])) + str(int(df_pop.at[x,'2020 Census Tract'])).zfill(6) for x in df_pop.index]
+gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2020']], on='BCT_txt', how='left')
+gdf_tract['weight'] = gdf_tract['pop_2020'] * (gdf_tract['Loss_USD_FLD']+gdf_tract['Loss_USD_HIW'])
 gdf_tract['Loss_USD'] = loss_deaths_total * gdf_tract['weight'] / gdf_tract['weight'].sum()
 
 

@@ -102,7 +102,7 @@ for i in np.arange(len(list_DPSId)):
 #%% sum lost hours, value, and aggregate to borough
 df_outages_1['Person_hrs'] = df_outages_1['CustomersOut'] * df_outages_1['Duration_hr']
 df_bor = df_outages_1[['Person_hrs', 'BoroughId']].groupby(by='BoroughId').sum()
-USD_per_hr_power_out = params.PARAMS.at['loss_day_power_2016', 'Value'] / 24.
+USD_per_hr_power_out = params.PARAMS.at['loss_day_power', 'Value'] / 24.
 df_bor['Loss_USD'] = USD_per_hr_power_out * df_bor['Person_hrs'] / ( 10.)  #multiply by 10 to annualize
 
 #%% assign to borough

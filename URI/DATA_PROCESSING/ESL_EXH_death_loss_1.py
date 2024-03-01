@@ -59,7 +59,7 @@ df_borrate.to_csv(path_borough_event_rate)
 #%% populate block dataset
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
 gdf_block = gpd.read_file(path_block)
-gdf_block = pd.merge(gdf_block, df_borrate, left_on='BoroCode', right_index=True, how='inner')
+gdf_block = pd.merge(gdf_block, df_borrate, left_on='borocode', right_index=True, how='inner')
 
 #reproject
 epsg = params.SETTINGS.at['epsg', 'Value']
@@ -84,11 +84,11 @@ df_borrate = pd.read_csv(path_borough_event_rate)
 #%% load population
 path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
 df_population = pd.read_excel(path_population_tract, skiprows=5)
-df_population.dropna(inplace=True, subset=['2010 DCP Borough Code', '2010 Census Tract'])
+df_population.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
 
 #%% get population for each borough
 #get borough population
-df_population_borough = df_population.groupby('2010 DCP Borough Code').sum()[2010]
+df_population_borough = df_population.groupby('2020 DCP Borough Code').sum()[2020]
 
 #%%calculate m =  # deaths due to extreme heat per 1000 people
 x  = df_population_borough.values
@@ -103,16 +103,16 @@ gdf_block = gpd.read_file(path_block)
 gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 
 #%%find id for join on population
-df_population['BCT_ID'] = [str(int(df_population['2010 DCP Borough Code'].iloc[i])) + \
-                           str(int(df_population['2010 Census Tract'].iloc[i])).zfill(6) for i in np.arange(len(df_population))]
+df_population['BCT_ID'] = [str(int(df_population['2020 DCP Borough Code'].iloc[i])) + \
+                           str(int(df_population['2020 Census Tract'].iloc[i])).zfill(6) for i in np.arange(len(df_population))]
 
-gdf_tract = gdf_tract.merge(df_population[[2010, 'BCT_ID']], left_on='BCT_txt', right_on='BCT_ID', how='inner')
+gdf_tract = gdf_tract.merge(df_population[[2020, 'BCT_ID']], left_on='BCT_txt', right_on='BCT_ID', how='inner')
 
 #%% calculate number of deaths per heat event
-gdf_tract['deaths_per_event'] = [m*x/1000. for x in gdf_tract[2010]]
+gdf_tract['deaths_per_event'] = [m*x/1000. for x in gdf_tract[2020]]
 
-#%% raname columns 2010
-gdf_tract.rename(columns={2010:'Pop2010'}, inplace=True)
+#%% raname columns 2020
+gdf_tract.rename(columns={2020:'Pop2020'}, inplace=True)
 
 #%% save results in
 path_results = params.PATHNAMES.at['EXH_deaths_per_event', 'Value']
@@ -125,10 +125,10 @@ path_events_per_year = params.PATHNAMES.at['EXH_events_per_year_tracts', 'Value'
 gdf_events_per_year = gpd.read_file(path_events_per_year)
 path_deaths_per_event = params.PATHNAMES.at['EXH_deaths_per_event', 'Value']
 gdf_deaths_per_event = gpd.read_file(path_deaths_per_event)
-value_life_2016 = params.PARAMS.at['value_of_stat_life_2016', 'Value']
+value_life = params.PARAMS.at['value_of_stat_life', 'Value']
 
 #%% convert value of lost life to 2019 value
-value_life = utils.convert_USD(value_life_2016, 2016)
+value_life = utils.convert_USD(value_life, 2022)
 
 #%% mere into single dataframe and calculate
 gdf_loss = gdf_events_per_year.merge(gdf_deaths_per_event.drop(columns='geometry'), on='BCT_txt', how='left')

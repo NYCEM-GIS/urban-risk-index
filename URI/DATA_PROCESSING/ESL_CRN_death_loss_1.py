@@ -23,7 +23,7 @@ value_loss_2016 = 81136410.00  #from spreadsheet
 value_loss = utils.convert_USD(value_loss_2016, 2016)
 
 #%%distribute by population
-gdf_tract['Loss_USD'] = value_loss * gdf_tract['pop_2010'] / gdf_tract['pop_2010'].sum()
+gdf_tract['Loss_USD'] = value_loss * gdf_tract['pop_2020'] / gdf_tract['pop_2020'].sum()
 
 
 #%% save results in

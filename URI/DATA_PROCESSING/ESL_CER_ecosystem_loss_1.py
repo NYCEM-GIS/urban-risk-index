@@ -31,7 +31,7 @@ gdf_tract.fillna(value={'erosion_rate_ft_yr': 0}, inplace=True)
 gdf_tract.fillna(value={'Shape_Leng': 0}, inplace=True)
 
 #%% get cost parameter
-value_per_ft2 = params.PARAMS.at['value_per_acre_marine_2016', 'Value'] / 43560.
+value_per_ft2 = params.PARAMS.at['value_per_acre_marine', 'Value'] / 43560.
 value_per_ft2_2019 = utils.convert_USD(value_per_ft2, 2016)
 
 #%% get number of foot-years of eroded land over 100 year period

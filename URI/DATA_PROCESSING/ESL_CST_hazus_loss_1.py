@@ -27,7 +27,7 @@ df_hazus = gpd.read_file(path_gdb, driver='FileGDB', layer=gdb_layer)
 df_hazus['Loss_USD'] = utils.convert_USD(df_hazus.Hurricane_AnnualizedLoss , 2007) * 1000.
 
 #%% merge to tract
-gdf_tract = gdf_tract.merge(df_hazus[['Tract2010_STFID', 'Loss_USD']], left_on='Stfid', right_on='Tract2010_STFID', how='left')
+gdf_tract = gdf_tract.merge(df_hazus[['Tract2010_STFID', 'Loss_USD']], left_on='geoid', right_on='Tract2010_STFID', how='left')
 
 #%% save as output
 path_output = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']

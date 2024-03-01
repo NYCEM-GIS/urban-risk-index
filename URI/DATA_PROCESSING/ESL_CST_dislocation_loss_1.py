@@ -70,7 +70,7 @@ df_units = pd.pivot_table(gdf_depths, values='UnitsRes', index='BASE_BBL', aggfu
 df_units.rename(columns={'UnitsRes':'UnitsRes_Count'}, inplace=True)
 gdf_depths = gdf_depths.merge(df_units, left_on='BASE_BBL', right_index=True, how='left')
 gdf_depths['Units_Res_Per_Building'] = gdf_depths['UnitsRes'] / gdf_depths['UnitsRes_Count']
-N_persons_per_residence = gdf_tract['pop_2010'].sum() /  gdf_depths['Units_Res_Per_Building'].sum()
+N_persons_per_residence = gdf_tract['pop_2020'].sum() /  gdf_depths['Units_Res_Per_Building'].sum()
 
 
 #%%  calculate N floors flooded

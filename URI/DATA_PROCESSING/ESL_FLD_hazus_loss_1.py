@@ -29,7 +29,7 @@ gdf_flood['Loss_USD'] = gdf_flood['Sum_BldgLo'] + gdf_flood['Sum_Cont_1'] + gdf_
 gdf_flood.Loss_USD = utils.convert_USD(gdf_flood.Loss_USD.values, 2018)
 
 #%% merge with tracts
-gdf_tract = gdf_tract.merge(gdf_flood[['Stfid', 'Loss_USD']], left_on='Stfid', right_on=['Stfid'], how='left')
+gdf_tract = gdf_tract.merge(gdf_flood[['Stfid', 'Loss_USD']], left_on='geoid', right_on=['Stfid'], how='left')
 
 #%% save as output
 path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']

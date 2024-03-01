@@ -24,7 +24,7 @@ layer_gbd = params.PATHNAMES.at['ESL_ERQ_hazus_layer', 'Value']
 df_hazus = gpd.read_file(path_gbd, driver='FileGBD', layer=layer_gbd)
 
 #%% use tract to merge hazus data to tract
-gdf_tract = gdf_tract.merge(df_hazus[['Tract', 'TotalLoss']], left_on='Stfid', right_on='Tract', how='left')
+gdf_tract = gdf_tract.merge(df_hazus[['Tract', 'TotalLoss']], left_on='geoid', right_on='Tract', how='left')
 
 #%% convert to current USD
 gdf_tract.TotalLoss = utils.convert_USD(gdf_tract.TotalLoss.values, 2018)
