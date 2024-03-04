@@ -19,7 +19,7 @@ utils.set_home()
 #%% load tracts a
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
 gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
+gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = utils.project_gdf(gdf_tract)
 gdf_tract.index = np.arange(len(gdf_tract))
 gdf_tract['area_ft2'] = gdf_tract.geometry.area
@@ -29,9 +29,9 @@ path_snow = params.PATHNAMES.at['ESL_WIW_snow_data', 'Value']
 df_snow = pd.read_excel(path_snow, sheet_name='Duplicate')
 
 #%%get costs based on 2018 dollars
-df_snow.index = np.arange(2007, 2019)
-df_snow['Snow Remove Cost 2019'] = [utils.convert_USD(df_snow.at[idx, 'Snow Removal Cost'], idx) for idx in df_snow.index]
-ave_cost_year = df_snow['Snow Remove Cost 2019'].mean() * 1000000
+df_snow.index = np.arange(2007, 2024)
+df_snow['Snow Remove Cost'] = [utils.convert_USD(df_snow.at[idx, 'Snow Removal Cost'], idx) for idx in df_snow.index]
+ave_cost_year = df_snow['Snow Remove Cost'].mean() * 1000000
 
 #%% get area of road in each tract
 path_road = params.PATHNAMES.at['ESL_WIW_road_cover', 'Value']

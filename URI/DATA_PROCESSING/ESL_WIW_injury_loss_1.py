@@ -42,8 +42,8 @@ df_bor['Hosp_per_100000'] = [df_bor.at[x, 'Y Value'] * df_2016.loc[df_2016.Bor_I
 #%% calculate tract hospitalization rate
 def calc_tract_hosp(BCT_txt):
     idx = gdf_tract.index[gdf_tract.BCT_txt==BCT_txt][0]
-    this_bor = gdf_tract.at[idx, 'BOROCODE']
-    this_pop = gdf_tract.at[idx, 'pop_2010']
+    this_bor = gdf_tract.at[idx, 'borocode']
+    this_pop = gdf_tract.at[idx, 'pop_2020']
     this_hosp_rate = df_bor.at[int(this_bor), 'Hosp_per_100000']
     return this_pop * this_hosp_rate / 100000.
 gdf_tract['N_hosp'] = gdf_tract.apply(lambda x: calc_tract_hosp(x['BCT_txt']), axis=1)
@@ -70,8 +70,8 @@ df_bor['Emerg_per_100000'] = [df_bor.at[x, 'Y Value'] * df_2016.loc[df_2016.Bor_
 #%% calculate tract hospitalization rate
 def calc_tract_emerg(BCT_txt):
     idx = gdf_tract.index[gdf_tract.BCT_txt==BCT_txt][0]
-    this_bor = gdf_tract.at[idx, 'BOROCODE']
-    this_pop = gdf_tract.at[idx, 'pop_2010']
+    this_bor = gdf_tract.at[idx, 'borocode']
+    this_pop = gdf_tract.at[idx, 'pop_2020']
     this_hosp_rate = df_bor.at[int(this_bor), 'Emerg_per_100000']
     return this_pop * this_hosp_rate / 100000.
 gdf_tract['N_emerg'] = gdf_tract.apply(lambda x: calc_tract_emerg(x['BCT_txt']), axis=1)
@@ -82,9 +82,9 @@ gdf_tract['N_emerg_uniq'] = gdf_tract['N_emerg'] - gdf_tract['N_hosp']
 
 #%% convert to loss.   Asssume emergency room visits with no hospitalization are "moderate" injuries.
 #Assume hospitalizations are "serious" injuries
-loss_per_moderate_injury_2016 = params.PARAMS.at['value_moderate_injury_2016', 'Value']
+loss_per_moderate_injury_2016 = params.PARAMS.at['value_moderate_injury', 'Value']
 loss_moderate_total = utils.convert_USD(loss_per_moderate_injury_2016, 2016)
-loss_per_serious_injury_2016 = params.PARAMS.at['value_serious_injury_2016', 'Value']
+loss_per_serious_injury_2016 = params.PARAMS.at['value_serious_injury', 'Value']
 loss_serious_total = utils.convert_USD(loss_per_serious_injury_2016, 2016)
 gdf_tract['Loss_USD'] = gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_emerg_uniq'] * loss_moderate_total
 

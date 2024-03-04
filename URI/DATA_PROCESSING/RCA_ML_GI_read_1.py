@@ -21,7 +21,7 @@ gdf_gi['OBJECTID'] = np.arange(len(gdf_gi))
 #%% load tracts
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
 gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
+gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = utils.project_gdf(gdf_tract)
 gdf_tract.index = np.arange(len(gdf_tract))
 

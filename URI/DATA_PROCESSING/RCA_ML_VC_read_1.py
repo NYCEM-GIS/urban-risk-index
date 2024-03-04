@@ -23,7 +23,7 @@ gdf_nta = gpd.read_file(path_nta)
 gdf_nta = gdf_nta.to_crs(epsg=epsg)
 
 #%% join veg data gdf_nta
-gdf_nta = gdf_nta.merge(df_veg, left_on='ntacode', right_on='NTA Code', how='left')
+gdf_nta = gdf_nta.merge(df_veg, left_on='cdta2020', right_on='NTA Code', how='left')
 
 #%% fill in missing data with median value
 gdf_nta.fillna(value={'Pct Veg Cover': gdf_nta['Pct Veg Cover'].median()}, inplace=True)
@@ -31,7 +31,7 @@ gdf_nta.fillna(value={'Pct Veg Cover': gdf_nta['Pct Veg Cover'].median()}, inpla
 #%%open tract dataset
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
 gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
+gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = gdf_tract.to_crs(epsg=epsg)
 
 #%% perform overlay and average

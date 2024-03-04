@@ -32,7 +32,7 @@ df_EventTypeCriticalIssues = pd.read_excel(path_EventTypeCriticalIssues)
 df_StormEventTypes = pd.read_excel(path_StormEventTypes)
 
 #%%  get hazard type id
-type_name = 'Winter Storm'
+type_name = 'Winter Weather'
 type_id = df_EventTypes.loc[df_EventTypes.Name == type_name, 'Id'].values[0]
 
 #%% get all storm events ids with this hazard type

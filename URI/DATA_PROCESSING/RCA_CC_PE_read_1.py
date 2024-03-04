@@ -24,7 +24,7 @@ df_data['FIPS_CT_txt'] = [str(int(df_data.at[idx, 'Census Tract'])) for idx in d
 epsg = params.SETTINGS.at['epsg', 'Value']
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
 gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
+gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = gdf_tract.to_crs(epsg=epsg)
 
 #%% load fips data
@@ -34,7 +34,7 @@ df_fips['Bor_ID_str'] = [str(df_fips.at[idx, 'Bor_ID']) for idx in df_fips.index
 df_fips['FIPS_mod'] = ['3600' + df_fips.at[idx, 'Bor_ID_str'] for idx in df_fips.index]
 
 #add fips id number
-gdf_tract = gdf_tract.merge(df_fips, left_on='BoroCode', right_on='Bor_ID_str', how='left')
+gdf_tract = gdf_tract.merge(df_fips, left_on='borocode', right_on='Bor_ID_str', how='left')
 gdf_tract['FIPS_CT_txt'] = [str(gdf_tract.at[idx, 'FIPS_mod']) + gdf_tract.at[idx, 'BCT_txt'][1:] for idx in gdf_tract.index]
 
 #%% merge displacement score

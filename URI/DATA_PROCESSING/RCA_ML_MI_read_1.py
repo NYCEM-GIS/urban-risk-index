@@ -105,7 +105,7 @@ for abbrev in list_abbrev:
 
 #%% save as output
 path_output = params.PATHNAMES.at['RCA_ML_MI_score', 'Value']
-path_output = r'.\2_PROCESSED_INPUTS\905_RCA_ML_MI_SCORE\RCA_ML_MI_score.shp'
+# path_output = r'.\2_PROCESSED_INPUTS\905_RCA_ML_MI_SCORE\RCA_ML_MI_score.shp'
 gdf_tract.to_file(path_output)
 
 #%% plot

@@ -34,7 +34,7 @@ gdf_tract_buffer.geometry = gdf_tract.geometry.buffer(buffer)
 #%%
 for i, idx in enumerate(gdf_tract_buffer.index):
     this_tract = gdf_tract.loc[idx:idx, :]
-    this_Stfid = gdf_tract.at[idx, 'Stfid']
+    this_Stfid = gdf_tract.at[idx, 'geoid']
     this_shoreline = gpd.overlay(gdf_shoreline, this_tract, how='intersection')
     if len(this_shoreline)>0:
         #get lengths

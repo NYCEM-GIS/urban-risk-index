@@ -45,17 +45,17 @@ df_bor['N_deaths_yr'] = N_deaths_year_NYC * df_bor['Y Value'] / df_bor['Y Value'
 #%% distribute deaths by population within each borough
 def calc_tract_deaths(BCT_txt):
     idx = gdf_tract.index[gdf_tract.BCT_txt==BCT_txt][0]
-    this_bor = gdf_tract.at[idx, 'BOROCODE']
-    this_pop = gdf_tract.at[idx, 'pop_2010']
-    this_bor_pop = gdf_tract.loc[gdf_tract.BOROCODE==this_bor, 'pop_2010'].sum()
+    this_bor = gdf_tract.at[idx, 'borocode']
+    this_pop = gdf_tract.at[idx, 'pop_2020']
+    this_bor_pop = gdf_tract.loc[gdf_tract.borocode==this_bor, 'pop_2020'].sum()
     this_N_deaths = df_bor.at[int(this_bor), 'N_deaths_yr']
     return this_N_deaths * this_pop / this_bor_pop
 gdf_tract['N_deaths'] = gdf_tract.apply(lambda x: calc_tract_deaths(x['BCT_txt']), axis=1)
 
 
 #%% convert to loss
-loss_per_death_2016 = params.PARAMS.at['value_of_stat_life_2016', 'Value']
-loss_deaths_total = utils.convert_USD(loss_per_death_2016, 2016)
+loss_per_death = params.PARAMS.at['value_of_stat_life', 'Value']
+loss_deaths_total = utils.convert_USD(loss_per_death, 2022)
 gdf_tract['Loss_USD'] = gdf_tract['N_deaths'] * loss_deaths_total
 
 #%% save as output

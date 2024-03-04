@@ -46,7 +46,7 @@ df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'pop_older_1yr':list_
 df['Stfid'] = [df.loc[x,"state"] + df.loc[x, 'county']+df.loc[x,'tract'] for x in df.index]
 
 #%% merge
-gdf_tract = gdf_tract.merge(df[['pop_older_1yr', 'Stfid', 'same_house_1yr_ago', 'diff_house_same_city_1yr_ago' ]], left_on='Stfid', right_on='Stfid', how='inner')
+gdf_tract = gdf_tract.merge(df[['pop_older_1yr', 'Stfid', 'same_house_1yr_ago', 'diff_house_same_city_1yr_ago' ]], left_on='geoid', right_on='Stfid', how='inner')
 
 #%%
 gdf_tract['percent_living_in_NY_over_1yr'] = (gdf_tract['same_house_1yr_ago'] + gdf_tract['diff_house_same_city_1yr_ago'])/gdf_tract['pop_older_1yr'] * 100.
