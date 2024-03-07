@@ -26,7 +26,7 @@ gdf_tract = utils.convert_to_tract_average(path_ac, column_ac,column_ac_out,
 
 #%% get tract population
 gdf_tract_pop = utils.get_blank_tract(add_pop=True)
-gdf_tract = gdf_tract.merge(gdf_tract_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')
+gdf_tract = gdf_tract.merge(gdf_tract_pop[['BCT_txt', 'pop_2020']], on='BCT_txt', how='left')
 
 #%% get ACs added by program
 path_gbd = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce_gbd', 'Value']
@@ -52,7 +52,7 @@ def update_ac(current_percent, pop, new_count):
        # if result > 100: print("Warning: AC percent is {}, greater than 100 with a population of {}.".format(result, pop))
     return min(result, 100)
 gdf_tract['ac_per_post'] = gdf_tract.apply(lambda row : update_ac(row['ac_per'],
-                                                    row['pop_2010'], row['field']), axis=1)
+                                                    row['pop_2020'], row['field']), axis=1)
 
 #%% calculate percent rank
 gdf_tract['ac_per_rnk'] = utils.normalize_rank_percentile(gdf_tract['ac_per_post'].values,

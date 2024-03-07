@@ -38,7 +38,7 @@ df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'gini':list_gini,
                                            'state':list_state})
 df['Stfid'] = [df.loc[x,"state"] + df.loc[x, 'county']+df.loc[x,'tract'] for x in df.index]
 #%% merge
-gdf_tract = gdf_tract.merge(df[['gini', 'Stfid']], left_on='Stfid', right_on='Stfid', how='inner')
+gdf_tract = gdf_tract.merge(df[['gini', 'Stfid']], left_on='geoid', right_on='Stfid', how='inner')
 
 #%%
 gdf_tract.fillna(0, inplace=True)

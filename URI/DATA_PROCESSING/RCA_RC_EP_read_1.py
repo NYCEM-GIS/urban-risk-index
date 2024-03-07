@@ -42,7 +42,7 @@ gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_Center', sco
 path_zone = params.PATHNAMES.at['RCA_RC_EP_evac_zones', 'Value']
 gdf_zone = gpd.read_file(path_zone)
 gdf_zone = gdf_zone.to_crs(gdf_tract.crs)
-gdf_zone = gdf_zone.loc[gdf_zone.hurricane=='X']
+gdf_zone = gdf_zone.loc[gdf_zone.hurricane_=='X']
 gdf_tract_sjoin = gpd.sjoin(gdf_tract, gdf_zone, how='inner', op='within')
 gdf_tract_sjoin['Is_inland'] = 1
 gdf_tract= gdf_tract.merge(gdf_tract_sjoin[['BCT_txt', 'Is_inland']], how='left', on='BCT_txt')

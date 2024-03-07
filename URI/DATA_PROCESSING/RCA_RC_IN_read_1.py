@@ -19,6 +19,8 @@ gdf_tract = utils.get_blank_tract()
 #%% open EOC activation spreadsheet
 path_activation = params.PATHNAMES.at['RCA_RC_IE_activation', 'Value']
 df_activation = pd.read_excel(path_activation)
+df_activation = pd.read_excel('.\\1_RAW_INPUTS\\OTH_HH_C\\EOCActivations_test_Shweta.xlsx')
+print(df_activation.shape)
 
 #%% Get list of hazards and EOC activation keyword
 list_hazards = ( ('EXH', 'Heat'),

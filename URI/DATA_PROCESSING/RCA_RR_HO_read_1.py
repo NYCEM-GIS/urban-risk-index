@@ -41,7 +41,7 @@ df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'owner':list_owner,
 df['Stfid'] = [df.loc[x,"state"] + df.loc[x, 'county']+df.loc[x,'tract'] for x in df.index]
 
 #%% merge
-gdf_tract = gdf_tract.merge(df[['owner', 'Stfid', 'tot']], left_on='Stfid', right_on='Stfid', how='inner')
+gdf_tract = gdf_tract.merge(df[['owner', 'Stfid', 'tot']], left_on='geoid', right_on='Stfid', how='inner')
 
 #%%
 gdf_tract['percent_home_owner'] = gdf_tract['owner']/gdf_tract['tot'] * 100.

@@ -17,7 +17,7 @@ utils.set_home()
 #%% load tract
 gdf_tract = utils.get_blank_tract(add_pop=True)
 gdf_tract['area_ft2'] = gdf_tract.geometry.area
-gdf_tract['pop_2010_density'] = gdf_tract['pop_2010'] / gdf_tract['area_ft2']
+gdf_tract['pop_2020_density'] = gdf_tract['pop_2020'] / gdf_tract['area_ft2']
 
 #%% load shelter capacity data
 path_sc_gbd = params.PATHNAMES.at['RCA_RC_SC_raw', 'Value']
@@ -42,16 +42,16 @@ for i, idx in enumerate(gdf_sc.index):
     #eliminate
     #get_intersection_areas
     gdf_intersect['area_ft2'] = gdf_intersect.geometry.area
-    gdf_intersect['population'] = gdf_intersect['area_ft2'] * gdf_intersect['pop_2010_density']
+    gdf_intersect['population'] = gdf_intersect['area_ft2'] * gdf_intersect['pop_2020_density']
     gdf_intersect['capacity_allocation'] = this_capacity * gdf_intersect['population'] / gdf_intersect['population'].sum()
     #loop through and add allocation to each tract
     for j, jdx in enumerate(gdf_intersect.index):
-        this_Stfid = gdf_intersect.at[jdx, 'Stfid']
-        gdf_tract.loc[gdf_tract['Stfid']==this_Stfid, 'LT_capacity_count'] += gdf_intersect.at[jdx, 'capacity_allocation']
+        this_Stfid = gdf_intersect.at[jdx, 'geoid']
+        gdf_tract.loc[gdf_tract['geoid']==this_Stfid, 'LT_capacity_count'] += gdf_intersect.at[jdx, 'capacity_allocation']
     #if i % 10 == 0: print("{}".format(i))
 
 #%% calculate capacity per 1000
-gdf_tract['capacity_allocation_per_1000'] = gdf_tract['LT_capacity_count'] * 1000. / gdf_tract['pop_2010']
+gdf_tract['capacity_allocation_per_1000'] = gdf_tract['LT_capacity_count'] * 1000. / gdf_tract['pop_2020']
 #set null values (with 0 population ) to 0
 gdf_tract.fillna(value={'capacity_allocation_per_1000':0}, inplace=True)
 
