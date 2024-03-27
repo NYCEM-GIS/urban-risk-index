@@ -1,5 +1,5 @@
 """
-calculate the total economic loss due to deaths from EXH
+calculate the total economic loss due to deaths from extreme heat (EXH)
 """
 
 #%% load packages
@@ -8,30 +8,38 @@ import pandas as pd
 import geopandas as gpd
 import os
 import matplotlib.pyplot as plt
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-
-#### GET EVENT FREQUENCY
-
-#%% open all storm events
-#open storm events
+#%% EXTRACT PARAMETERS
+# Input paths
 path_stormevents = params.PATHNAMES.at['stormevents_table', 'Value']
 path_stormeventsboroughs = params.PATHNAMES.at['stormeventsboroughs_table', 'Value']
+path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
+# Hard-coded
+start_date = params.HARDCODED.at['heat_event_count_start_date', 'Value']
+end_date = params.HARDCODED.at['heat_event_count_end_date', 'Value']
+# Settings
+epsg = params.SETTINGS.at['epsg', 'Value']
+# Params
+deaths_year = params.PARAMS.at['EXH_deaths_per_year', 'Value']
+value_life = params.PARAMS.at['value_of_stat_life', 'Value']
+# Output paths
+path_results = params.PATHNAMES.at['EXH_ESL_deaths_per_year_tract', 'Value']
+
+#%% LOAD DATA
 df_stormevents = pd.read_excel(path_stormevents)
 df_stormeventsboroughs = pd.read_excel(path_stormeventsboroughs)
+df_population = pd.read_excel(path_population_tract, skiprows=5)
+gdf_tract = utils.get_blank_tract(add_pop=True)
 
 #%% screen out heat events
 heat_events_bool = ['Heat' in x for x in df_stormevents['Name']]
 df_stormevents = df_stormevents.loc[heat_events_bool, :]
 
 #%% screen out using date range
-#get start, end date
-start_date = params.HARDCODED.at['heat_event_count_start_date', 'Value']
-end_date = params.HARDCODED.at['heat_event_count_end_date', 'Value']
 df_stormevents = df_stormevents.loc[df_stormevents['StartDate']>start_date]
 df_stormevents = df_stormevents.loc[df_stormevents['EndDate']<end_date]
 
@@ -52,38 +60,10 @@ n_years = (end_date - start_date).days / 365.25
 df_borrate = df_borcount / n_years
 df_borrate.index  = [str(x) for x in df_borrate.index]
 
-#%% save annual rate for the death rate calculation
-path_borough_event_rate = params.PATHNAMES.at['EXH_events_per_borough', 'Value']
-df_borrate.to_csv(path_borough_event_rate)
-
-#%% populate block dataset
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_block = pd.merge(gdf_block, df_borrate, left_on='borocode', right_index=True, how='inner')
-
-#reproject
-epsg = params.SETTINGS.at['epsg', 'Value']
-gdf_block = gdf_block.to_crs(epsg = epsg)
-
-#%% dissolve to tract level
-gdf_tract = gdf_block[['BCT_txt', 'geometry', 'Heat_Events_Per_Year']].dissolve(by='BCT_txt', aggfunc='mean')
-
-#%% save results in
-path_results = params.PATHNAMES.at['EXH_events_per_year_tracts', 'Value']
-gdf_tract.to_file(path_results)
-
-#### GET ANNUAL DEATH BY TRACT
-
-#%% get number of deaths per year
-deaths_year = params.PARAMS.at['EXH_deaths_per_year', 'Value']
-
-#%% get the number of events per borough.  Note this is calculated by EXH_frequency_1.py
-path_borough_event_rate = params.PATHNAMES.at['EXH_events_per_borough', 'Value']
-df_borrate = pd.read_csv(path_borough_event_rate)
+#%% populate tract dataset
+gdf_events_per_year = pd.merge(gdf_tract, df_borrate, left_on='borocode', right_index=True, how='inner')
 
 #%% load population
-path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
-df_population = pd.read_excel(path_population_tract, skiprows=5)
 df_population.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
 
 #%% get population for each borough
@@ -97,46 +77,27 @@ numerator = deaths_year
 denominator = np.array([x[i] * y[i] for i in np.arange(len(x))]).sum()/1000.
 m = numerator / denominator
 
-#%% import block and dissolve to tract
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-
 #%%find id for join on population
 df_population['BCT_ID'] = [str(int(df_population['2020 DCP Borough Code'].iloc[i])) + \
                            str(int(df_population['2020 Census Tract'].iloc[i])).zfill(6) for i in np.arange(len(df_population))]
 
-gdf_tract = gdf_tract.merge(df_population[[2020, 'BCT_ID']], left_on='BCT_txt', right_on='BCT_ID', how='inner')
+gdf_deaths_per_event = gdf_tract.merge(df_population[[2020, 'BCT_ID']], left_on='BCT_txt', right_on='BCT_ID', how='inner')
 
 #%% calculate number of deaths per heat event
-gdf_tract['deaths_per_event'] = [m*x/1000. for x in gdf_tract[2020]]
+gdf_deaths_per_event['deaths_per_event'] = [m*x/1000. for x in gdf_deaths_per_event[2020]]
 
 #%% raname columns 2020
-gdf_tract.rename(columns={2020:'Pop2020'}, inplace=True)
-
-#%% save results in
-path_results = params.PATHNAMES.at['EXH_deaths_per_event', 'Value']
-gdf_tract.to_file(path_results)
-
-#### GET LOSS BY TRACT
-
-#%% load the event rate, death rate, and cost per death
-path_events_per_year = params.PATHNAMES.at['EXH_events_per_year_tracts', 'Value']
-gdf_events_per_year = gpd.read_file(path_events_per_year)
-path_deaths_per_event = params.PATHNAMES.at['EXH_deaths_per_event', 'Value']
-gdf_deaths_per_event = gpd.read_file(path_deaths_per_event)
-value_life = params.PARAMS.at['value_of_stat_life', 'Value']
+gdf_deaths_per_event.rename(columns={2020:'Pop2020'}, inplace=True)
 
 #%% convert value of lost life to 2019 value
 value_life = utils.convert_USD(value_life, 2022)
 
 #%% mere into single dataframe and calculate
 gdf_loss = gdf_events_per_year.merge(gdf_deaths_per_event.drop(columns='geometry'), on='BCT_txt', how='left')
-gdf_loss['deaths_year'] = gdf_loss['Heat_Event'] * gdf_loss['deaths_per']
+gdf_loss['deaths_year'] = gdf_loss['Heat_Events_Per_Year'] * gdf_loss['deaths_per_event']
 gdf_loss['Loss_USD'] = gdf_loss['deaths_year'] * value_life
 
 #%% save results in
-path_results = params.PATHNAMES.at['EXH_ESL_deaths_per_year_tract', 'Value']
 gdf_loss.to_file(path_results)
 
 #%% plot
@@ -156,7 +117,3 @@ except:
 
 #%% output complete message
 print("Finished calculating EXH loss due to excess deaths.")
-
-
-
-
