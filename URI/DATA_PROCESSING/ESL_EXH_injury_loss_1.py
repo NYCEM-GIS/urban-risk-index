@@ -12,7 +12,6 @@ import requests
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
-import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
 #%% load tract
