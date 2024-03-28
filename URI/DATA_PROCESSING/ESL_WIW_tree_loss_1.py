@@ -12,19 +12,22 @@ import URI.MISC.plotting_1 as plotting
 
 utils.set_home()
 
-#%% load gree service data
+#%% EXTRACT PARAMETERS
+# Input paths
 path_tree = params.PATHNAMES.at['HHC_TreeServices', 'Value']
-df_tree = pd.read_excel(path_tree, parse_dates=['DateInitiated', 'DateCreated'])
-
-#%%% visualize the results
-gdf_tract = utils.get_blank_tract()
-
-#%% get list of events
 path_Events = params.PATHNAMES.at['stormevents_table', 'Value']
 path_EventTypes = params.PATHNAMES.at['HHC_eventtypes', 'Value']
 path_CriticalIssues =  params.PATHNAMES.at['HHC_critical_issues', 'Value']
 path_EventTypeCriticalIssues = params.PATHNAMES.at['HHC_EventTypeCriticalIssues', 'Value']
 path_StormEventTypes = params.PATHNAMES.at['HHC_stormeventtypes', 'Value']
+# Params
+service_buffer = params.PARAMS.at['buffer_period_tree_servicing_days', 'Value']
+# Output paths
+path_results = params.PATHNAMES.at['ESL_WIW_loss_tree', 'Value']
+
+#%% LOAD DATA
+df_tree = pd.read_excel(path_tree, parse_dates=['DateInitiated', 'DateCreated'])
+gdf_tract = utils.get_blank_tract()
 df_Events = pd.read_excel(path_Events, parse_dates=['StartDate', 'EndDate'])
 df_EventTypes = pd.read_excel(path_EventTypes)
 df_CriticalIssues = pd.read_excel(path_CriticalIssues)
@@ -47,7 +50,6 @@ df_Events = df_Events.loc[df_Events.StartDate >= '2009-01-01', :]
 df_Events = df_Events.loc[df_Events.StartDate < '2019-01-01', :]
 
 #%% get tree service calls in this range
-service_buffer = params.PARAMS.at['buffer_period_tree_servicing_days', 'Value']
 df_tree['Is_Event'] = np.zeros(len(df_tree))
 for i, idx in enumerate(df_Events.index):
     start_date = df_Events.at[idx, 'StartDate']
@@ -59,9 +61,6 @@ df_tree_1 = df_tree.loc[df_tree.Is_Event==1,:]
 
 #%% only consider work orders
 df_tree_2 = df_tree_1.loc[( (df_tree_1.HHCImportType !=0) & (df_tree_1.HHCImportType !=8)), :]
-
-#%% assume all work orders are 3500
-Loss_USD = len(df_tree_2) *3500 / 10
 
 #%% plot distribution of tree services
 gdf_tree = gpd.GeoDataFrame(df_tree, geometry=gpd.points_from_xy(df_tree.Long, df_tree.Lat))
@@ -82,7 +81,6 @@ gdf_tract.rename(columns={"Lat":"Tree_Service_Count"}, inplace=True)
 gdf_tract['Loss_USD'] = Loss_USD * gdf_tract['Tree_Service_Count'] / gdf_tract['Tree_Service_Count'].sum()
 
 #%% #%% save results in
-path_results = params.PATHNAMES.at['ESL_WIW_loss_tree', 'Value']
 gdf_tract.to_file(path_results)
 
 #%% plot

@@ -13,19 +13,27 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% open mitigation geopackages
+#%% EXTRACT PARAMETERS
+# Input paths
 path_gdb = params.PATHNAMES.at['RCA_ML_MI_gdb', 'Value']
-epsg = params.SETTINGS.at['epsg', 'Value']
-gdf_points = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_lines_update_20211027')
-gdf_points = gdf_points.to_crs(epsg = epsg)
-gdf_lines = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_lines_update_20211027')
-gdf_lines = gdf_lines.to_crs(epsg = epsg)
-gdf_polygons = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_polygons_update_20211213')
-gdf_polygons = gdf_polygons.to_crs(epsg = epsg)
-
-#%% open mitigation dataset table
 path_table = params.PATHNAMES.at['RCA_ML_MI_table', 'Value']
+path_block = params.PATHNAMES.at['census_blocks', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['RCA_ML_MI_score', 'Value']
+# Settings
+epsg = params.SETTINGS.at['epsg', 'Value']
+
+#%% LOAD DATA
+gdf_points = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_lines_update_20211027')
+gdf_lines = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_lines_update_20211027')
+gdf_polygons = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_polygons_update_20211213')
 df_table = pd.read_excel(path_table)
+
+#%% open mitigation geopackages
+gdf_points = gdf_points.to_crs(epsg = epsg)
+gdf_lines = gdf_lines.to_crs(epsg = epsg)
+gdf_polygons = gdf_polygons.to_crs(epsg = epsg)
+gdf_block = gpd.read_file(path_block)
 
 #%% remove not mapped, no cost (from 687 to 207)
 df_table = df_table.loc[df_table['Cost Estimate']>0, :]
@@ -54,8 +62,6 @@ gdf_polygons_valid['geometry'] = gdf_polygons_valid['geometry'].buffer(distance 
 gdf_buffer = pd.concat([gdf_points_valid, gdf_lines_valid, gdf_polygons_valid]).reset_index(drop=True)
 
 #%% load the tract dataset
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
 gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = gdf_tract.to_crs(epsg=epsg)
 gdf_tract['area_ft2'] = gdf_tract['geometry'].area
@@ -104,7 +110,6 @@ for abbrev in list_abbrev:
     gdf_tract = utils.calculate_kmeans(gdf_tract, data_column=abbrev, score_column='Score_'+abbrev)
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_ML_MI_score', 'Value']
 # path_output = r'.\2_PROCESSED_INPUTS\905_RCA_ML_MI_SCORE\RCA_ML_MI_score.shp'
 gdf_tract.to_file(path_output)
 

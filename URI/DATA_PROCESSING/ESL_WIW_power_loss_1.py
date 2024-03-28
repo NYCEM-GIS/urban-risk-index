@@ -17,16 +17,19 @@ import URI.MISC.plotting_1 as plotting
 
 utils.set_home()
 
-#%% load gree service data
+#%% EXTRACT PARAMETERS
+# Input paths
+path_outages = params.PATHNAMES.at['ESL_CST_outages_data', 'Value']
+# Params
+outage_buffer  = params.PARAMS.at['buffer_period_power_outage_days', 'Value']
+USD_per_hr_power_out = params.PARAMS.at['loss_day_power', 'Value'] / 24.
+# Output paths
+path_results = params.PATHNAMES.at['ESL_WIW_loss_power', 'Value']
+
+#%% LOAD DATA
 path_tree = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\TreeServices.xlsx'
 df_tree = pd.read_excel(path_tree, parse_dates=['DateInitiated', 'DateCreated'])
-
-
-#%%% visualize the results
 gdf_tract = utils.get_blank_tract()
-
-
-#%% get list of events
 path_Events = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\StormEvents.xlsx'
 path_EventTypes =  r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\EventTypes.xlsx'
 path_CriticalIssues =  r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\CriticalIssues.xlsx'
@@ -37,6 +40,7 @@ df_EventTypes = pd.read_excel(path_EventTypes)
 df_CriticalIssues = pd.read_excel(path_CriticalIssues)
 df_EventTypeCriticalIssues = pd.read_excel(path_EventTypeCriticalIssues)
 df_StormEventTypes = pd.read_excel(path_StormEventTypes)
+df_outages = pd.read_excel(path_outages)
 
 #%%  get hazard type id
 type_name = 'Winter Storm'
@@ -53,12 +57,7 @@ df_Events = df_Events.loc[df_EventIds.index, :]
 df_Events = df_Events.loc[df_Events.StartDate >= '2003-01-01', :]
 df_Events = df_Events.loc[df_Events.StartDate < '2013-01-01', :]
 
-#%% open power outages table
-path_outages = params.PATHNAMES.at['ESL_CST_outages_data', 'Value']
-df_outages = pd.read_excel(path_outages)
-
 #%% get power outages during these events
-outage_buffer  = params.PARAMS.at['buffer_period_power_outage_days', 'Value']
 df_outages['Is_Event'] = np.zeros(len(df_outages))
 for i, idx in enumerate(df_Events.index):
     start_date = df_Events.at[idx, 'StartDate']
@@ -102,7 +101,6 @@ for i in np.arange(len(list_DPSId)):
 #%% sum lost hours, value, and aggregate to borough
 df_outages_1['Person_hrs'] = df_outages_1['CustomersOut'] * df_outages_1['Duration_hr']
 df_bor = df_outages_1[['Person_hrs', 'BoroughId']].groupby(by='BoroughId').sum()
-USD_per_hr_power_out = params.PARAMS.at['loss_day_power', 'Value'] / 24.
 df_bor['Loss_USD'] = USD_per_hr_power_out * df_bor['Person_hrs'] / (10.)  #multiply by 10 to annualize
 
 #%% assign to borought
@@ -116,7 +114,6 @@ for i, bor in enumerate(gdf_tract.BOROCODE.unique()):
     gdf_tract.loc[gdf_tract_bor.index, 'Loss_USD'] = gdf_tract_bor['Loss_USD']
 
 #%% #%% save results in
-path_results = params.PATHNAMES.at['ESL_WIW_loss_power', 'Value']
 gdf_tract.to_file(path_results)
 
 #%% plot

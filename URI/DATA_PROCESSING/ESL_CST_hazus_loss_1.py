@@ -15,12 +15,15 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-# %% open tract
-gdf_tract = utils.get_blank_tract()
-
-#%% open hazus data
+#%% EXTRACT PARAMETERS
+# Input paths
 path_gdb = params.PATHNAMES.at['ESL_CST_hazus_gdb', 'Value']
 gdb_layer = params.PATHNAMES.at['ESL_CST_hazus_layer', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 df_hazus = gpd.read_file(path_gdb, driver='FileGDB', layer=gdb_layer)
 
 #%% convert from 2007 to URI dollars, multiply by 1000
@@ -30,7 +33,6 @@ df_hazus['Loss_USD'] = utils.convert_USD(df_hazus.Hurricane_AnnualizedLoss , 200
 gdf_tract = gdf_tract.merge(df_hazus[['Tract2010_STFID', 'Loss_USD']], left_on='geoid', right_on='Tract2010_STFID', how='left')
 
 #%% save as output
-path_output = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

@@ -16,14 +16,19 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tract
-gdf_tract = utils.get_blank_tract()
-gdf_tract['area_ft2'] = gdf_tract.geometry.area
-
-#%%load cooling center data
+#%% EXTRACT PARAMETERS
+# Input paths
 gbd_cc = params.PATHNAMES.at["RCA_RC_CC_gdb", "Value"]
 layer_cc = params.PATHNAMES.at["RCA_RC_CC_layer", "Value"]
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RC_CC_score', 'Value']
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 gdf_cc = gpd.read_file(gbd_cc, drive='FileGDB', layer=layer_cc)
+
+#%% modify tract
+gdf_tract['area_ft2'] = gdf_tract.geometry.area
 
 #%%  add 1/2 mile buffer
 gdf_cc_buffer = gdf_cc.copy()
@@ -59,7 +64,6 @@ gdf_tract.fillna(0, inplace=True)
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Fraction_Covered')
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RC_CC_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

@@ -13,13 +13,20 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%%% open tract
+#%% EXTRACT PARAMETERS
+# Input paths
+path_activation = params.PATHNAMES.at['RCA_RC_IE_activation', 'Value']
+# Params
+list_abbrv = params.ABBREVIATIONS.iloc[0:11, 0].values
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RC_IN_score', 'Value']
+
+#%% LOAD DATA
+df_activation = pd.read_excel(path_activation)
+df_activation = pd.read_excel('.\\1_RAW_INPUTS\\OTH_HH_C\\EOCActivations_test_Shweta.xlsx')
 gdf_tract = utils.get_blank_tract()
 
 #%% open EOC activation spreadsheet
-path_activation = params.PATHNAMES.at['RCA_RC_IE_activation', 'Value']
-df_activation = pd.read_excel(path_activation)
-df_activation = pd.read_excel('.\\1_RAW_INPUTS\\OTH_HH_C\\EOCActivations_test_Shweta.xlsx')
 print(df_activation.shape)
 
 #%% Get list of hazards and EOC activation keyword
@@ -28,7 +35,6 @@ list_hazards = ( ('EXH', 'Heat'),
                  ('CST', 'Coastal Storm'),     #Coastal Storm, na
                  ('FLD', 'Flooding'))  #Coastal Erosion, na
 
-list_abbrv = params.ABBREVIATIONS.iloc[0:11, 0].values
 
 #%%
 df_count = pd.DataFrame(index=np.arange(len(list_abbrv)), data={'abbrv': list_abbrv,
@@ -139,9 +145,7 @@ for abbrv in list_abbrv:
                                                     len(gdf_tract))
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RC_IN_score', 'Value']
 gdf_tract.to_file(path_output)
-
 
 #%% plot
 for haz in list_abbrv:

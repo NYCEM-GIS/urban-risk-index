@@ -15,13 +15,17 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tract
-gdf_tract = utils.get_blank_tract()
+#%% EXTRACT PARAMETERS
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RR_IE_score', 'Value']
 
-#%% load place attachment data
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 session = requests.Session()
 session.verify = False
 c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8", session=session)
+
+#%% place attachment data
 gini_val = c.acs5.state_county_tract('B19083_001E', states.NY.fips, '*', Census.ALL)
 
 #%%
@@ -29,7 +33,6 @@ list_tract1 = [x['tract'] for x in gini_val]
 list_state = [x['state'] for x in gini_val]
 list_county = [x['county'] for x in gini_val]
 list_gini = [x['B19083_001E'] for x in gini_val]
-
 
 #%%
 df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'gini':list_gini,
@@ -56,7 +59,6 @@ gdf_tract['gini_adj'] = gdf_tract.apply(lambda row: adjust_nan(row['gini']), axi
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='gini_adj', score_column='Score', n_cluster=5, reverse=True)
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RR_IE_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

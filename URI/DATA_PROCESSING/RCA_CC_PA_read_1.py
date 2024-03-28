@@ -16,13 +16,17 @@ import URI.MISC.plotting_1 as plotting
 import requests
 utils.set_home()
 
-#%% load tract
-gdf_tract = utils.get_blank_tract()
+#%% EXTRACT PARAMETERS
+# output paths
+path_output = params.PATHNAMES.at['RCA_CC_PA_score', 'Value']
 
-#%% load place attachment data
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 session = requests.Session()
 session.verify = False
 c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8", session=session)
+
+#%% place attachment data
 response_pop_older_1yr = c.acs5.state_county_tract('B07204_001E', states.NY.fips, '*', Census.ALL)
 response_same_house_1yr_ago  = c.acs5.state_county_tract('B07204_002E', states.NY.fips, '*', Census.ALL)
 response_diff_house_same_city_1yr_ago  = c.acs5.state_county_tract('B07204_005E', states.NY.fips, '*', Census.ALL)
@@ -56,9 +60,7 @@ gdf_tract.fillna(gdf_tract['percent_living_in_NY_over_1yr'].median() , inplace=T
 #%% xconvert to score 1-5
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='percent_living_in_NY_over_1yr', n_cluster=5)
 
-
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_CC_PA_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

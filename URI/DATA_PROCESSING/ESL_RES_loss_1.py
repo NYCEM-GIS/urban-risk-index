@@ -13,20 +13,53 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% define paths (move to spreadsheet)
+#%% EXTRACT PARAMETERS
+# Input paths
 path_PVI_gdb = params.PATHNAMES.at['ESL_RES_PVI_gbd', 'Value']
 path_PVI_layer = params.PATHNAMES.at['ESL_RES_PVI_layer', 'Value']
 path_covid = params.PATHNAMES.at['ESL_RES_COVID_deaths', 'Value']
 path_zcta = params.PATHNAMES.at['BOUNDARY_zcta', 'Value']
+path_loss_death = params.PATHNAMES.at['ESL_RES_death_loss', 'Value']
+path_loss_injury = params.PATHNAMES.at['ESL_RES_injury_loss', 'Value']
+path_loss_wages = params.PATHNAMES.at['ESL_RES_wages_loss', 'Value']
+path_loss_economy = params.PATHNAMES.at['ESL_RES_economy_loss', 'Value']
+# Params
+Loss_life = params.PARAMS.at['value_of_stat_life', 'Value']
+# Hard-coded
+P_mild = 0.049
+P_severe = 0.01
+R_mild_attack = 0.18
+R_severe_attack = 0.33
+R_mild_hosp = 0.01
+R_severe_hosp = 0.12
+R_mild_death = 0.003
+R_severe_death = 0.025
+Loss_life = utils.convert_USD(Loss_life, 2022)
+Loss_wages_2019 = 958.66
+Loss_wages = utils.convert_USD(Loss_wages_2019, 2019)
+Loss_hosp_2016 = 107000
+Loss_hosp = utils.convert_USD(Loss_hosp_2016, 2016)
+Loss_econ_mild_2019 = 5000000000 # total
+Loss_econ_mild = utils.convert_USD(Loss_econ_mild_2019, 2019)
+Loss_econ_severe_2019 = 68000000000
+Loss_econ_severe = utils.convert_USD(Loss_econ_severe_2019, 2019)
+update_data=0  #set to 1 to update data
 
-
-#%% read tracts
+#%% LOAD DATA
 gdf_tracts = utils.get_blank_tract(add_pop=True)
+gdf_PVI = gpd.read_file(path_PVI_gdb, drive='FileGDB', layer=path_PVI_layer)
+if update_data:
+    url = r'https://raw.githubusercontent.com/nychealth/coronavirus-data/master/totals/data-by-modzcta.csv'
+    df_covid = pd.read_csv(url, error_bad_lines=False)
+    df_covid.to_csv(path_covid)
+df_covid = pd.read_csv(path_covid)
+gdf_zcta = gpd.read_file(path_zcta)
+
+#%% modify tracts
 gdf_tracts['tract_area_sqmi'] = gdf_tracts.geometry.area/(5280**2)
 gdf_tracts['tract_pop_per_sqmi'] = gdf_tracts['pop_2020'] / gdf_tracts['tract_area_sqmi']
 
 #%% open vulnerability index
-gdf_PVI = gpd.read_file(path_PVI_gdb, drive='FileGDB', layer=path_PVI_layer)
 gdf_PVI = utils.project_gdf(gdf_PVI)
 gdf_PVI['COMMDIST_area_sqmi'] = gdf_PVI.geometry.area/(5280.**2)
 #gdf_PVI['COMMDIST_vul_pop'] = gdf_PVI['Overall_Density_per_SqMi'] * gdf_PVI['COMMDIST_area_sqmi']
@@ -56,17 +89,10 @@ gdf_tracts['pct_total_burden_PVI'] = gdf_tracts['union_vul_pop'] / gdf_tracts['u
 gdf_tracts.fillna(value={'pct_total_burden_PVI': gdf_tracts['pct_total_burden_PVI'].median()}, inplace=True)
 
 
-#%% open cases data from city github
-update_data=0  #set to 1 to update data
-if update_data:
-    url = r'https://raw.githubusercontent.com/nychealth/coronavirus-data/master/totals/data-by-modzcta.csv'
-    df_covid = pd.read_csv(url, error_bad_lines=False)
-    df_covid.to_csv(path_covid)
-df_covid = pd.read_csv(path_covid)
+#%% cases data
 df_covid['MODIFIED_ZCTA_STR'] = [str(x) for x in df_covid['MODIFIED_ZCTA']]
 
 #%% open modified ZCTA shapefile
-gdf_zcta = gpd.read_file(path_zcta)
 gdf_zcta = utils.project_gdf(gdf_zcta)
 gdf_zcta['ZCTA_area_sqmi'] = gdf_zcta.geometry.area/(5280**2)
 
@@ -113,35 +139,7 @@ gdf_tracts['pct_burden_average'] = (gdf_tracts[['pct_total_burden_deaths',
 #plotting.plot_inline(gdf_tracts, column='pct_burden_average')
 
 #%% plot result for visualization
-
 fig = plt.figure()
-
-# %% define parameters (move to spreadsheet)
-P_mild = 0.049
-P_severe = 0.01
-R_mild_attack = 0.18
-R_severe_attack = 0.33
-R_mild_hosp = 0.01
-R_severe_hosp = 0.12
-R_mild_death = 0.003
-R_severe_death = 0.025
-
-Loss_life = params.PARAMS.at['value_of_stat_life', 'Value']
-Loss_life = utils.convert_USD(Loss_life, 2022)
-Loss_wages_2019 = 958.66
-Loss_wages = utils.convert_USD(Loss_wages_2019, 2019)
-Loss_hosp_2016 = 107000
-Loss_hosp = utils.convert_USD(Loss_hosp_2016, 2016)
-Loss_econ_mild_2019 = 5000000000 # total
-Loss_econ_mild = utils.convert_USD(Loss_econ_mild_2019, 2019)
-Loss_econ_severe_2019 = 68000000000
-Loss_econ_severe = utils.convert_USD(Loss_econ_severe_2019, 2019)
-
-path_loss_death = params.PATHNAMES.at['ESL_RES_death_loss', 'Value']
-path_loss_injury = params.PATHNAMES.at['ESL_RES_injury_loss', 'Value']
-path_loss_wages = params.PATHNAMES.at['ESL_RES_wages_loss', 'Value']
-path_loss_economy = params.PATHNAMES.at['ESL_RES_economy_loss', 'Value']
-
 
 #%%  calculate death losses
 mild_death_count = gdf_tracts.pop_2020.sum() * P_mild * R_mild_attack * R_mild_death

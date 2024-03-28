@@ -14,29 +14,31 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% #%% open tract
-gdf_tract = utils.get_blank_tract()
-
-#%% open insurance policies
+#%% EXTRACT PARAMETERS
+# Input paths
 path_fp = params.PATHNAMES.at['RCA_RR_FP_raw', 'Value']
+folder_scratch = params.PATHNAMES.at['RCA_RR_FP_SCORE_scratch', 'Value']
+path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
+path_count = params.PATHNAMES.at['RCA_RR_FP_building_count_csv', "Value"]
+# Output paths
+path_results = params.PATHNAMES.at['RCA_RR_FP_score', 'Value']
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 gdf_fp = gpd.read_file(path_fp)
+gdf_footprint = gpd.read_file(path_footprint, driver='FileGBD', layer='NYC_Buildings_composite_20200110')
 
 #%% create scratch folder if not already
-folder_scratch = params.PATHNAMES.at['RCA_RR_FP_SCORE_scratch', 'Value']
 if not os.path.exists(folder_scratch):
     os.mkdir(folder_scratch)
 
 #%% count buildings by tract and save result in scratch
-#open buildings
-path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
-gdf_footprint = gpd.read_file(path_footprint, driver='FileGBD', layer='NYC_Buildings_composite_20200110')
 #spatial join to get count
 gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', op='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['BIN'], aggfunc=len)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
 gdf_tract.fillna(value={'BIN': 0}, inplace=True)
-path_count = params.PATHNAMES.at['RCA_RR_FP_building_count_csv', "Value"]
 gdf_tract.rename(columns={"BIN":"Building_Count"}, inplace=True)
 df_count.to_csv(path_count)
 
@@ -64,9 +66,7 @@ gdf_tract['Percent_Coverage'] = gdf_tract.apply(lambda row: calc_percent_covered
 #%% calculate score
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Percent_Coverage')
 
-
 #%% save results in
-path_results = params.PATHNAMES.at['RCA_RR_FP_score', 'Value']
 gdf_tract.to_file(path_results)
 
 #%% plot

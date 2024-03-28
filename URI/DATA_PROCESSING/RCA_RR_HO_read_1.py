@@ -15,13 +15,17 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tract
-gdf_tract = utils.get_blank_tract()
+#%% EXTRACT PARAMETERS
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RR_HO_score', 'Value']
 
-#%% load place attachment data
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 session = requests.Session()
 session.verify = False
 c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8", session=session)
+
+#%% place attachment data
 response_total = c.acs5.state_county_tract('B25026_001E', states.NY.fips, '*', Census.ALL)
 response_owners = c.acs5.state_county_tract('B25026_002E', states.NY.fips, '*', Census.ALL)
 list_tract1 = [x['tract'] for x in response_total]
@@ -30,7 +34,6 @@ list_county = [x['county'] for x in response_total]
 list_total = [x['B25026_001E'] for x in response_total]
 list_tract2 = [x['tract'] for x in response_owners]
 list_owner = [x['B25026_002E'] for x in response_owners]
-
 
 #%%
 df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'owner':list_owner,
@@ -51,7 +54,6 @@ gdf_tract.fillna(0, inplace=True)
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='percent_home_owner', score_column='Score', n_cluster=5)
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RR_HO_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

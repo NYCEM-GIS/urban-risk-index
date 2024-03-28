@@ -14,22 +14,31 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% open data
+#%% EXTRACT PARAMETERS
+# Input paths
 path_data = params.PATHNAMES.at['RCA_CC_community_infrastructure_raw', 'Value']
-gdf_data = gpd.read_file(path_data)  #community centers
-epsg = params.SETTINGS.at['epsg', 'Value']
-gdf_data = gdf_data.to_crs(epsg=epsg)
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
+path_tract = params.PATHNAMES.at['boundary_tract', 'Value']
+path_radius = params.PATHNAMES.at['RCA_CC_radius', 'Value']
+path_radius = params.PATHNAMES.at['RCA_CC_radius', 'Value']
+# Settings
+epsg = params.SETTINGS.at['epsg', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['RCA_CC_CI_score', 'Value']
+
+#%% LOAD DATA
+gdf_data = gpd.read_file(path_data)  #community centers
 gdf_block = gpd.read_file(path_block)
+
+
+#%% tract data
+gdf_data = gdf_data.to_crs(epsg=epsg)
 gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = gdf_tract.to_crs(epsg=epsg)
 gdf_tract['area_ft2'] = gdf_tract['geometry'].area
-
-path_tract = params.PATHNAMES.at['boundary_tract', 'Value']
 gdf_tract.to_file(path_tract)
 
 #%% make shapefile with 1/2 mile radius
-path_radius = params.PATHNAMES.at['RCA_CC_radius', 'Value']
 gdf_buffer = gdf_data.copy()
 gdf_buffer['geometry'] = gdf_data['geometry'].buffer(distance=5280/2)
 gdf_buffer.to_file(path_radius)
@@ -74,9 +83,7 @@ df_label['Score'] = np.arange(1, 6)
 #assign score to each cluster
 gdf_tract = gdf_tract.merge(df_label[['Cluster_ID', 'Score']], on='Cluster_ID', how='left')
 
-
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_CC_CI_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

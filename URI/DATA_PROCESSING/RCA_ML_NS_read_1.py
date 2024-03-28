@@ -14,12 +14,17 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tracts
-gdf_tract = utils.get_blank_tract()
-
-#%% load shoreline
+#%% EXTRACT PARAMETERS
+# Input paths
 path_shoreline_gdb = params.PATHNAMES.at['RCA_ML_NS_shoreline_gbd', 'Value']
 path_shoreline_layer = params.PATHNAMES.at['RCA_ML_NS_shoreline_layer', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['RCA_ML_NS_score', 'Value']
+# Params
+buffer = params.PARAMS.at['search_buffer_for_natural_shoreline_ft', 'Value']
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 gdf_shoreline = gpd.read_file(path_shoreline_gdb, driver='FileGDB', layer=path_shoreline_layer)
 gdf_shoreline = utils.project_gdf(gdf_shoreline)
 
@@ -27,7 +32,6 @@ gdf_shoreline = utils.project_gdf(gdf_shoreline)
 gdf_tract['per_SL'] = np.ones(len(gdf_tract)) * np.nan
 
 #%% calculate fraction of shoreline
-buffer = params.PARAMS.at['search_buffer_for_natural_shoreline_ft', 'Value']
 gdf_tract_buffer = gdf_tract.copy()
 gdf_tract_buffer.geometry = gdf_tract.geometry.buffer(buffer)
 
@@ -51,7 +55,6 @@ gdf_tract.fillna(value={'per_SL':0}, inplace=True)
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='per_SL', n_cluster=5)
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_ML_NS_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

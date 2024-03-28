@@ -20,7 +20,7 @@ dict_erosion_rate_ft_yr = {}
 for loc in list_locations:
     param_name = 'erosion_rate_' + loc + '_ft_yr'
     dict_erosion_rate_ft_yr[loc] = params.PARAMS.at[param_name, 'Value']
-# Output Path
+# Output Paths
 path_output = params.PATHNAMES.at['ESL_CER_ecosystem_loss', 'Value']
 
 

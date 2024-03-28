@@ -15,25 +15,32 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tract
-gdf_tract = utils.get_blank_tract(add_pop=True)
-
-#%% load deaths and get average number per year across NYC
+#%% EXTRACT PARAMETERS
+# Input paths
 path_deaths = params.PATHNAMES.at['ESL_WIW_deaths_data', 'Value']
+path_hosp = params.PATHNAMES.at['ESL_WIW_hosp_data', 'Value']
+path_borid = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+# Params
+loss_per_death = params.PARAMS.at['value_of_stat_life', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['ESL_WIW_loss_deaths', 'Value']
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract(add_pop=True)
 df_deaths = pd.read_csv(path_deaths, skiprows=9, skipfooter = 5, engine='python')
+df_hosp = pd.read_csv(path_hosp, skiprows=12, skipfooter=5, engine='python')
+df_borid = pd.read_excel(path_borid)
+
+#%% and get average number per year across NYC of load deaths
 N_deaths_year_NYC = df_deaths['Y Value'].mean()
 
 #%% load hospitalizations.  assume that deaths are by borough same as the age-adjusted hospitalziation rate
 #note it would be better to use unadjusted hospitalization rate, but that is available for only one year
 #so may be too noisy
-path_hosp = params.PATHNAMES.at['ESL_WIW_hosp_data', 'Value']
-df_hosp = pd.read_csv(path_hosp, skiprows=12, skipfooter=5, engine='python')
 #remove
 df_hosp = df_hosp.loc[df_hosp['Geography Name'] != 'New York City', :]
 
 #%% add borough code to hosp data
-path_borid = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-df_borid = pd.read_excel(path_borid)
 df_hosp['Bor_ID'] = [df_borid.loc[df_borid.Borough==x, 'Bor_ID'].iloc[0] for x in df_hosp['Geography Name']]
 
 #%% get borough specific average
@@ -52,14 +59,11 @@ def calc_tract_deaths(BCT_txt):
     return this_N_deaths * this_pop / this_bor_pop
 gdf_tract['N_deaths'] = gdf_tract.apply(lambda x: calc_tract_deaths(x['BCT_txt']), axis=1)
 
-
 #%% convert to loss
-loss_per_death = params.PARAMS.at['value_of_stat_life', 'Value']
 loss_deaths_total = utils.convert_USD(loss_per_death, 2022)
 gdf_tract['Loss_USD'] = gdf_tract['N_deaths'] * loss_deaths_total
 
 #%% save as output
-path_output = params.PATHNAMES.at['ESL_WIW_loss_deaths', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

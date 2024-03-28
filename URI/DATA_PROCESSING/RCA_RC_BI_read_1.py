@@ -14,10 +14,18 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
+#%% EXTRACT PARAMETERS
+# Input paths
+path_block = params.PATHNAMES.at['census_blocks', 'Value']
+path_bikescore = params.PATHNAMES.at['RCA_RC_BI_bikescore_csv', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RC_BI_score', 'Value']
+
+#%% LOAD DATA
+gdf_block = gpd.read_file(path_block)
+df_bikescore  = pd.read_csv(path_bikescore)
 
 #%% load tracts a
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
 gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = utils.project_gdf(gdf_tract)
 gdf_tract.index = np.arange(len(gdf_tract))
@@ -28,8 +36,6 @@ gdf_tract['lon'] = gdf_tract_wgs.geometry.centroid.x
 
 
 #%% load walkscore and merge to tract shapefile
-path_bikescore = params.PATHNAMES.at['RCA_RC_BI_bikescore_csv', 'Value']
-df_bikescore  = pd.read_csv(path_bikescore)
 temp = df_bikescore['BCT_txt']
 df_bikescore['BCT_txt'] = [str(x) for x in temp]
 gdf_tract = gdf_tract.merge(df_bikescore[['BCT_txt', 'bikescore']], on='BCT_txt', how='left')
@@ -38,7 +44,6 @@ gdf_tract = gdf_tract.merge(df_bikescore[['BCT_txt', 'bikescore']], on='BCT_txt'
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='bikescore')
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RC_BI_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%%  document result with readme

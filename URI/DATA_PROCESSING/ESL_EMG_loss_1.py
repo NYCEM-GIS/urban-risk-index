@@ -13,20 +13,23 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tracts
-gdf_tract = utils.get_blank_tract(add_pop=True)
-
-#%% define parameters
+#%% EXTRACT PARAMETERS
+# Input paths
 path_loss = params.PATHNAMES.at['ESL_EMG_loss', 'Value']
-
+# Params
 loss_per_death = params.PARAMS.at['value_of_stat_life', 'Value']
 loss_per_death = utils.convert_USD(loss_per_death, 2022)
-
+# Hard-coded
 N_outbreaks = 7.
 start_year = 1981
 end_year = 2020 #inclusive
-P_outbreak_yr = N_outbreaks / (end_year - start_year + 1)  #add 1 because inclusive
 total_outbreak_deaths = 12049.34  #for 7 events
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract(add_pop=True)
+
+#%%loss calculation
+P_outbreak_yr = N_outbreaks / (end_year - start_year + 1)  #add 1 because inclusive
 deaths_per_outbreak = total_outbreak_deaths / N_outbreaks
 deaths_per_year = deaths_per_outbreak * P_outbreak_yr
 loss_per_year = deaths_per_year * loss_per_death

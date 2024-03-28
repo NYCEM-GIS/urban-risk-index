@@ -14,26 +14,38 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tract
+#%% EXTRACT PARAMETERS
+# Input paths
+path_hosp = params.PATHNAMES.at['ESL_EXH_hosp_data', 'Value']
+path_borid = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+path_2016 = params.PATHNAMES.at['ESL_EXH_hosp_2016', 'Value']
+path_emerg = params.PATHNAMES.at['ESL_EXH_emerg_data', 'Value']
+path_2016 = params.PATHNAMES.at['ESL_EXH_emerg_2016', 'Value']
+# Params
+loss_per_moderate_injury_2016 = params.PARAMS.at['value_moderate_injury', 'Value']
+loss_per_serious_injury_2016 = params.PARAMS.at['value_serious_injury', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['ESL_EXT_loss_injury', 'Value']
+
+#%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
+df_hosp = pd.read_csv(path_hosp, skiprows=14, skipfooter=5, engine='python')
+df_borid = pd.read_excel(path_borid)
+df_2016 = pd.read_csv(path_2016, skiprows=6, skipfooter=23, engine='python')
+df_emerg = pd.read_csv(path_emerg, skiprows=14, skipfooter=5, engine='python')
+df_2016 = pd.read_csv(path_2016, skiprows=6, skipfooter=23, engine='python')
 
 #%% load hospitalizations.  These are the most severe injuries
-path_hosp = params.PATHNAMES.at['ESL_EXH_hosp_data', 'Value']
-df_hosp = pd.read_csv(path_hosp, skiprows=14, skipfooter=5, engine='python')
 #keey only the borough estimates
 df_hosp = df_hosp.loc[df_hosp['Geography Name'] != 'New York City', :]
 
 #%% add borough code to hosp data
-path_borid = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-df_borid = pd.read_excel(path_borid)
 df_hosp['Bor_ID'] = [df_borid.loc[df_borid.Borough==x, 'Bor_ID'].iloc[0] for x in df_hosp['Geography Name']]
 
 #%% get borough specific average
 df_bor = df_hosp[['Bor_ID', 'Y Value']].groupby('Bor_ID').mean()
 
 #%% open 2016 data to convert from age-adjusted to annual rate
-path_2016 = params.PATHNAMES.at['ESL_EXH_hosp_2016', 'Value']
-df_2016 = pd.read_csv(path_2016, skiprows=6, skipfooter=23, engine='python')
 df_2016['ratio'] = df_2016['Estimated Annual Rate (per 100,000 residents)'] /  df_2016['Age-Adjusted Rate (per 100,000 residents)']
 df_2016['Bor_ID'] = [df_borid.loc[df_borid.Borough==x, 'Bor_ID'].iloc[0] for x in df_2016['Borough']]
 df_bor['Hosp_per_100000'] = [df_bor.at[x, 'Y Value'] * df_2016.loc[df_2016.Bor_ID==x, 'ratio'].values[0] for x in df_bor.index]
@@ -48,8 +60,6 @@ def calc_tract_hosp(BCT_txt):
 gdf_tract['N_hosp'] = gdf_tract.apply(lambda x: calc_tract_hosp(x['BCT_txt']), axis=1)
 
 #%% calculate number of emergeny room visits
-path_emerg = params.PATHNAMES.at['ESL_EXH_emerg_data', 'Value']
-df_emerg = pd.read_csv(path_emerg, skiprows=14, skipfooter=5, engine='python')
 #keey only the borough estimates
 df_emerg = df_emerg.loc[df_emerg['Geography Name'] != 'New York City', :]
 
@@ -60,8 +70,6 @@ df_emerg['Bor_ID'] = [df_borid.loc[df_borid.Borough==x, 'Bor_ID'].iloc[0] for x 
 df_bor = df_emerg[['Bor_ID', 'Y Value']].groupby('Bor_ID').mean()
 
 #%% open 2016 data to convert from age-adjusted to annual rate
-path_2016 = params.PATHNAMES.at['ESL_EXH_emerg_2016', 'Value']
-df_2016 = pd.read_csv(path_2016, skiprows=6, skipfooter=23, engine='python')
 df_2016['ratio'] = df_2016['Estimated Annual Rate (per 100,000 residents)'] /  df_2016['Age-Adjusted Rate (per 100,000 residents)']
 df_2016['Bor_ID'] = [df_borid.loc[df_borid.Borough==x, 'Bor_ID'].iloc[0] for x in df_2016['Borough']]
 df_bor['Emerg_per_100000'] = [df_bor.at[x, 'Y Value'] * df_2016.loc[df_2016.Bor_ID==x, 'ratio'].values[0] for x in df_bor.index]
@@ -81,14 +89,11 @@ gdf_tract['N_emerg_uniq'] = gdf_tract['N_emerg'] - gdf_tract['N_hosp']
 
 #%% convert to loss.   Asssume emergency room visits with no hospitalization are "moderate" injuries.
 #Assume hospitalizations are "serious" injuries
-loss_per_moderate_injury_2016 = params.PARAMS.at['value_moderate_injury', 'Value']
 loss_moderate_total = utils.convert_USD(loss_per_moderate_injury_2016, 2016)
-loss_per_serious_injury_2016 = params.PARAMS.at['value_serious_injury', 'Value']
 loss_serious_total = utils.convert_USD(loss_per_serious_injury_2016, 2016)
 gdf_tract['Loss_USD'] = gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_emerg_uniq'] * loss_moderate_total
 
 #%% save as output
-path_output = params.PATHNAMES.at['ESL_EXT_loss_injury', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

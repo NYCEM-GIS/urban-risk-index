@@ -12,15 +12,22 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load data
+#%% EXTRACT PARAMETERS
+# Input paths
 path_gi = params.PATHNAMES.at['RCA_ML_GI_raw', 'Value']
+path_block = params.PATHNAMES.at['census_blocks', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['RCA_ML_GI_score', 'Value']
+
+#%% LOAD DATA
 gdf_gi = gpd.read_file(path_gi)
+gdf_block = gpd.read_file(path_block)
+
+#%% modify
 gdf_gi = utils.project_gdf(gdf_gi)
 gdf_gi['OBJECTID'] = np.arange(len(gdf_gi))
 
-#%% load tracts
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
+#%% tracts
 gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = utils.project_gdf(gdf_tract)
 gdf_tract.index = np.arange(len(gdf_tract))
@@ -41,7 +48,6 @@ gdf_merge.fillna(value=0, inplace=True)
 gdf_merge = utils.calculate_kmeans(gdf_merge, data_column='count', score_column='Score', n_cluster=5)
 
 #%% save
-path_output = params.PATHNAMES.at['RCA_ML_GI_score', 'Value']
 gdf_merge.to_file(path_output)
 
 plotting.plot_notebook(gdf_merge, column='Score', title='RCA_ML_GI: Green Infrastructure',

@@ -12,20 +12,27 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% open cdc dataset
+#%% EXTRACT PARAMETERS
+# Input paths
 path_cdc = params.PATHNAMES.at['RCA_MHI_cdc_sov', 'Value']
-gdf_cdc = gpd.read_file(path_cdc)
-
-#%% load tract data
-epsg = params.SETTINGS.at['epsg', 'Value']
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
+path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+# Settings
+epsg = params.SETTINGS.at['epsg', 'Value']
+# Params
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RR_MH_score', 'Value']
+
+#%% LOAD DATA
+gdf_cdc = gpd.read_file(path_cdc)
 gdf_block = gpd.read_file(path_block)
+df_fips = pd.read_excel(path_fips)
+
+#%% tract data
 gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = gdf_tract.to_crs(epsg=epsg)
 
-#%% load fips data
-path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-df_fips = pd.read_excel(path_fips)
+#%% fips data
 df_fips['Bor_ID_str'] = [str(df_fips.at[idx, 'Bor_ID']) for idx in df_fips.index]
 df_fips['FIPS_mod'] = ['3600' + df_fips.at[idx, 'Bor_ID_str'] for idx in df_fips.index]
 
@@ -42,7 +49,6 @@ gdf_tract.loc[gdf_tract['E_PCI']==-999, 'E_PCI'] = 0
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='E_PCI')
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RR_MH_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

@@ -16,11 +16,20 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load AC data and convert to track average
+#%% EXTRACT PARAMETERS
+# Input paths
 path_ac = params.PATHNAMES.at['RCA_RC_ACH_raw', 'Value']
+path_gbd = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce_gbd', 'Value']
+layer_gbd = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce_layer', 'Value']
+# Output paths
+path_results = params.PATHNAMES.at['RCA_RC_AC_score', 'Value']
+
+#%% LOAD DATA
+gdf_tf = gpd.read_file(path_gbd, driver='FileGDB', layer=layer_gbd)
+
+#%% convert ac data to track average
 column_ac = "DATA_VALUE"
 column_ac_out = "ac_per"
-
 gdf_tract = utils.convert_to_tract_average(path_ac, column_ac,column_ac_out,
                                list_input_null_values=[-999], output_null_value=-999)
 
@@ -29,9 +38,6 @@ gdf_tract_pop = utils.get_blank_tract(add_pop=True)
 gdf_tract = gdf_tract.merge(gdf_tract_pop[['BCT_txt', 'pop_2020']], on='BCT_txt', how='left')
 
 #%% get ACs added by program
-path_gbd = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce_gbd', 'Value']
-layer_gbd = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce_layer', 'Value']
-gdf_tf = gpd.read_file(path_gbd, driver='FileGDB', layer=layer_gbd)
 gdf_tf = utils.project_gdf(gdf_tf)
 
 #%% get count within each tract
@@ -61,7 +67,6 @@ gdf_tract['ac_per_rnk'] = utils.normalize_rank_percentile(gdf_tract['ac_per_post
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='ac_per_rnk')
 
 #%% save results in
-path_results = params.PATHNAMES.at['RCA_RC_AC_score', 'Value']
 gdf_tract.to_file(path_results)
 
 #%% plot

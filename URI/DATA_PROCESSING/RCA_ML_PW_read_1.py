@@ -12,9 +12,16 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load data
+#%% EXTRACT PARAMETERS
+# Input paths
 path_pwf = params.PATHNAMES.at['RCA_ML_PWF_raw', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['RCA_ML_PW_score', 'Value']
+
+#%% LOAD DATA
 gdf_pwf = gpd.read_file(path_pwf)
+
+#%% modify 
 gdf_pwf = utils.project_gdf(gdf_pwf)
 gdf_pwf['OBJECTID'] = np.arange(len(gdf_pwf))
 
@@ -25,7 +32,6 @@ gdf_tract = utils.calculate_radial_count(gdf_pwf, column_key= 'OBJECTID', buffer
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Fraction_Covered', score_column='Score', n_cluster=5)
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_ML_PW_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

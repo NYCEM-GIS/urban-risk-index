@@ -15,11 +15,14 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% get tract
-gdf_tract = utils.get_blank_tract()
-
-#%% load hazus data
+#%% EXTRACT PARAMETERS
+# Input paths
 path_flood = params.PATHNAMES.at['ESL_FLD_hazus', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 gdf_flood = gpd.read_file(path_flood)
 
 #%% get flood loss total
@@ -32,7 +35,6 @@ gdf_flood.Loss_USD = utils.convert_USD(gdf_flood.Loss_USD.values, 2018)
 gdf_tract = gdf_tract.merge(gdf_flood[['Stfid', 'Loss_USD']], left_on='geoid', right_on=['Stfid'], how='left')
 
 #%% save as output
-path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

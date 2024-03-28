@@ -14,26 +14,30 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-
-#%% load tracts a
+#%% EXTRACT PARAMETERS
+# Input paths
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
+folder_scratch = params.PATHNAMES.at['RCA_RC_WA_SCORE_scratch', 'Value']
+if not os.path.exists(folder_scratch):
+    os.mkdir(folder_scratch)
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RC_WA_score', 'Value']
+
+#%% LOAD DATA
 gdf_block = gpd.read_file(path_block)
+path_walkscore = params.PATHNAMES.at['RCA_RC_WA_walkscore_csv', 'Value']
+df_walkscore = pd.read_csv(path_walkscore)
+
+#%% modify tracts a
 gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = utils.project_gdf(gdf_tract)
 gdf_tract.index = np.arange(len(gdf_tract))
-
 gdf_tract_wgs = gdf_tract.to_crs(epsg=4326)
 gdf_tract['lat'] = gdf_tract_wgs.geometry.centroid.y
 gdf_tract['lon'] = gdf_tract_wgs.geometry.centroid.x
 
-#%% make scratch folder if doesn't already exist
-folder_scratch = params.PATHNAMES.at['RCA_RC_WA_SCORE_scratch', 'Value']
-if not os.path.exists(folder_scratch):
-    os.mkdir(folder_scratch)
-
 #%% use API to  get walkscore
 # note the number of data downloads per day is limited.
-path_walkscore = params.PATHNAMES.at['RCA_RC_WA_walkscore_csv', 'Value']
 if not os.path.exists(path_walkscore):
     for i, idx in enumerate(gdf_tract.index[1825:]):
         lat = str( np.round(gdf_tract['lat'].loc[idx], 5))
@@ -64,8 +68,7 @@ if not os.path.exists(path_walkscore):
 
         gdf_tract[['BCT_txt', 'walkscore', 'bikescore', 'transitscore', 'lat', 'lon']].to_csv(path_walkscore)
 
-#%% load walkscore and merge to tract shapefile
-df_walkscore = pd.read_csv(path_walkscore)
+#%% modify walkscore and merge to tract shapefile
 temp = df_walkscore['BCT_txt']
 df_walkscore['BCT_txt'] = [str(x) for x in temp]
 gdf_tract = gdf_tract.merge(df_walkscore[['BCT_txt', 'walkscore']], on='BCT_txt', how='left')
@@ -74,7 +77,6 @@ gdf_tract = gdf_tract.merge(df_walkscore[['BCT_txt', 'walkscore']], on='BCT_txt'
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='walkscore')
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RC_WA_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

@@ -14,13 +14,18 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% get tracts
-gdf_tract = utils.get_blank_tract()
-
-#%% load data
+#%% EXTRACT PARAMETERS
+# Input paths
 path_center = params.PATHNAMES.at['RCA_RC_EP_raw', 'Value']
+path_zone = params.PATHNAMES.at['RCA_RC_EP_evac_zones', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RC_EP_score', 'Value']
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 gdf_center = gpd.read_file(path_center)
 gdf_center = utils.project_gdf(gdf_center)
+gdf_zone = gpd.read_file(path_zone)
 
 #%%get centroid
 gdf_centroid = gdf_tract.copy()
@@ -39,8 +44,6 @@ gdf_tract['Distance_Center'] = gdf_centroid.apply(lambda row: near(row.geometry)
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_Center', score_column='Score', reverse=True)
 
 #%%assign 5 to everything in zone X of hurrican evac zone
-path_zone = params.PATHNAMES.at['RCA_RC_EP_evac_zones', 'Value']
-gdf_zone = gpd.read_file(path_zone)
 gdf_zone = gdf_zone.to_crs(gdf_tract.crs)
 gdf_zone = gdf_zone.loc[gdf_zone.hurricane_=='X']
 gdf_tract_sjoin = gpd.sjoin(gdf_tract, gdf_zone, how='inner', op='within')
@@ -49,7 +52,6 @@ gdf_tract= gdf_tract.merge(gdf_tract_sjoin[['BCT_txt', 'Is_inland']], how='left'
 gdf_tract.loc[gdf_tract.Is_inland==1, 'Score'] = 5
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RC_EP_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

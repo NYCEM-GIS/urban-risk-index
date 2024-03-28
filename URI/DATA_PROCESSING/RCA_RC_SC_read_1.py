@@ -14,15 +14,24 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tract
+#%% EXTRACT PARAMETERS
+# Input paths
+path_sc_gbd = params.PATHNAMES.at['RCA_RC_SC_raw', 'Value']
+layer_sc = params.PATHNAMES.at['RCA_RC_SC_layer', 'Value']
+# Params
+buffer_radius = params.PARAMS.at['search_buffer_for_shelter_capacity_ft', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['RCA_RC_SC_score', 'Value']
+
+#%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
+gdf_sc = gpd.read_file(path_sc_gbd, driver='FileGBD', layer=layer_sc)
+
+#%% modify tract
 gdf_tract['area_ft2'] = gdf_tract.geometry.area
 gdf_tract['pop_2020_density'] = gdf_tract['pop_2020'] / gdf_tract['area_ft2']
 
-#%% load shelter capacity data
-path_sc_gbd = params.PATHNAMES.at['RCA_RC_SC_raw', 'Value']
-layer_sc = params.PATHNAMES.at['RCA_RC_SC_layer', 'Value']
-gdf_sc = gpd.read_file(path_sc_gbd, driver='FileGBD', layer=layer_sc)
+#%% modify shelter capacity data
 gdf_sc = gdf_sc.to_crs(crs=gdf_tract.crs)
 #convert null to 0 values
 gdf_sc.fillna(value={'Long_term_capacity':0}, inplace=True)
@@ -31,7 +40,6 @@ gdf_sc.fillna(value={'Long_term_capacity':0}, inplace=True)
 #add column to count allocated shelter beds
 gdf_tract['LT_capacity_count'] = np.zeros(len(gdf_tract))
 #loop through each shelter and assign capacity to tracts
-buffer_radius = params.PARAMS.at['search_buffer_for_shelter_capacity_ft', 'Value']
 for i, idx in enumerate(gdf_sc.index):
     this_shelter = gdf_sc.loc[idx:idx, :].copy()
     this_capacity = this_shelter.at[idx, 'Long_term_capacity']
@@ -60,7 +68,6 @@ gdf_tract.fillna(value={'capacity_allocation_per_1000':0}, inplace=True)
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='capacity_allocation_per_1000')
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RC_SC_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

@@ -14,19 +14,24 @@ import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
-#%% load tract
-
-#%% load tracts a
+#%% EXTRACT PARAMETERS
+# Input paths
 path_block = params.PATHNAMES.at['census_blocks', 'Value']
+path_snow = params.PATHNAMES.at['ESL_WIW_snow_data', 'Value']
+path_road = params.PATHNAMES.at['ESL_WIW_road_cover', 'Value']
+# Output paths
+path_output = params.PATHNAMES.at['ESL_WIW_loss_snow', 'Value']
+
+#%% LOAD DATA
 gdf_block = gpd.read_file(path_block)
+df_snow = pd.read_excel(path_snow, sheet_name='Duplicate')
+df_road = pd.read_csv(path_road)
+
+#%% tracts 
 gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
 gdf_tract = utils.project_gdf(gdf_tract)
 gdf_tract.index = np.arange(len(gdf_tract))
 gdf_tract['area_ft2'] = gdf_tract.geometry.area
-
-#%% load snow removal costs
-path_snow = params.PATHNAMES.at['ESL_WIW_snow_data', 'Value']
-df_snow = pd.read_excel(path_snow, sheet_name='Duplicate')
 
 #%%get costs based on 2018 dollars
 df_snow.index = np.arange(2007, 2024)
@@ -34,8 +39,6 @@ df_snow['Snow Remove Cost'] = [utils.convert_USD(df_snow.at[idx, 'Snow Removal C
 ave_cost_year = df_snow['Snow Remove Cost'].mean() * 1000000
 
 #%% get area of road in each tract
-path_road = params.PATHNAMES.at['ESL_WIW_road_cover', 'Value']
-df_road = pd.read_csv(path_road)
 df_road.index = np.arange(len(df_road))
 df_road['BCT_txt'] = [str(df_road.at[idx, 'BCT_TXT']) for idx in df_road.index]
 gdf_tract = gdf_tract.merge(df_road, on='BCT_txt', how='left')
@@ -45,7 +48,6 @@ gdf_tract['road_area_ft2'] = gdf_tract['area_ft2'] * gdf_tract['MEAN']
 gdf_tract['Loss_USD'] = ave_cost_year * gdf_tract['road_area_ft2'] / gdf_tract['road_area_ft2'].sum()
 
 #%% save as output
-path_output = params.PATHNAMES.at['ESL_WIW_loss_snow', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot
