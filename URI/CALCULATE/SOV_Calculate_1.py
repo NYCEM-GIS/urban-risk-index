@@ -25,21 +25,8 @@ def calculate_SOV():
     gdf_sovi = gpd.read_file(path_sovi)
     #reproject
     epsg = params.SETTINGS.at['epsg', 'Value']
-    gdf_sovi = gdf_sovi.to_crs(epsg=epsg)
-
-    #%%load FIPS data
-    path_FIPS = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-    df_FIPS = pd.read_excel(path_FIPS)
-
-    #%% load the census block and dissolve to census track
-    path_block = params.PATHNAMES.at['census_blocks', 'Value']
-    gdf_block = gpd.read_file(path_block)
-    gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False,
-                                                            aggfunc='first')
-    gdf_tract['BoroCode_Int'] = [int(gdf_tract.at[x, 'BoroCode']) for x in gdf_tract.index]
-    gdf_tract = gdf_tract.merge(df_FIPS, left_on='BoroCode_Int', right_on='Bor_ID', how='inner')
-    gdf_tract['FIPS_CT'] = [str(gdf_tract.at[idx, 'FIPS']) + str(gdf_tract.at[idx, 'BCT_txt'])[1:] for idx in gdf_tract.index]
-    gdf_tract = gdf_tract.merge(gdf_sovi[['FIPS', 'RPL_THEMES']], left_on='FIPS_CT', right_on='FIPS', how='left')
+    gdf_tract = gdf_sovi.to_crs(epsg=epsg)
+    gdf_tract['BCT_txt'] = gdf_tract['FIPS']
 
     #%% normalize result to scale of 0.01 to 0.99
     gdf_tract['SOV_rank'] = utils.normalize_rank_percentile(gdf_tract['RPL_THEMES'].values,

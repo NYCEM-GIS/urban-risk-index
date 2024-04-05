@@ -5,9 +5,7 @@ calculate the total economic loss due to deaths from extreme heat (EXH)
 #%% load packages
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -47,18 +45,18 @@ df_stormevents = df_stormevents.loc[df_stormevents['EndDate']<end_date]
 #make empty dataframe to populate with borough count
 df_borcount = pd.DataFrame(index=[1, 2, 3, 4, 5],
                            data={'Heat_Events_Per_Year':np.zeros(5)})
-#loop through event storm event id in borough count list.
-#if is a stormevent with extreme heat, add 1
+# loop through event storm event id in borough count list.
+# if is a stormevent with extreme heat, add 1
 for idx in df_stormeventsboroughs.index:
     this_stormeventid = df_stormeventsboroughs.at[idx, 'StormEventId']
     if this_stormeventid in df_stormevents['Id'].values:
         this_borid = int(df_stormeventsboroughs.at[idx, 'BoroughId'])
-        df_borcount.at[this_borid,'Heat_Events_Per_Year'] += 1
+        df_borcount.at[this_borid, 'Heat_Events_Per_Year'] += 1
 
 #%% convert to annual rate of extreme heat events per year
 n_years = (end_date - start_date).days / 365.25
 df_borrate = df_borcount / n_years
-df_borrate.index  = [str(x) for x in df_borrate.index]
+df_borrate.index = [str(x) for x in df_borrate.index]
 
 #%% populate tract dataset
 gdf_events_per_year = pd.merge(gdf_tract, df_borrate, left_on='borocode', right_index=True, how='inner')
@@ -71,7 +69,7 @@ df_population.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census
 df_population_borough = df_population.groupby('2020 DCP Borough Code').sum()[2020]
 
 #%%calculate m =  # deaths due to extreme heat per 1000 people
-x  = df_population_borough.values
+x = df_population_borough.values
 y = df_borrate['Heat_Events_Per_Year'].values
 numerator = deaths_year
 denominator = np.array([x[i] * y[i] for i in np.arange(len(x))]).sum()/1000.
@@ -87,7 +85,7 @@ gdf_deaths_per_event = gdf_tract.merge(df_population[[2020, 'BCT_ID']], left_on=
 gdf_deaths_per_event['deaths_per_event'] = [m*x/1000. for x in gdf_deaths_per_event[2020]]
 
 #%% raname columns 2020
-gdf_deaths_per_event.rename(columns={2020:'Pop2020'}, inplace=True)
+gdf_deaths_per_event.rename(columns={2020: 'Pop2020'}, inplace=True)
 
 #%% convert value of lost life to 2019 value
 value_life = utils.convert_USD(value_life, 2022)

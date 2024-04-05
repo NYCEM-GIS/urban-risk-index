@@ -6,23 +6,18 @@ import pandas as pd
 import geopandas as gpd
 import os
 import matplotlib.pyplot as plt
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
+path_covid = params.PATHNAMES.at['ESL_RES_COVID_deaths', 'Value']
 path_PVI_gdb = params.PATHNAMES.at['ESL_RES_PVI_gbd', 'Value']
 path_PVI_layer = params.PATHNAMES.at['ESL_RES_PVI_layer', 'Value']
-path_covid = params.PATHNAMES.at['ESL_RES_COVID_deaths', 'Value']
 path_zcta = params.PATHNAMES.at['BOUNDARY_zcta', 'Value']
-path_loss_death = params.PATHNAMES.at['ESL_RES_death_loss', 'Value']
-path_loss_injury = params.PATHNAMES.at['ESL_RES_injury_loss', 'Value']
-path_loss_wages = params.PATHNAMES.at['ESL_RES_wages_loss', 'Value']
-path_loss_economy = params.PATHNAMES.at['ESL_RES_economy_loss', 'Value']
+
 # Params
 Loss_life = params.PARAMS.at['value_of_stat_life', 'Value']
 # Hard-coded
@@ -39,11 +34,17 @@ Loss_wages_2019 = 958.66
 Loss_wages = utils.convert_USD(Loss_wages_2019, 2019)
 Loss_hosp_2016 = 107000
 Loss_hosp = utils.convert_USD(Loss_hosp_2016, 2016)
-Loss_econ_mild_2019 = 5000000000 # total
+Loss_econ_mild_2019 = 5000000000  # total
 Loss_econ_mild = utils.convert_USD(Loss_econ_mild_2019, 2019)
 Loss_econ_severe_2019 = 68000000000
 Loss_econ_severe = utils.convert_USD(Loss_econ_severe_2019, 2019)
-update_data=0  #set to 1 to update data
+update_data = False  # set to True to update data
+
+# Output paths
+path_loss_death = params.PATHNAMES.at['ESL_RES_death_loss', 'Value']
+path_loss_economy = params.PATHNAMES.at['ESL_RES_economy_loss', 'Value']
+path_loss_injury = params.PATHNAMES.at['ESL_RES_injury_loss', 'Value']
+path_loss_wages = params.PATHNAMES.at['ESL_RES_wages_loss', 'Value']
 
 #%% LOAD DATA
 gdf_tracts = utils.get_blank_tract(add_pop=True)
@@ -62,32 +63,30 @@ gdf_tracts['tract_pop_per_sqmi'] = gdf_tracts['pop_2020'] / gdf_tracts['tract_ar
 #%% open vulnerability index
 gdf_PVI = utils.project_gdf(gdf_PVI)
 gdf_PVI['COMMDIST_area_sqmi'] = gdf_PVI.geometry.area/(5280.**2)
-#gdf_PVI['COMMDIST_vul_pop'] = gdf_PVI['Overall_Density_per_SqMi'] * gdf_PVI['COMMDIST_area_sqmi']
 
 #%% get number of vulnerable people in each tract
 gdf_union = gpd.overlay(gdf_tracts, gdf_PVI, how='union')
-#drop portions that don't overlap with tracts
+# drop portions that don't overlap with tracts
 gdf_union.dropna(subset=['BCT_txt'], inplace=True)
-#assume areas of tracts not covered by PVI have zero vulnerable opo
-gdf_union.fillna(value={'Overall_Density_per_SqMi':0, 'COMMDIST':0}, inplace=True)
+# assume areas of tracts not covered by PVI have zero vulnerable opo
+gdf_union.fillna(value={'Overall_Density_per_SqMi': 0, 'COMMDIST': 0}, inplace=True)
 #%% get number of vulnerable persons in the DISTCOMMs
 gdf_union['union_area_sqmi'] = gdf_union.geometry.area/(5280.**2)
-#the raw value will be refined  based on population distribution
-gdf_union['union_vul_pop_raw'] =  gdf_union['union_area_sqmi'] * gdf_union['Overall_Density_per_SqMi']
+# the raw value will be refined  based on population distribution
+gdf_union['union_vul_pop_raw'] = gdf_union['union_area_sqmi'] * gdf_union['Overall_Density_per_SqMi']
 gdf_union['union_pop'] = gdf_union['union_area_sqmi'] * gdf_union['tract_pop_per_sqmi']
 gdf_union['union_vul_pop'] = np.zeros(len(gdf_union))
 for i, idx in enumerate(gdf_union.index):
     this_union_pop = gdf_union.loc[idx, 'union_pop']
     this_COMMDIST = gdf_union.loc[idx, 'COMMDIST']
-    this_COMMDIST_pop = gdf_union.loc[gdf_union['COMMDIST']==this_COMMDIST, 'union_pop'].sum()
-    this_COMMDIST_vul_pop = gdf_union.loc[gdf_union['COMMDIST']==this_COMMDIST, 'union_vul_pop_raw'].sum()
+    this_COMMDIST_pop = gdf_union.loc[gdf_union['COMMDIST'] == this_COMMDIST, 'union_pop'].sum()
+    this_COMMDIST_vul_pop = gdf_union.loc[gdf_union['COMMDIST'] == this_COMMDIST, 'union_vul_pop_raw'].sum()
     gdf_union.loc[idx, 'union_vul_pop'] = this_COMMDIST_vul_pop * this_union_pop / this_COMMDIST_pop
 df_group = gdf_union.groupby('geoid')[['union_vul_pop']].sum()
 gdf_tracts = gdf_tracts.merge(df_group, left_on='geoid', right_index=True, how='left')
 gdf_tracts['pct_total_burden_PVI'] = gdf_tracts['union_vul_pop'] / gdf_tracts['union_vul_pop'].sum()
-#the overlay is causing somem gaps, causing nan.  fill withi average value
+# the overlay is causing some gaps, causing nan.  fill with average value
 gdf_tracts.fillna(value={'pct_total_burden_PVI': gdf_tracts['pct_total_burden_PVI'].median()}, inplace=True)
-
 
 #%% cases data
 df_covid['MODIFIED_ZCTA_STR'] = [str(x) for x in df_covid['MODIFIED_ZCTA']]
@@ -97,29 +96,21 @@ gdf_zcta = utils.project_gdf(gdf_zcta)
 gdf_zcta['ZCTA_area_sqmi'] = gdf_zcta.geometry.area/(5280**2)
 
 gdf_zcta = gdf_zcta.merge(df_covid, left_on='modzcta', right_on='MODIFIED_ZCTA_STR', how='left')
-#set null values to zero, because they are parks
+# set null values to zero, because they are parks
 gdf_zcta.fillna(value={'COVID_DEATH_COUNT': 0}, inplace=True)
-
-#%%
-#gdf_zcta['deaths_per_sqmi'] = gdf_zcta['COVID_DEATH_COUNT'] / gdf_zcta['ZCTA_area_sqmi']
 gdf_union = gpd.overlay(gdf_tracts, gdf_zcta, how='union')
 
 #%%
-#drop portions that don't overlap with tracts
+# drop portions that don't overlap with tracts
 gdf_union.dropna(subset=['BCT_txt'], inplace=True)
 
-#%% get na
-#plotting.plot_inline(gdf_tracts, column='pop_2020')
-#plotting.plot_inline(gdf_union.loc[gdf_union['COVID_DEATH_COUNT'].isna(), :], column='pop_2020')
-
 #%%
-#assume areas of tracts not covered by PVI have zero vulnerable opo
-gdf_union.fillna(value={'COVID_DEATH_COUNT':0, 'MODIFIED_ZCTA_STR':'0'}, inplace=True)
+# assume areas of tracts not covered by PVI have zero vulnerable opo
+gdf_union.fillna(value={'COVID_DEATH_COUNT': 0, 'MODIFIED_ZCTA_STR': '0'}, inplace=True)
 
 #%% get number of deaths in the in the DISTCOMMs
 gdf_union['union_area_sqmi'] = gdf_union.geometry.area/(5280.**2)
-#the raw value will be refined  based on population distribution
-#gdf_union['union_vul_pop_raw'] =  gdf_union['union_area_sqmi'] * gdf_union['Overall_Density_per_SqMi']
+# the raw value will be refined  based on population distribution
 gdf_union['union_pop'] = gdf_union['union_area_sqmi'] * gdf_union['tract_pop_per_sqmi']
 gdf_union['union_death_count'] = np.zeros(len(gdf_union))
 for i, idx in enumerate(gdf_union.index):
@@ -136,10 +127,6 @@ gdf_tracts['pct_total_burden_deaths'] = gdf_tracts['union_death_count'] / gdf_tr
 gdf_tracts['pct_burden_average'] = (gdf_tracts[['pct_total_burden_deaths',
                                                'pct_total_burden_PVI']].mean(axis=1))/(gdf_tracts[['pct_total_burden_deaths',
                                                'pct_total_burden_PVI']].mean(axis=1)).sum()
-#plotting.plot_inline(gdf_tracts, column='pct_burden_average')
-
-#%% plot result for visualization
-fig = plt.figure()
 
 #%%  calculate death losses
 mild_death_count = gdf_tracts.pop_2020.sum() * P_mild * R_mild_attack * R_mild_death
@@ -166,7 +153,7 @@ gdf_tract_wages['Loss_USD'] = annual_wages_loss * gdf_tracts['pct_burden_average
 gdf_tract_wages[['geoid', 'BCT_txt', 'Loss_USD', 'geometry']].to_file(path_loss_wages)
 
 #%% calculate economy losses, distributed by population
-annual_econ_loss = P_mild* Loss_econ_mild + P_severe * Loss_econ_severe
+annual_econ_loss = P_mild * Loss_econ_mild + P_severe * Loss_econ_severe
 gdf_tract_econ = gdf_tracts.copy()
 gdf_tract_econ['Loss_USD'] = annual_econ_loss * gdf_tracts['pop_2020'] / gdf_tracts['pop_2020'].sum()
 gdf_tract_econ[['geoid', 'BCT_txt', 'Loss_USD', 'geometry']].to_file(path_loss_economy)
@@ -181,7 +168,7 @@ try:
     The data was produced by {}
     Located in {}
     """.format(os.path.basename(__file__), os.path.dirname(__file__))
-    path_readme = os.path.dirname(path_results)
+    path_readme = os.path.dirname(path_loss_death)
     utils.write_readme(path_readme, text)
 except:
     pass

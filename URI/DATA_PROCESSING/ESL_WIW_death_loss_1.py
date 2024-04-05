@@ -1,17 +1,10 @@
 """ deaths due to winter storms"""
 
 #%% read packages
-import numpy as np
 import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
@@ -27,17 +20,19 @@ path_output = params.PATHNAMES.at['ESL_WIW_loss_deaths', 'Value']
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
-df_deaths = pd.read_csv(path_deaths, skiprows=9, skipfooter = 5, engine='python')
+df_deaths = pd.read_csv(path_deaths, skiprows=9, skipfooter=5, engine='python')
 df_hosp = pd.read_csv(path_hosp, skiprows=12, skipfooter=5, engine='python')
 df_borid = pd.read_excel(path_borid)
 
-#%% and get average number per year across NYC of load deaths
+#%% get average number per year across NYC of load deaths
 N_deaths_year_NYC = df_deaths['Y Value'].mean()
 
-#%% load hospitalizations.  assume that deaths are by borough same as the age-adjusted hospitalziation rate
-#note it would be better to use unadjusted hospitalization rate, but that is available for only one year
-#so may be too noisy
-#remove
+#%% load hospitalizations.
+# Assume that deaths are by borough same as the age-adjusted hospitalization rate
+# note it would be better to use unadjusted hospitalization rate, but that is available for only one year
+# so may be too noisy
+
+# remove NYC-level data
 df_hosp = df_hosp.loc[df_hosp['Geography Name'] != 'New York City', :]
 
 #%% add borough code to hosp data
@@ -49,14 +44,17 @@ df_bor = df_hosp[['Bor_ID', 'Y Value']].groupby('Bor_ID').mean()
 #%% distribute deaths using rate as weight
 df_bor['N_deaths_yr'] = N_deaths_year_NYC * df_bor['Y Value'] / df_bor['Y Value'].sum()
 
+
 #%% distribute deaths by population within each borough
 def calc_tract_deaths(BCT_txt):
-    idx = gdf_tract.index[gdf_tract.BCT_txt==BCT_txt][0]
+    idx = gdf_tract.index[gdf_tract.BCT_txt == BCT_txt][0]
     this_bor = gdf_tract.at[idx, 'borocode']
     this_pop = gdf_tract.at[idx, 'pop_2020']
-    this_bor_pop = gdf_tract.loc[gdf_tract.borocode==this_bor, 'pop_2020'].sum()
+    this_bor_pop = gdf_tract.loc[gdf_tract.borocode == this_bor, 'pop_2020'].sum()
     this_N_deaths = df_bor.at[int(this_bor), 'N_deaths_yr']
     return this_N_deaths * this_pop / this_bor_pop
+
+
 gdf_tract['N_deaths'] = gdf_tract.apply(lambda x: calc_tract_deaths(x['BCT_txt']), axis=1)
 
 #%% convert to loss

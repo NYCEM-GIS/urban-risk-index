@@ -2,17 +2,10 @@
 
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
 import datetime
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
-from shapely import wkb
-import pyodbc
 import URI.MISC.plotting_1 as plotting
 
 utils.set_home()
@@ -21,7 +14,7 @@ utils.set_home()
 # Input paths
 path_outages = params.PATHNAMES.at['ESL_CST_outages_data', 'Value']
 # Params
-outage_buffer  = params.PARAMS.at['buffer_period_power_outage_days', 'Value']  = params.PARAMS.at['buffer_period_power_outage_days', 'Value']
+outage_buffer = params.PARAMS.at['buffer_period_power_outage_days', 'Value']  = params.PARAMS.at['buffer_period_power_outage_days', 'Value']
 USD_per_hr_power_out = params.PARAMS.at['loss_day_power', 'Value'] / 24.
 # Output paths
 path_results = params.PATHNAMES.at['ESL_CST_loss_power', 'Value']

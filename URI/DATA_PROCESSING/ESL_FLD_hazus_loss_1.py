@@ -1,23 +1,16 @@
-""" incorporate flooding damaage due to coastal storms"""
+""" incorporate flooding damage due to coastal storms"""
 
 #%% read packages
-import numpy as np
-import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_flood = params.PATHNAMES.at['ESL_FLD_hazus', 'Value']
+path_flood = r'.\1_RAW_INPUTS\FLD_HAZUS\Hazus_Flooding_AnnualizedLoss.shp'
 # Output paths
 path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
 

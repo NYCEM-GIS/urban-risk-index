@@ -1,16 +1,10 @@
 """ read in the community infrastructure factor into tract level map"""
 
 #%% read packages
-import numpy as np
-import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from census import Census
-from us import states
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 

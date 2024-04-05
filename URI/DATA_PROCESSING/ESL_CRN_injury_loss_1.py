@@ -1,17 +1,11 @@
 """
-calculate the total economic loss due to deeaths from CRN
+calculate the total economic loss due to deaths from CRN
 """
 
 #%% load packages
-import numpy as np
-import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
@@ -19,7 +13,7 @@ utils.set_home()
 # Input paths
 path_results = params.PATHNAMES.at['ESL_CRN_injury_loss', 'Value']
 # Hard-coded
-value_loss_2016 =  100815345.20  #from spreadsheet
+value_loss_2016 = 100815345.20  # from spreadsheet
 value_loss = utils.convert_USD(value_loss_2016, 2016)
 
 #%% LOAD DATA
