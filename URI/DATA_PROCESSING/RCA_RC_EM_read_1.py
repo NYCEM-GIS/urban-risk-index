@@ -2,9 +2,12 @@
 
 #%% read packages
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 import os
+import matplotlib.pyplot as plt
 from shapely.ops import nearest_points
+
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -19,7 +22,8 @@ path_output = params.PATHNAMES.at['RCA_RC_EM_score', 'Value']
 
 #%% LOAD DATA
 gdf_hospital = gpd.read_file(path_hospital)
-gdf_block = gpd.read_file(path_block)
+# gdf_block = gpd.read_file(path_block)
+gdf_block = utils.get_blank_tract()
 
 #%% modify data
 gdf_hospital = utils.project_gdf(gdf_hospital)
