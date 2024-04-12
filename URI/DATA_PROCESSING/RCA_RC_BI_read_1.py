@@ -5,10 +5,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -22,9 +18,7 @@ path_bikescore = params.PATHNAMES.at['RCA_RC_BI_bikescore_csv', 'Value']
 path_output = params.PATHNAMES.at['RCA_RC_BI_score', 'Value']
 
 #%% LOAD DATA
-# gdf_block = gpd.read_file(path_block)
-gdf_block = utils.get_blank_tract()
-
+gdf_block = gpd.read_file(path_block)
 df_bikescore  = pd.read_csv(path_bikescore)
 
 #%% load tracts a

@@ -5,8 +5,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -21,8 +19,7 @@ path_output = params.PATHNAMES.at['RCA_ML_GI_score', 'Value']
 
 #%% LOAD DATA
 gdf_gi = gpd.read_file(path_gi)
-# gdf_block = gpd.read_file(path_block)
-gdf_block = utils.get_blank_tract()
+gdf_block = gpd.read_file(path_block)
 
 #%% modify
 gdf_gi = utils.project_gdf(gdf_gi)

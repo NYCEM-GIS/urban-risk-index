@@ -1,12 +1,9 @@
 """ get vegetative cover data"""
 
 #%% read packages
-import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -25,9 +22,7 @@ epsg = params.SETTINGS.at['epsg', 'Value']
 #%% LOAD DATA
 df_veg = pd.read_excel(path_veg)
 gdf_nta = gpd.read_file(path_nta)
-# gdf_block = gpd.read_file(path_block)
-gdf_block = utils.get_blank_tract()
-
+gdf_block = gpd.read_file(path_block)
 
 #%%neighborhood shapefile
 gdf_nta = gdf_nta.to_crs(epsg=epsg)

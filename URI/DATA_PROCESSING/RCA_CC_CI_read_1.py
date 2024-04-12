@@ -5,10 +5,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-import sys
 from sklearn.cluster import KMeans
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -28,9 +25,7 @@ path_output = params.PATHNAMES.at['RCA_CC_CI_score', 'Value']
 
 #%% LOAD DATA
 gdf_data = gpd.read_file(path_data)  #community centers
-# gdf_block = gpd.read_file(path_block)
-# gdf_block = gdf_tract = utils.get_blank_tract()
-gdf_block = gpd.read_file(r".\1_RAW_INPUTS_old\BOUNDARY_CENSUS_BLOCK\nycb2010_20c\nycb2010_20c\nycb2010.shp")
+gdf_block = gpd.read_file(path_block)
 
 
 #%% tract data
@@ -52,8 +47,6 @@ df_fill = pd.DataFrame(columns=['BCT_txt', 'Fraction_Covered'])
 #print("Calculating.")
 for i, idx in enumerate(gdf_buffer.index):
     this_buffer = gdf_buffer.loc[[idx]]
-    print(this_buffer.columns)
-    print(gdf_tract.columns)
     #take intersection
     this_intersect = gpd.overlay(gdf_tract, this_buffer[['OBJECTID', 'geometry']], how='intersection')
     this_intersect['area_intersect_ft2'] = this_intersect['geometry'].area

@@ -187,11 +187,9 @@ def convert_to_tract_average(path_data, column_name, column_name_out,
         gdf_data = path_data.copy()
     epsg = params.SETTINGS.at['epsg', 'Value']
     gdf_data = gdf_data.to_crs(epsg=epsg)
-    # path_block = params.PATHNAMES.at['census_blocks', 'Value']
-    # gdf_block = gpd.read_file(path_block)
-    # gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-    gdf_tract = get_blank_tract()
-
+    path_block = params.PATHNAMES.at['census_blocks', 'Value']
+    gdf_block = gpd.read_file(path_block)
+    gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
     gdf_tract = gdf_tract.to_crs(epsg=epsg)
     # get spatial union, drop areas with no tract
     gdf_union = gpd.overlay(gdf_tract, gdf_data, how='union')

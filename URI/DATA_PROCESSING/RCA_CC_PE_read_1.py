@@ -7,8 +7,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -26,9 +24,7 @@ path_output = params.PATHNAMES.at['RCA_CC_PE_score', 'Value']
 
 #%% LOAD DATA
 df_data = pd.read_excel(path_data)
-# gdf_block = gpd.read_file(path_block)
-gdf_block = gdf_tract = utils.get_blank_tract()
-
+gdf_block = gpd.read_file(path_block)
 df_fips = pd.read_excel(path_fips)
 
 #%% place attachment data
