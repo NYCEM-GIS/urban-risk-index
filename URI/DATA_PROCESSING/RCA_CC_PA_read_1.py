@@ -1,4 +1,4 @@
-""" read in the community infrastructure factor into tract level map"""
+""" read in the place attachment factor into tract level map"""
 
 #%% read packages
 import numpy as np
@@ -24,8 +24,8 @@ c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8", session=session)
 
 #%% place attachment data
 response_pop_older_1yr = c.acs5.state_county_tract('B07204_001E', states.NY.fips, '*', Census.ALL)
-response_same_house_1yr_ago  = c.acs5.state_county_tract('B07204_002E', states.NY.fips, '*', Census.ALL)
-response_diff_house_same_city_1yr_ago  = c.acs5.state_county_tract('B07204_005E', states.NY.fips, '*', Census.ALL)
+response_same_house_1yr_ago = c.acs5.state_county_tract('B07204_002E', states.NY.fips, '*', Census.ALL)
+response_diff_house_same_city_1yr_ago = c.acs5.state_county_tract('B07204_005E', states.NY.fips, '*', Census.ALL)
 list_tract1 = [x['tract'] for x in response_pop_older_1yr]
 list_state = [x['state'] for x in response_pop_older_1yr]
 list_county = [x['county'] for x in response_pop_older_1yr]
@@ -37,21 +37,24 @@ list_diff_house_same_city_1yr_ago = [x['B07204_005E'] for x in response_diff_hou
 
 
 #%%
-df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'pop_older_1yr':list_pop_older_1yr,
-                                            'same_house_1yr_ago':list_same_house_1yr_ago,
-                                            'diff_house_same_city_1yr_ago':list_diff_house_same_city_1yr_ago,
-                                           'tract':list_tract1,
-                                           'county':list_county,
-                                           'state':list_state})
-df['Stfid'] = [df.loc[x,"state"] + df.loc[x, 'county']+df.loc[x,'tract'] for x in df.index]
+df = pd.DataFrame(
+    index=np.arange(len(list_tract1)),
+    data={'pop_older_1yr': list_pop_older_1yr,
+          'same_house_1yr_ago': list_same_house_1yr_ago,
+          'diff_house_same_city_1yr_ago': list_diff_house_same_city_1yr_ago,
+          'tract': list_tract1,
+          'county': list_county,
+          'state': list_state}
+)
+df['Stfid'] = [df.loc[x, "state"] + df.loc[x, 'county']+df.loc[x, 'tract'] for x in df.index]
 
 #%% merge
-gdf_tract = gdf_tract.merge(df[['pop_older_1yr', 'Stfid', 'same_house_1yr_ago', 'diff_house_same_city_1yr_ago' ]], left_on='geoid', right_on='Stfid', how='inner')
+gdf_tract = gdf_tract.merge(df[['pop_older_1yr', 'Stfid', 'same_house_1yr_ago', 'diff_house_same_city_1yr_ago']], left_on='geoid', right_on='Stfid', how='inner')
 
 #%%
 gdf_tract['percent_living_in_NY_over_1yr'] = (gdf_tract['same_house_1yr_ago'] + gdf_tract['diff_house_same_city_1yr_ago'])/gdf_tract['pop_older_1yr'] * 100.
-#set missing values to median
-gdf_tract.fillna(gdf_tract['percent_living_in_NY_over_1yr'].median() , inplace=True)
+# set missing values to median
+gdf_tract.fillna(gdf_tract['percent_living_in_NY_over_1yr'].median(), inplace=True)
 
 #%% xconvert to score 1-5
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='percent_living_in_NY_over_1yr', n_cluster=5)

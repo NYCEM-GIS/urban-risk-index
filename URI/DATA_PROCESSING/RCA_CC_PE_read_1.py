@@ -47,7 +47,7 @@ gdf_tract['FIPS_CT_txt'] = [str(gdf_tract.at[idx, 'FIPS_mod']) + gdf_tract.at[id
 gdf_tract = gdf_tract.merge(df_data[['FIPS_CT_txt', 'Avg. Participation Score 2018']], left_on='FIPS_CT_txt', right_on='FIPS_CT_txt', how='left')
 
 #%% fill na value with median voter participation score
-values = {'Avg. Participation Score 2018':gdf_tract['Avg. Participation Score 2018'].median()}
+values = {'Avg. Participation Score 2018': gdf_tract['Avg. Participation Score 2018'].median()}
 gdf_tract.fillna(value=values, inplace=True)
 
 #%% reclassify to score 1-5

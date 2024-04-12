@@ -1,4 +1,4 @@
-""" get parks with green infrastructrure cover data"""
+""" get parks with green infrastructure cover data"""
 
 #%% read packages
 import numpy as np
@@ -32,13 +32,13 @@ gdf_tract.index = np.arange(len(gdf_tract))
 
 #%% crete buffered tracts
 gdf_tract_buffer = gdf_tract.copy()
-gdf_tract_buffer['geometry'] = gdf_tract['geometry'].buffer(distance = 528)
-gdf_tract_buffer['area_buffer_mi2'] = gdf_tract_buffer['geometry'].area  / (5280*5280)
+gdf_tract_buffer['geometry'] = gdf_tract['geometry'].buffer(distance=528)
+gdf_tract_buffer['area_buffer_mi2'] = gdf_tract_buffer['geometry'].area / (5280*5280)
 
 #%% get count in each tract
 gdf_join = gpd.sjoin(gdf_tract_buffer, gdf_gi)
 count = gdf_join['BCT_txt'].value_counts()
-df_counts = pd.DataFrame(index=count.index, data={'count':count.values})
+df_counts = pd.DataFrame(index=count.index, data={'count': count.values})
 
 #%% join results to tracts
 gdf_merge = gdf_tract.merge(df_counts, left_on='BCT_txt', right_index=True, how='left')

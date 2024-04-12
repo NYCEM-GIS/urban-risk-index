@@ -23,7 +23,7 @@ gdf_pwf = utils.project_gdf(gdf_pwf)
 gdf_pwf['OBJECTID'] = np.arange(len(gdf_pwf))
 
 #%% calculate radial count, 1/2 mile
-gdf_tract = utils.calculate_radial_count(gdf_pwf, column_key= 'OBJECTID', buffer_distance_ft=2640)
+gdf_tract = utils.calculate_radial_count(gdf_pwf, column_key='OBJECTID', buffer_distance_ft=2640)
 
 #%% xconvert to score 1-5
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Fraction_Covered', score_column='Score', n_cluster=5)

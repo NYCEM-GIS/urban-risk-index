@@ -1,8 +1,7 @@
-""" Calcualtes the fraction of shoreline that is natural."""
+""" Calculates the fraction of shoreline that is natural."""
 
 #%%% import packages
 import numpy as np
-import pandas as pd
 import geopandas as gpd
 import os
 import URI.MISC.params_1 as params
@@ -34,20 +33,18 @@ gdf_tract_buffer.geometry = gdf_tract.geometry.buffer(buffer)
 #%%
 for i, idx in enumerate(gdf_tract_buffer.index):
     this_tract = gdf_tract.loc[idx:idx, :]
-    this_Stfid = gdf_tract.at[idx, 'geoid']
     this_shoreline = gpd.overlay(gdf_shoreline, this_tract, how='intersection')
-    if len(this_shoreline)>0:
-        #get lengths
+    if len(this_shoreline) > 0:
+        # get lengths
         this_shoreline['Length_ft'] = this_shoreline.geometry.length
-        length_natural = this_shoreline.loc[this_shoreline['Type']=='3', 'Length_ft'].sum()
+        length_natural = this_shoreline.loc[this_shoreline['Type'] == '3', 'Length_ft'].sum()
         length_total = this_shoreline['Length_ft'].sum()
         gdf_tract.at[idx, 'per_SL'] = (length_natural / length_total) * 100.
-        #print('{} {}'.format(i, (length_natural / length_total) * 100.))
 
-#%%fill with na values
-gdf_tract.fillna(value={'per_SL':0}, inplace=True)
+#%% fill with na values
+gdf_tract.fillna(value={'per_SL': 0}, inplace=True)
 
-#%% xconvert to score 1-5
+#%% convert to score 1-5
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='per_SL', n_cluster=5)
 
 #%% save as output

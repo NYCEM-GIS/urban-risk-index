@@ -60,7 +60,7 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse
         print("warning: kmeans score already exists.")
         return df
     else:
-        if len(df)<5:
+        if len(df) < 5:
             df_result = df.copy()
             df_result[score_column] = np.ones(len(df))*3
         else:
@@ -68,16 +68,16 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 df['Cluster_ID'] = kmeans.fit_predict(np.round(df[[data_column]], 6))
-            #make lookup for class label
+            # make lookup for class label
             df_label = pd.DataFrame()
             df_label['Cluster_ID'] = np.arange(n_cluster)
             df_label['Cluster_Center'] = kmeans.cluster_centers_.flatten()
             df_label.sort_values('Cluster_Center', inplace=True)
-            if reverse==False:
+            if not reverse:
                 df_label[score_column] = np.arange(1, n_cluster+1)
             else:
                 df_label[score_column] = np.arange(n_cluster, 0, -1)
-            #assign score to each cluster
+            # assign score to each cluster
             df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
             df_result.drop(columns={'Cluster_ID'}, inplace=True)
         return df_result
@@ -140,14 +140,15 @@ def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
     gdf_tract.fillna(0, inplace=True)
     return gdf_tract
 
+
 #%%
 def project_gdf(gdf):
-    epsg = epsg = params.SETTINGS.at['epsg', 'Value']
-    gdf = gdf.to_crs(epsg = epsg)
+    epsg = params.SETTINGS.at['epsg', 'Value']
+    gdf = gdf.to_crs(epsg=epsg)
     return gdf
 
-#%%
 
+#%%
 def get_blank_tract(add_pop=False):
     path_tract = params.PATHNAMES.at['BOUNDARY_tract', 'Value']
     list_exclude = params.HARDCODED.at['list_excluded_tracts', 'Value']
@@ -157,7 +158,7 @@ def get_blank_tract(add_pop=False):
     gdf_tract['BCT_txt'] = gdf_tract['boroct2020'].values
     gdf_tract = project_gdf(gdf_tract)
     gdf_tract.index = np.arange(len(gdf_tract))
-    if add_pop==True:
+    if add_pop:
         path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
         df_pop = pd.read_excel(path_population_tract, skiprows=5)
         df_pop.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
@@ -175,22 +176,20 @@ def divide_zero(x, y):
     else:
         return x / y
 
+
 # %% zonal statistics with input shapefile into output shapefile
 # path data can either be string or actual data gdf file
 # handle null values.
 def convert_to_tract_average(path_data, column_name, column_name_out,
-                             list_input_null_values=[-999], output_null_value=-999):
+                             list_input_null_values=None, output_null_value=-999):
     # get data to convert
+    if list_input_null_values is None:
+        list_input_null_values = [-999]
     if type(path_data) == str:
         gdf_data = gpd.read_file(path_data)
     else:
         gdf_data = path_data.copy()
-    epsg = params.SETTINGS.at['epsg', 'Value']
-    gdf_data = gdf_data.to_crs(epsg=epsg)
-    path_block = params.PATHNAMES.at['census_blocks', 'Value']
-    gdf_block = gpd.read_file(path_block)
-    gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-    gdf_tract = gdf_tract.to_crs(epsg=epsg)
+    gdf_tract = get_blank_tract()
     # get spatial union, drop areas with no tract
     gdf_union = gpd.overlay(gdf_tract, gdf_data, how='union')
     gdf_union.dropna(subset=['BCT_txt'], inplace=True)
@@ -198,13 +197,11 @@ def convert_to_tract_average(path_data, column_name, column_name_out,
     gdf_union['area_ft2'] = gdf_union['geometry'].area
     # for each tract, calculate area weighted average of contributions
     # if some values are null, use other values.  If all value are null, assign null
-    output_null_value = -999
-    list_input_null_values = [-999]
     gdf_tract[column_name_out] = np.zeros(len(gdf_tract))
     for i, idx in enumerate(gdf_tract.index):
-        this_BCT = gdf_tract.at[idx, 'BCT_txt']
+        this_bct = gdf_tract.at[idx, 'BCT_txt']
         # get slices from this tract
-        this_gdf_union = gdf_union.loc[gdf_union['BCT_txt'] == this_BCT, :]
+        this_gdf_union = gdf_union.loc[gdf_union['BCT_txt'] == this_bct, :]
         # remove null data values
         this_gdf_union.dropna(subset=[column_name], inplace=True)
         # remove null values based on list
@@ -214,11 +211,11 @@ def convert_to_tract_average(path_data, column_name, column_name_out,
         # if nothing left, set tract value to null value
         if len(this_gdf_union) == 0:
             gdf_tract.at[idx, column_name_out] = output_null_value
-        # otherise set to spatially weighted average
+        # otherwise set to spatially weighted average
         else:
-            DATA_VALUE_tract_ave = np.average(this_gdf_union[column_name].values,
+            data_value_tract_ave = np.average(this_gdf_union[column_name].values,
                                               weights=this_gdf_union['area_ft2'].values)
-            gdf_tract.at[idx, column_name_out] = DATA_VALUE_tract_ave
+            gdf_tract.at[idx, column_name_out] = data_value_tract_ave
     return gdf_tract
 
 

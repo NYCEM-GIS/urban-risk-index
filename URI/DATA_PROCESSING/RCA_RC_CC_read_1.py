@@ -1,6 +1,4 @@
 """ load in cooling center factor """
-
-
 #%% read packages
 import numpy as np
 import pandas as pd
@@ -30,29 +28,23 @@ gdf_cc_buffer = gdf_cc.copy()
 gdf_cc_buffer['geometry'] = gdf_cc['geometry'].buffer(distance=5280/2.)
 
 #%% create empty df to fill
-df_fill = pd.DataFrame(columns = ['BCT_txt', 'Fraction_Covered'])
+df_fill = pd.DataFrame(columns=['BCT_txt', 'Fraction_Covered'])
 
 #%% loop through each buffer, and add BCT_txt and area filled to list
-#print("Calculating.")
 for i, idx in enumerate(gdf_cc_buffer.index):
     this_buffer = gdf_cc_buffer.loc[[idx]]
-    #take intersection
+    # take intersection
     this_intersect = gpd.overlay(gdf_tract, this_buffer[['NYCEM_ID', 'geometry']], how='intersection')
     this_intersect['area_intersect_ft2'] = this_intersect['geometry'].area
     this_intersect['Fraction_Covered'] = np.minimum(this_intersect['area_intersect_ft2'] / this_intersect['area_ft2'], 1.0)
-    #add to df_fill
+    # add to df_fill
     df_fill = df_fill.append(this_intersect[['BCT_txt', 'Fraction_Covered']])
-#     if i % 50 == 0:
-#         print(".")
-# print('.')
-
 
 #%% get the sum  by tract and join
 df_sum = df_fill.groupby(by='BCT_txt').sum()
 gdf_tract = gdf_tract.merge(df_sum, on='BCT_txt', how='left')
-#gdf_tract = gdf_tract.to_file(r'.\1_RAW_INPUTS\ZZZ_SCRATCH\NYC_count.shp')
 
-#fill nan with value 0
+# fill nan with value 0
 gdf_tract.fillna(0, inplace=True)
 
 #%% calculate score
@@ -71,7 +63,7 @@ try:
     The data was produced by {}
     Located in {}
     """.format(os.path.basename(__file__), os.path.dirname(__file__))
-    path_readme = os.path.dirname(path_results)
+    path_readme = os.path.dirname(path_output)
     utils.write_readme(path_readme, text)
 except:
     pass
