@@ -13,6 +13,9 @@ utils.set_home()
 # Input paths
 path_flood_bronx = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Bronx\Bronx_100PFIRM\results.shp"
 path_flood_kings = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Kings\Kings_100PFIRM\results.shp"
+path_flood_manhattan = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\New York\NewYork_100PFIRM\results.shp"
+path_flood_queens = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Queens\Queens_100PFIRM\results.shp"
+path_flood_richmond = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Richmond\Richmond_100PFIRM\results.shp"
 # Output paths
 path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
 
@@ -20,14 +23,14 @@ path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
 gdf_tract = utils.get_blank_tract()
 gdf_flood_bronx = gpd.read_file(path_flood_bronx)
 gdf_flood_kings = gpd.read_file(path_flood_kings)
-gdf_flood_manhattan = gpd.read_file(r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\New York\NewYork_100PFIRM\results.shp")
-gdf_flood_queens = gpd.read_file(r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Queens\Queens_100PFIRM\results.shp")
-gdf_flood_richmond = gpd.read_file(r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Richmond\Richmond_100PFIRM\results.shp")
+gdf_flood_manhattan = gpd.read_file(path_flood_manhattan)
+gdf_flood_queens = gpd.read_file(path_flood_queens)
+gdf_flood_richmond = gpd.read_file(path_flood_richmond)
 
 #%% Flood Data Preprocessing
-print(type(gdf_flood_bronx))
 gdf_flood_data_list = [gdf_flood_bronx, gdf_flood_kings, gdf_flood_manhattan, gdf_flood_queens, gdf_flood_richmond]
 gdf_flood_data_by_tract_list = []
+
 for fld_file in gdf_flood_data_list:
     fld_file['tract'] = fld_file['block'][:11]  # Tract ID is equal to the first 11 digits of the block id
     fld_file_by_tract = fld_file[['tract', 'EconLoss', 'geometry']].dissolve(by='tract', as_index=False)

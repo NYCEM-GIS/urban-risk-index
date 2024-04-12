@@ -13,7 +13,6 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 folder_scratch = params.PATHNAMES.at['RCA_RC_WA_SCORE_scratch', 'Value']
 if not os.path.exists(folder_scratch):
     os.mkdir(folder_scratch)
@@ -21,13 +20,12 @@ if not os.path.exists(folder_scratch):
 path_output = params.PATHNAMES.at['RCA_RC_WA_score', 'Value']
 
 #%% LOAD DATA
-gdf_block = gpd.read_file(path_block)
 path_walkscore = params.PATHNAMES.at['RCA_RC_WA_walkscore_csv', 'Value']
 df_walkscore = pd.read_csv(path_walkscore)
 
 #%% modify tracts a
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
+
+gdf_tract = utils.get_blank_tract()
 gdf_tract.index = np.arange(len(gdf_tract))
 gdf_tract_wgs = gdf_tract.to_crs(epsg=4326)
 gdf_tract['lat'] = gdf_tract_wgs.geometry.centroid.y

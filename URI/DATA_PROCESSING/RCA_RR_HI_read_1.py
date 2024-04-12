@@ -13,7 +13,6 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_cdc = params.PATHNAMES.at['RCA_MHI_cdc_sov', 'Value']
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
 # Settings
 epsg = params.SETTINGS.at['epsg', 'Value']
@@ -22,12 +21,10 @@ path_output = params.PATHNAMES.at['RCA_RR_HI_score', 'Value']
 
 #%% LOAD DATA
 gdf_cdc = gpd.read_file(path_cdc)
-gdf_block = gpd.read_file(path_block)
 df_fips = pd.read_excel(path_fips)
 
-#%% modify tract data
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = gdf_tract.to_crs(epsg=epsg)
+#%% get tract data
+gdf_tract = utils.get_blank_tract()
 
 #%% modify fips data
 df_fips['Bor_ID_str'] = [str(df_fips.at[idx, 'Bor_ID']) for idx in df_fips.index]

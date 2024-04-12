@@ -13,21 +13,18 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_gi = params.PATHNAMES.at['RCA_ML_GI_raw', 'Value']
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_ML_GI_score', 'Value']
 
 #%% LOAD DATA
 gdf_gi = gpd.read_file(path_gi)
-gdf_block = gpd.read_file(path_block)
 
 #%% modify
 gdf_gi = utils.project_gdf(gdf_gi)
 gdf_gi['OBJECTID'] = np.arange(len(gdf_gi))
 
 #%% tracts
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
+gdf_tract = utils.get_blank_tract()
 gdf_tract.index = np.arange(len(gdf_tract))
 
 #%% crete buffered tracts

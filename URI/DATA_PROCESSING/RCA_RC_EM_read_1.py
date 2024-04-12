@@ -13,21 +13,18 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_hospital = params.PATHNAMES.at['RCA_RC_EMA_raw', 'Value']
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RC_EM_score', 'Value']
 
 #%% LOAD DATA
 gdf_hospital = gpd.read_file(path_hospital)
-gdf_block = gpd.read_file(path_block)
 
 #%% modify data
 gdf_hospital = utils.project_gdf(gdf_hospital)
 gdf_hospital['OBJECTID'] = np.arange(len(gdf_hospital))
 
 #%% modify tracts a
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
+gdf_tract = utils.get_blank_tract()
 
 #%%get centroid
 gdf_centroid = gdf_tract.copy()

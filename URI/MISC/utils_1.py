@@ -109,10 +109,7 @@ def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
     #load gdf_tract
     epsg = params.SETTINGS.at['epsg', 'Value']
     gdf_data = gdf_data.to_crs(epsg=epsg)
-    path_block = params.PATHNAMES.at['census_blocks', 'Value']
-    gdf_block = gpd.read_file(path_block)
-    gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-    gdf_tract = gdf_tract.to_crs(epsg=epsg)
+    gdf_tract = get_blank_tract()
     gdf_tract['area_ft2'] = gdf_tract['geometry'].area
     #make shapefile with 1/2 mile radius
     gdf_buffer = gdf_data.copy()

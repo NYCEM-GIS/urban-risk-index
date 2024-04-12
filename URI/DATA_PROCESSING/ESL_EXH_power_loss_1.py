@@ -13,7 +13,6 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
 # Params
 yearly_outage = params.PARAMS.at['EXH_outage_person_hrs_per_year', 'Value']
@@ -22,15 +21,13 @@ loss_outage_hr = params.PARAMS.at['loss_day_power', 'Value'] / 24.
 path_output = params.PATHNAMES.at['ESL_EXH_loss_power', 'Value']
 
 #%% LOAD DATA
-gdf_block = gpd.read_file(path_block)
 df_pop = pd.read_excel(path_population_tract, skiprows=5)
 
 #%%calculate total loss
 yearly_loss = yearly_outage * loss_outage_hr
 
-#%%  open tract
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
+#%%  get tract
+gdf_tract = utils.get_blank_tract()
 
 #%% open population and join
 df_pop.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])

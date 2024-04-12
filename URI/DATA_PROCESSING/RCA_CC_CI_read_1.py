@@ -13,7 +13,6 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_data = params.PATHNAMES.at['RCA_CC_community_infrastructure_raw', 'Value']
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 path_tract = params.PATHNAMES.at['boundary_tract', 'Value']
 # Settings
 epsg = params.SETTINGS.at['epsg', 'Value']
@@ -22,12 +21,10 @@ path_output = params.PATHNAMES.at['RCA_CC_CI_score', 'Value']
 
 #%% LOAD DATA
 gdf_data = gpd.read_file(path_data)  # community centers
-gdf_block = gpd.read_file(path_block)
 
 #%% tract data
 gdf_data = gdf_data.to_crs(epsg=epsg)
-gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = gdf_tract.to_crs(epsg=epsg)
+gdf_tract = utils.get_blank_tract()
 gdf_tract['area_ft2'] = gdf_tract['geometry'].area
 gdf_tract.to_file(path_tract)
 

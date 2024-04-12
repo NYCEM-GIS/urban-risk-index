@@ -12,18 +12,15 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 path_transitscore = params.PATHNAMES.at['RCA_RC_TR_transitscore_csv', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RC_TR_score', 'Value']
 
 #%% LOAD DATA
-gdf_block = gpd.read_file(path_block)
 df_transitscore  = pd.read_csv(path_transitscore)
 
 #%% modify tracts a
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
+gdf_tract = utils.get_blank_tract()
 gdf_tract.index = np.arange(len(gdf_tract))
 
 gdf_tract_wgs = gdf_tract.to_crs(epsg=4326)

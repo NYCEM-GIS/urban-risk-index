@@ -12,18 +12,15 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 path_bikescore = params.PATHNAMES.at['RCA_RC_BI_bikescore_csv', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RC_BI_score', 'Value']
 
 #%% LOAD DATA
-gdf_block = gpd.read_file(path_block)
 df_bikescore  = pd.read_csv(path_bikescore)
 
 #%% load tracts a
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
+gdf_tract = utils.get_blank_tract()
 gdf_tract.index = np.arange(len(gdf_tract))
 
 gdf_tract_wgs = gdf_tract.to_crs(epsg=4326)
@@ -66,7 +63,7 @@ try:
     The data was produced by {}
     Located in {}
     """.format(os.path.basename(__file__), os.path.dirname(__file__))
-    path_readme = os.path.dirname(path_results)
+    path_readme = os.path.dirname(path_output)
     utils.write_readme(path_readme, text)
 except:
     pass

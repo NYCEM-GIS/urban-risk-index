@@ -15,9 +15,6 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 #%% EXTRACT PARAMETERS
-# Input paths
-# path_gbd = params.PATHNAMES.at['ESL_ERQ_hazus_gbd', 'Value']
-# layer_gbd = params.PATHNAMES.at['ESL_ERQ_hazus_layer', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['ESL_ERQ_hazus_loss', 'Value']
 

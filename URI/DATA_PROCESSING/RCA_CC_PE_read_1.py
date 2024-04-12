@@ -5,7 +5,6 @@
 #%% read packages
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
@@ -15,16 +14,12 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_data = params.PATHNAMES.at['RCA_CC_PE_data', 'Value']
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-# Settings
-epsg = params.SETTINGS.at['epsg', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_CC_PE_score', 'Value']
 
 #%% LOAD DATA
 df_data = pd.read_excel(path_data)
-gdf_block = gpd.read_file(path_block)
 df_fips = pd.read_excel(path_fips)
 
 #%% place attachment data
@@ -32,8 +27,7 @@ df_data.dropna(inplace=True, subset=['Census Tract', 'Avg. Participation Score 2
 df_data['FIPS_CT_txt'] = [str(int(df_data.at[idx, 'Census Tract'])) for idx in df_data.index]
 
 #%% tract data
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = gdf_tract.to_crs(epsg=epsg)
+gdf_tract = utils.get_blank_tract()
 
 #%% fips data
 df_fips['Bor_ID_str'] = [str(df_fips.at[idx, 'Bor_ID']) for idx in df_fips.index]

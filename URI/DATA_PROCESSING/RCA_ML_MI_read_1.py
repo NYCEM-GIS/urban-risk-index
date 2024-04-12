@@ -14,7 +14,6 @@ utils.set_home()
 # Input paths
 path_gdb = params.PATHNAMES.at['RCA_ML_MI_gdb', 'Value']
 path_table = params.PATHNAMES.at['RCA_ML_MI_table', 'Value']
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_ML_MI_score', 'Value']
 # Settings
@@ -30,7 +29,6 @@ df_table = pd.read_excel(path_table)
 gdf_points = gdf_points.to_crs(epsg=epsg)
 gdf_lines = gdf_lines.to_crs(epsg=epsg)
 gdf_polygons = gdf_polygons.to_crs(epsg=epsg)
-gdf_block = gpd.read_file(path_block)
 
 #%% remove not mapped, no cost (from 687 to 207)
 df_table = df_table.loc[df_table['Cost Estimate'] > 0, :]
@@ -65,8 +63,7 @@ gdf_polygons_valid['geometry'] = gdf_polygons_valid['geometry'].buffer(distance=
 gdf_buffer = pd.concat([gdf_points_valid, gdf_lines_valid, gdf_polygons_valid]).reset_index(drop=True)
 
 #%% load the tract dataset
-gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = gdf_tract.to_crs(epsg=epsg)
+gdf_tract = utils.get_blank_tract()
 gdf_tract['area_ft2'] = gdf_tract['geometry'].area
 gdf_tract.index = np.arange(len(gdf_tract))
 

@@ -12,20 +12,17 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
 path_snow = params.PATHNAMES.at['ESL_WIW_snow_data', 'Value']
 path_road = params.PATHNAMES.at['ESL_WIW_road_cover', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['ESL_WIW_loss_snow', 'Value']
 
 #%% LOAD DATA
-gdf_block = gpd.read_file(path_block)
 df_snow = pd.read_excel(path_snow, sheet_name='Duplicate')
 df_road = pd.read_csv(path_road)
 
 #%% tracts 
-gdf_tract = gdf_block[['BCT_txt', 'borocode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
+gdf_tract = utils.get_blank_tract()
 gdf_tract.index = np.arange(len(gdf_tract))
 gdf_tract['area_ft2'] = gdf_tract.geometry.area
 
