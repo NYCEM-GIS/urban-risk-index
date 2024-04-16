@@ -8,6 +8,8 @@ import pandas as pd
 import scipy.stats as stats
 from sklearn.cluster import KMeans
 from URI.MISC import params_1 as params
+from shapely.ops import nearest_points
+
 
 
 #%% set home directory
@@ -21,14 +23,17 @@ def write_readme(path_readme, readme_text):
     f.write(readme_text)
     f.close()
 
+
 #%% normalize score to scale of 0 to 1 (exclusive)
-    #values should be numpy array
-def normalize_rank_percentile(values, list_input_null_values=[-999], output_null_value=-999):
-    #remove null values from array
+# values should be numpy array
+def normalize_rank_percentile(values, list_input_null_values=None, output_null_value=-999):
+    # remove null values from array
+    if list_input_null_values is None:
+        list_input_null_values = [-999]
     values_trim = np.delete(values, np.where(np.isin(values, list_input_null_values)))
-    #add a very high values and low value to prevent 0 and 100 values
+    # add a very high values and low value to prevent 0 and 100 values
     values_trim = np.r_[-1e20, values_trim, 1e20]
-    #look through and calculate values_out
+    # look through and calculate values_out
     values_out = np.zeros(len(values))
     for i, val in enumerate(values):
         if np.isin(val, list_input_null_values):
@@ -107,8 +112,7 @@ def calculate_equal_interval(df, data_column, score_column='Score_EI', n_cluster
 #gdf_data is point layer, column_key is unique id for each point
 def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
     #load gdf_tract
-    epsg = params.SETTINGS.at['epsg', 'Value']
-    gdf_data = gdf_data.to_crs(epsg=epsg)
+    gdf_data = project_gdf(gdf_data)
     gdf_tract = get_blank_tract()
     gdf_tract['area_ft2'] = gdf_tract['geometry'].area
     #make shapefile with 1/2 mile radius
@@ -216,6 +220,11 @@ def convert_to_tract_average(path_data, column_name, column_name_out,
     return gdf_tract
 
 
+def near(gdf, single_point, points_layer):
+    # find the nearest point and return the corresponding Place value
+    nearest = gdf.geometry == nearest_points(single_point, points_layer)[1]
+    distance = single_point.distance(gdf[nearest]['geometry'].iloc[0])
+    return distance
 
 
 

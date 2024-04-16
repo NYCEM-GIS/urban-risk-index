@@ -23,7 +23,6 @@ df_road = pd.read_csv(path_road)
 
 #%% tracts 
 gdf_tract = utils.get_blank_tract()
-gdf_tract.index = np.arange(len(gdf_tract))
 gdf_tract['area_ft2'] = gdf_tract.geometry.area
 
 #%%get costs based on 2018 dollars

@@ -31,7 +31,7 @@ gdf_tract = utils.get_blank_tract()
 
 #%% open population and join
 df_pop.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
-df_pop.rename(columns={2020:'pop_2020'}, inplace=True)
+df_pop.rename(columns={2020: 'pop_2020'}, inplace=True)
 df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2020 DCP Borough Code'])) + str(int(df_pop.at[x,'2020 Census Tract'])).zfill(6) for x in df_pop.index]
 gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2020']], on='BCT_txt', how='left')
 

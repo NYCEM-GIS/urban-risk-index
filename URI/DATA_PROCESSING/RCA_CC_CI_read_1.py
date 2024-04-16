@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-from sklearn.cluster import KMeans
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
@@ -13,20 +12,16 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_data = params.PATHNAMES.at['RCA_CC_community_infrastructure_raw', 'Value']
-path_tract = params.PATHNAMES.at['boundary_tract', 'Value']
-# Settings
-epsg = params.SETTINGS.at['epsg', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_CC_CI_score', 'Value']
 
 #%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 gdf_data = gpd.read_file(path_data)  # community centers
 
 #%% tract data
-gdf_data = gdf_data.to_crs(epsg=epsg)
-gdf_tract = utils.get_blank_tract()
+gdf_data = utils.project_gdf(gdf_data)
 gdf_tract['area_ft2'] = gdf_tract['geometry'].area
-gdf_tract.to_file(path_tract)
 
 #%% make shapefile with 1/2 mile radius
 gdf_buffer = gdf_data.copy()
@@ -52,20 +47,8 @@ gdf_tract = gdf_tract.merge(df_sum, on='BCT_txt', how='left')
 # fill nan with value 0
 gdf_tract.fillna(0, inplace=True)
 
-# cluter to score by 5
-kmeans = KMeans(n_clusters=5)
-gdf_tract['Cluster_ID'] = kmeans.fit_predict(gdf_tract[['Fraction_Covered']])
-
-#%% make lookup for class label
-df_label = pd.DataFrame()
-df_label['Cluster_ID'] = np.arange(5)
-df_label['Cluster_Center'] = kmeans.cluster_centers_.flatten()
-df_label.sort_values('Cluster_Center', inplace=True)
-df_label['Label'] = ['Low', 'Med-Low', 'Med', 'Med-High', 'High']
-df_label['Score'] = np.arange(1, 6)
-
-# assign score to each cluster
-gdf_tract = gdf_tract.merge(df_label[['Cluster_ID', 'Score']], on='Cluster_ID', how='left')
+#%% calculate score
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Fraction_Covered')
 
 #%% save as output
 gdf_tract.to_file(path_output)

@@ -25,7 +25,6 @@ gdf_gi['OBJECTID'] = np.arange(len(gdf_gi))
 
 #%% tracts
 gdf_tract = utils.get_blank_tract()
-gdf_tract.index = np.arange(len(gdf_tract))
 
 #%% crete buffered tracts
 gdf_tract_buffer = gdf_tract.copy()

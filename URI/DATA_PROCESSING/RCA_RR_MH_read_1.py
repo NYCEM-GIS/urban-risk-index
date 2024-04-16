@@ -13,9 +13,6 @@ utils.set_home()
 # Input paths
 path_cdc = params.PATHNAMES.at['RCA_MHI_cdc_sov', 'Value']
 path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-# Settings
-epsg = params.SETTINGS.at['epsg', 'Value']
-# Params
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RR_MH_score', 'Value']
 

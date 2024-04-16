@@ -11,14 +11,13 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-gbd_cc = params.PATHNAMES.at["RCA_RC_CC_gdb", "Value"]
 layer_cc = params.PATHNAMES.at["RCA_RC_CC_layer", "Value"]
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RC_CC_score', 'Value']
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()
-gdf_cc = gpd.read_file(gbd_cc, drive='FileGDB', layer=layer_cc)
+gdf_cc = gpd.read_file(layer_cc)
 
 #%% modify tract
 gdf_tract['area_ft2'] = gdf_tract.geometry.area

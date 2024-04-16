@@ -98,8 +98,7 @@ df_bor['Loss_USD'] = USD_per_hr_power_out * df_bor['Person_hrs'] / (10.)  #multi
 
 #%% assign to borought
 gdf_tract = utils.get_blank_tract(add_pop=True)
-gdf_tract.index = np.arange(len(gdf_tract))
-gdf_tract['Loss_USD'] = np.zeros(len(gdf_tract))
+gdf_tract['Loss_USD'] = 0
 for i, bor in enumerate(gdf_tract.BOROCODE.unique()):
     gdf_tract_bor = gdf_tract.loc[gdf_tract.BOROCODE==bor, :].copy()
     #assign losses by population

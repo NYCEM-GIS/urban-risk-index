@@ -1,9 +1,7 @@
 """ get bikability score"""
 
 #%% read packages
-import numpy as np
 import pandas as pd
-import geopandas as gpd
 import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
@@ -12,26 +10,20 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_transitscore = params.PATHNAMES.at['RCA_RC_TR_transitscore_csv', 'Value']
+path_transit_score = params.PATHNAMES.at['RCA_RC_TR_transitscore_csv', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RC_TR_score', 'Value']
 
 #%% LOAD DATA
-df_transitscore  = pd.read_csv(path_transitscore)
+df_transit_score = pd.read_csv(path_transit_score)
 
 #%% modify tracts a
 gdf_tract = utils.get_blank_tract()
-gdf_tract.index = np.arange(len(gdf_tract))
-
-gdf_tract_wgs = gdf_tract.to_crs(epsg=4326)
-gdf_tract['lat'] = gdf_tract_wgs.geometry.centroid.y
-gdf_tract['lon'] = gdf_tract_wgs.geometry.centroid.x
-
 
 #%% modify walkscore and merge to tract shapefile
-temp = df_transitscore['BCT_txt']
-df_transitscore['BCT_txt'] = [str(x) for x in temp]
-gdf_tract = gdf_tract.merge(df_transitscore[['BCT_txt', 'transitscore']], on='BCT_txt', how='left')
+temp = df_transit_score['BCT_txt']
+df_transit_score['BCT_txt'] = [str(x) for x in temp]
+gdf_tract = gdf_tract.merge(df_transit_score[['BCT_txt', 'transitscore']], on='BCT_txt', how='left')
 
 #%% calculate score
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='transitscore')

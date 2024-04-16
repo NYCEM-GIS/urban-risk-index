@@ -98,11 +98,10 @@ df_bor = df_outages_1[['Person_hrs', 'BoroughId']].groupby(by='BoroughId').sum()
 df_bor['Loss_USD'] = USD_per_hr_power_out * df_bor['Person_hrs'] / ( 10.)  #multiply by 10 to annualize
 
 #%% assign to borough
-gdf_tract.index = np.arange(len(gdf_tract))
-gdf_tract['Loss_USD'] = np.zeros(len(gdf_tract))
+gdf_tract['Loss_USD'] = 0
 for i, bor in enumerate(gdf_tract.BOROCODE.unique()):
-    gdf_tract_bor = gdf_tract.loc[gdf_tract.BOROCODE==bor, :].copy()
-    #assign losses by population
+    gdf_tract_bor = gdf_tract.loc[gdf_tract.BOROCODE == bor, :].copy()
+    # assign losses by population
     gdf_tract_bor['Loss_USD'] = df_bor.at[int(bor), 'Loss_USD'] * gdf_tract_bor['pop_2010'] / gdf_tract_bor['pop_2010'].sum()
     gdf_tract.loc[gdf_tract_bor.index, 'Loss_USD'] = gdf_tract_bor['Loss_USD']
 

@@ -24,8 +24,7 @@ def calculate_SOV():
     path_sovi = params.PATHNAMES.at['SOV_tract', 'Value']
     gdf_sovi = gpd.read_file(path_sovi)
     #reproject
-    epsg = params.SETTINGS.at['epsg', 'Value']
-    gdf_tract = gdf_sovi.to_crs(epsg=epsg)
+    gdf_tract = utils.project_gdf(gdf_sovi)
     gdf_tract['BCT_txt'] = gdf_tract['FIPS']
 
     #%% normalize result to scale of 0.01 to 0.99

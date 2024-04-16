@@ -15,15 +15,13 @@ path_veg = params.PATHNAMES.at['RCA_ML_VC_table', 'Value']
 path_nta = params.PATHNAMES.at['BOUNDARY_neighborhood', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_ML_VC_score', 'Value']
-# Settings
-epsg = params.SETTINGS.at['epsg', 'Value']
 
 #%% LOAD DATA
 df_veg = pd.read_excel(path_veg)
 gdf_nta = gpd.read_file(path_nta)
 
 #%%neighborhood shapefile
-gdf_nta = gdf_nta.to_crs(epsg=epsg)
+gdf_nta = utils.project_gdf(gdf_nta)
 
 #%% join veg data gdf_nta
 gdf_nta = gdf_nta.merge(df_veg, left_on='cdta2020', right_on='NTA Code', how='left')

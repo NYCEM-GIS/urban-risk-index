@@ -13,8 +13,6 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_events = params.PATHNAMES.at['RCA_CC_EO_locations', 'Value']
-# Settings
-epsg = params.SETTINGS.at['epsg', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_CC_EO_score', 'Value']
 
@@ -26,7 +24,7 @@ df_events = pd.read_csv(path_events)
 gdf_events = gpd.GeoDataFrame(df_events, geometry=gpd.points_from_xy(df_events.Longitude, df_events.Latitude),
                               crs=4326)
 gdf_events['Event_ID'] = np.arange(len(gdf_events))
-gdf_events = gdf_events.to_crs(epsg=epsg)
+gdf_events = utils.project_gdf(gdf_events)
 # drop na values
 gdf_events.dropna(subset=['Latitude', 'Longitude'], inplace=True)
 

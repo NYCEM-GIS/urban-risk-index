@@ -19,8 +19,6 @@ path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
 # Hard-coded
 start_date = params.HARDCODED.at['heat_event_count_start_date', 'Value']
 end_date = params.HARDCODED.at['heat_event_count_end_date', 'Value']
-# Settings
-epsg = params.SETTINGS.at['epsg', 'Value']
 # Params
 deaths_year = params.PARAMS.at['EXH_deaths_per_year', 'Value']
 value_life = params.PARAMS.at['value_of_stat_life', 'Value']
@@ -44,7 +42,7 @@ df_stormevents = df_stormevents.loc[df_stormevents['EndDate']<end_date]
 #%% get the count per borough
 #make empty dataframe to populate with borough count
 df_borcount = pd.DataFrame(index=[1, 2, 3, 4, 5],
-                           data={'Heat_Events_Per_Year':np.zeros(5)})
+                           data={'Heat_Events_Per_Year': np.zeros(5)})
 # loop through event storm event id in borough count list.
 # if is a stormevent with extreme heat, add 1
 for idx in df_stormeventsboroughs.index:

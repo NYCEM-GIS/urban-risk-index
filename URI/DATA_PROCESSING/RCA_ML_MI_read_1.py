@@ -16,8 +16,6 @@ path_gdb = params.PATHNAMES.at['RCA_ML_MI_gdb', 'Value']
 path_table = params.PATHNAMES.at['RCA_ML_MI_table', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_ML_MI_score', 'Value']
-# Settings
-epsg = params.SETTINGS.at['epsg', 'Value']
 
 #%% LOAD DATA
 gdf_points = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_action_points_update_20211027')
@@ -26,9 +24,9 @@ gdf_polygons = gpd.read_file(path_gdb, driver='FileGDB', layer='Mitigation_actio
 df_table = pd.read_excel(path_table)
 
 #%% open mitigation geopackages
-gdf_points = gdf_points.to_crs(epsg=epsg)
-gdf_lines = gdf_lines.to_crs(epsg=epsg)
-gdf_polygons = gdf_polygons.to_crs(epsg=epsg)
+gdf_points = utils.project_gdf(gdf_points)
+gdf_lines = utils.project_gdf(gdf_lines)
+gdf_polygons = utils.project_gdf(gdf_polygons)
 
 #%% remove not mapped, no cost (from 687 to 207)
 df_table = df_table.loc[df_table['Cost Estimate'] > 0, :]
@@ -65,7 +63,6 @@ gdf_buffer = pd.concat([gdf_points_valid, gdf_lines_valid, gdf_polygons_valid]).
 #%% load the tract dataset
 gdf_tract = utils.get_blank_tract()
 gdf_tract['area_ft2'] = gdf_tract['geometry'].area
-gdf_tract.index = np.arange(len(gdf_tract))
 
 #%% create blank table to populate with investment values for each hazard
 list_hazards = ['CBRN', 'Coastal Erosion', 'Coastal Storms', 'Flooding',

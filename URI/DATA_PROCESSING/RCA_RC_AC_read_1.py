@@ -19,14 +19,16 @@ layer_gbd = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce_layer', 'Value']
 # Output paths
 path_results = params.PATHNAMES.at['RCA_RC_AC_score', 'Value']
 
+# Air conditioining
+column_ac = "DATA_VALUE"
+column_ac_out = "ac_per"
+
 #%% LOAD DATA
 gdf_tf = gpd.read_file(path_gbd, driver='FileGDB', layer=layer_gbd)
 
 #%% convert ac data to track average
-column_ac = "DATA_VALUE"
-column_ac_out = "ac_per"
-gdf_tract = utils.convert_to_tract_average(path_ac, column_ac,column_ac_out,
-                               list_input_null_values=[-999], output_null_value=-999)
+
+gdf_tract = utils.convert_to_tract_average(path_ac, column_ac, column_ac_out)
 
 #%% get tract population
 gdf_tract_pop = utils.get_blank_tract(add_pop=True)
@@ -40,25 +42,27 @@ gdf_join = gpd.sjoin(gdf_tf, gdf_tract, how='left', op='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['field'], aggfunc=len)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
-gdf_tract.fillna(value={'field':0}, inplace=True)
+gdf_tract.fillna(value={'field': 0}, inplace=True)
+
 
 #%% update ac percentage
 def update_ac(current_percent, pop, new_count):
-    if current_percent==-999.0:
+    if current_percent == -999.0:
         result = current_percent
-    elif pop==0:
+    elif pop == 0:
         result = current_percent
     else:
         result = current_percent + (new_count/pop)*100.
-       # if result > 100: print("Warning: AC percent is {}, greater than 100 with a population of {}.".format(result, pop))
     return min(result, 100)
-gdf_tract['ac_per_post'] = gdf_tract.apply(lambda row : update_ac(row['ac_per'],
-                                                    row['pop_2020'], row['field']), axis=1)
+
+
+gdf_tract['ac_per_post'] = gdf_tract.apply(lambda row: update_ac(row['ac_per'], row['pop_2020'], row['field']), axis=1)
 
 #%% calculate percent rank
-gdf_tract['ac_per_rnk'] = utils.normalize_rank_percentile(gdf_tract['ac_per_post'].values,
-                                                          list_input_null_values=[-999],
-                                                          output_null_value=-999)
+gdf_tract['ac_per_rnk'] = utils.normalize_rank_percentile(
+    gdf_tract['ac_per_post'].values,
+    list_input_null_values=[-999],
+    output_null_value=-999)
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='ac_per_rnk')
 
 #%% save results in
