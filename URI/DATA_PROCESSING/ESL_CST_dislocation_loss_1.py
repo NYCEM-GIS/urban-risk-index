@@ -14,7 +14,6 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
-footprint_layer_name = 'NYC_Buildings_composite_20200110'
 folder_scratch = params.PATHNAMES.at['ESL_CST_loss_dislocation_scratch', 'Value']
 if not os.path.exists(folder_scratch):
     os.mkdir(folder_scratch)
