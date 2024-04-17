@@ -1,4 +1,4 @@
-""" read in the community infrastructure factor into tract level map"""
+""" read in the Income Equality (Gini index) into tract level map"""
 
 #%% read packages
 import numpy as np
@@ -36,20 +36,23 @@ df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'gini':list_gini,
                                            'tract':list_tract1,
                                            'county':list_county,
                                            'state':list_state})
-df['Stfid'] = [df.loc[x,"state"] + df.loc[x, 'county']+df.loc[x,'tract'] for x in df.index]
+df['Stfid'] = [df.loc[x, "state"] + df.loc[x, 'county']+df.loc[x, 'tract'] for x in df.index]
 #%% merge
 gdf_tract = gdf_tract.merge(df[['gini', 'Stfid']], left_on='geoid', right_on='Stfid', how='inner')
 
 #%%
 gdf_tract.fillna(0, inplace=True)
 
+
 #%%na values are -666666666.... set to median gini values for now
 def adjust_nan(val):
-    if val==-666666666.0:
+    if val == -666666666.0:
         result = gdf_tract['gini'].median()
     else:
-        result= val
+        result = val
     return result
+
+
 gdf_tract['gini_adj'] = gdf_tract.apply(lambda row: adjust_nan(row['gini']), axis=1)
 
 #%% xconvert to score 1-5

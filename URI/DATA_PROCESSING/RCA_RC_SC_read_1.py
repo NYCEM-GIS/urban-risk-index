@@ -12,25 +12,26 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_sc_gbd = params.PATHNAMES.at['RCA_RC_SC_raw', 'Value']
 layer_sc = params.PATHNAMES.at['RCA_RC_SC_layer', 'Value']
 # Params
 buffer_radius = params.PARAMS.at['search_buffer_for_shelter_capacity_ft', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RC_SC_score', 'Value']
 
+# Relevant input field names
+fn_long_term_capacity = 'Long_term_'  # URI 1.0 - "Long_term_capacity"
+
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
-gdf_sc = gpd.read_file(path_sc_gbd, driver='FileGBD', layer=layer_sc)
+gdf_sc = gpd.read_file(layer_sc)
+gdf_sc = utils.project_gdf(gdf_sc)
 
 #%% modify tract
 gdf_tract['area_ft2'] = gdf_tract.geometry.area
 gdf_tract['pop_2020_density'] = gdf_tract['pop_2020'] / gdf_tract['area_ft2']
 
-#%% modify shelter capacity data
-gdf_sc = gdf_sc.to_crs(crs=gdf_tract.crs)
-#convert null to 0 values
-gdf_sc.fillna(value={'Long_term_capacity':0}, inplace=True)
+# convert null to 0 values
+gdf_sc.fillna(value={fn_long_term_capacity: 0}, inplace=True)
 
 #%% allocate shelter beds to tracts based on population.
 #add column to count allocated shelter beds
@@ -38,12 +39,11 @@ gdf_tract['LT_capacity_count'] = np.zeros(len(gdf_tract))
 #loop through each shelter and assign capacity to tracts
 for i, idx in enumerate(gdf_sc.index):
     this_shelter = gdf_sc.loc[idx:idx, :].copy()
-    this_capacity = this_shelter.at[idx, 'Long_term_capacity']
+    this_capacity = this_shelter.at[idx, fn_long_term_capacity]
     this_shelter.loc[idx, 'geometry'] = this_shelter.loc[idx, 'geometry'].buffer(distance=buffer_radius)
     this_shelter.loc[idx, 'geometry'] = this_shelter.loc[idx, 'geometry']
     #get intersecting tracts
     gdf_intersect = gpd.overlay(gdf_tract, this_shelter, how='intersection')
-    #eliminate
     #get_intersection_areas
     gdf_intersect['area_ft2'] = gdf_intersect.geometry.area
     gdf_intersect['population'] = gdf_intersect['area_ft2'] * gdf_intersect['pop_2020_density']
@@ -51,13 +51,12 @@ for i, idx in enumerate(gdf_sc.index):
     #loop through and add allocation to each tract
     for j, jdx in enumerate(gdf_intersect.index):
         this_Stfid = gdf_intersect.at[jdx, 'geoid']
-        gdf_tract.loc[gdf_tract['geoid']==this_Stfid, 'LT_capacity_count'] += gdf_intersect.at[jdx, 'capacity_allocation']
-    #if i % 10 == 0: print("{}".format(i))
+        gdf_tract.loc[gdf_tract['geoid'] == this_Stfid, 'LT_capacity_count'] += gdf_intersect.at[jdx, 'capacity_allocation']
 
 #%% calculate capacity per 1000
 gdf_tract['capacity_allocation_per_1000'] = gdf_tract['LT_capacity_count'] * 1000. / gdf_tract['pop_2020']
 #set null values (with 0 population ) to 0
-gdf_tract.fillna(value={'capacity_allocation_per_1000':0}, inplace=True)
+gdf_tract.fillna(value={'capacity_allocation_per_1000': 0}, inplace=True)
 
 #%% calculate score
 #need to handle missing data

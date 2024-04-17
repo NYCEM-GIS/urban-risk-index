@@ -37,10 +37,10 @@ gdf_tract = utils.get_blank_tract(add_pop=True)
 #%% make copy of building footprints  with hurricane depths, if it doesn't already exist
 if not os.path.exists(path_footprint_depths):
     # open and project footprint shapefile
-    gdf_footprint = gpd.read_file(path_footprint, driver='FileGBD', layer=footprint_layer_name)
-    gdf_depths = gdf_footprint.to_crs(gdf_tract.crs)
+    gdf_footprint = gpd.read_file(path_footprint)
+    gdf_depths = utils.project_gdf(gdf_footprint)
     # loop through 4 cat types
-    for cat in np.arange(1,5):
+    for cat in np.arange(1, 5):
         print(".....adding data for category {} storms".format(cat))
         # get path to depth raster
         path_C = params.PATHNAMES.at['ESL_CST_SLOSH_C{}'.format(cat), 'Value']

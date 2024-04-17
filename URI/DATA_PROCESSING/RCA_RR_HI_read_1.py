@@ -14,8 +14,6 @@ utils.set_home()
 # Input paths
 path_cdc = params.PATHNAMES.at['RCA_MHI_cdc_sov', 'Value']
 path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-# Settings
-epsg = params.SETTINGS.at['epsg', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RR_HI_score', 'Value']
 
@@ -37,7 +35,7 @@ gdf_tract['FIPS_CT_txt'] = [str(gdf_tract.at[idx, 'FIPS']) + gdf_tract.at[idx, '
 #%% merge displacement score
 gdf_tract = gdf_tract.merge(gdf_cdc[['FIPS', 'EP_UNINSUR']], left_on='FIPS_CT_txt', right_on='FIPS', how='left')
 #assign -999 values a value of 0
-gdf_tract.loc[gdf_tract['EP_UNINSUR']==-999, 'EP_UNINSUR'] = np.median(gdf_tract['EP_UNINSUR'])
+gdf_tract.loc[gdf_tract['EP_UNINSUR'] == -999, 'EP_UNINSUR'] = np.median(gdf_tract['EP_UNINSUR'])
 
 #%% assign to value of 1-5
 gdf_tract['EP_Insure'] = 100. - gdf_tract['EP_UNINSUR']

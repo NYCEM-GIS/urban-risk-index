@@ -1,4 +1,4 @@
-""" read in the community infrastructure factor into tract level map"""
+""" read in the home ownership factor into tract level map"""
 
 #%% read packages
 import numpy as np
@@ -33,12 +33,13 @@ list_tract2 = [x['tract'] for x in response_owners]
 list_owner = [x['B25026_002E'] for x in response_owners]
 
 #%%
-df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'owner':list_owner,
-                                            'tot':list_total,
-                                           'tract':list_tract1,
-                                           'county':list_county,
-                                           'state':list_state})
-df['Stfid'] = [df.loc[x,"state"] + df.loc[x, 'county']+df.loc[x,'tract'] for x in df.index]
+df = pd.DataFrame(index=np.arange(len(list_tract1)),
+                  data={'owner': list_owner,
+                        'tot': list_total,
+                        'tract': list_tract1,
+                        'county': list_county,
+                        'state': list_state})
+df['Stfid'] = [df.loc[x, "state"] + df.loc[x, 'county']+df.loc[x, 'tract'] for x in df.index]
 
 #%% merge
 gdf_tract = gdf_tract.merge(df[['owner', 'Stfid', 'tot']], left_on='geoid', right_on='Stfid', how='inner')

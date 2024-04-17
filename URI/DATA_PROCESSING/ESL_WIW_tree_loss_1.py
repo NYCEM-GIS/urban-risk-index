@@ -63,7 +63,7 @@ gdf_tree = gpd.GeoDataFrame(df_tree, geometry=gpd.points_from_xy(df_tree.Long, d
 gdf_tree = gdf_tree.loc[gdf_tree.Lat !=0, :]
 gdf_tree = gdf_tree.loc[gdf_tree.Long !=0, :]
 gdf_tree.crs = "EPSG:4326"
-gdf_tree = gdf_tree.to_crs(gdf_tract.crs)
+gdf_tree = utils.project_gdf(gdf_tree)
 
 #%% get count per tract of tree services
 gdf_join = gpd.sjoin(gdf_tree, gdf_tract, how='left', op='within')

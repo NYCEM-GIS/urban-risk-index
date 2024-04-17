@@ -1,4 +1,4 @@
-""" median incomome by tract"""
+""" median household income by tract"""
 
 #%% read packages
 import pandas as pd
@@ -32,12 +32,12 @@ gdf_tract = gdf_tract.merge(df_fips, left_on='borocode', right_on='Bor_ID_str', 
 gdf_tract['FIPS_CT_txt'] = [str(gdf_tract.at[idx, 'FIPS']) + gdf_tract.at[idx, 'BCT_txt'][1:] for idx in gdf_tract.index]
 
 #%% merge displacement score
-gdf_tract = gdf_tract.merge(gdf_cdc[['FIPS', 'E_PCI']], left_on='FIPS_CT_txt', right_on='FIPS', how='left')
+gdf_tract = gdf_tract.merge(gdf_cdc[['FIPS', 'E_POV150']], left_on='FIPS_CT_txt', right_on='FIPS', how='left')
 #assign -999 values a value of 0
-gdf_tract.loc[gdf_tract['E_PCI']==-999, 'E_PCI'] = 0
+gdf_tract.loc[gdf_tract['E_POV150'] == -999, 'E_POV150'] = 0
 
 #%% assign to value of 1-5
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='E_PCI')
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='E_POV150')
 
 #%% save as output
 gdf_tract.to_file(path_output)
