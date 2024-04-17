@@ -11,11 +11,11 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_flood_bronx = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Bronx\Bronx_100PFIRM\results.shp"
-path_flood_kings = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Kings\Kings_100PFIRM\results.shp"
-path_flood_manhattan = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\New York\NewYork_100PFIRM\results.shp"
-path_flood_queens = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Queens\Queens_100PFIRM\results.shp"
-path_flood_richmond = r".\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Flooding\Coastal Flooding 100 Year\Richmond\Richmond_100PFIRM\results.shp"
+path_flood_bronx = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Bronx\Bronx_100PFIRM\results.shp"
+path_flood_kings = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Kings\Kings_100PFIRM\results.shp"
+path_flood_manhattan = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\New York\NewYork_100PFIRM\results.shp"
+path_flood_queens = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Queens\Queens_100PFIRM\results.shp"
+path_flood_richmond = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Richmond\Richmond_100PFIRM\results.shp"
 # Output paths
 path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
 
