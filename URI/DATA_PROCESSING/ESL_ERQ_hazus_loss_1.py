@@ -20,7 +20,6 @@ path_output = params.PATHNAMES.at['ESL_ERQ_hazus_loss', 'Value']
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
-# df_hazus = gpd.read_file(path_gbd, driver='FileGBD', layer=layer_gbd)
 df_hazus = gpd.read_file(r".\\1_RAW_INPUTS\Hazus - Loss Estimation Data\Earthquakes (5.2M)\results.shp")
 
 
