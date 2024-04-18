@@ -15,12 +15,14 @@ import URI.MISC.plotting_1 as plotting
 import URI.MISC.plotting_1 as plotting
 utils.set_home()
 #%% EXTRACT PARAMETERS
+# Input paths
+path_erq_hazus = r'.\1_RAW_INPUTS\ERQ_HAZUS\Earthquakes (5.2M)\results.shp'
 # Output paths
 path_output = params.PATHNAMES.at['ESL_ERQ_hazus_loss', 'Value']
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
-df_hazus = gpd.read_file(r".\\1_RAW_INPUTS\Hazus - Loss Estimation Data\Earthquakes (5.2M)\results.shp")
+df_hazus = gpd.read_file(path_erq_hazus)
 
 
 #%% use tract to merge hazus data to tract

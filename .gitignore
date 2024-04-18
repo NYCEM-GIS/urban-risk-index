@@ -5,3 +5,5 @@ Testing Census API - Shweta.py
 .idea/4_CODE.iml
 Installation/0_TEST_INSTALL.ipynb
 Installation/environment.yml
+.idea/*
+*.ipynb filter=strip-notebook-output
