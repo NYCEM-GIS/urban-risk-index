@@ -15,7 +15,7 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_dot = params.PATHNAMES.at['ESL_CST_dot_table', 'Value']
-path_fld_loss = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
+path_cst_loss = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
 # Settings
 ref_year = params.SETTINGS.at['target_year', 'Value']
 # Output paths
@@ -24,7 +24,7 @@ path_output = params.PATHNAMES.at['ESL_CST_loss_dot', 'Value']
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
 df_dot = pd.read_excel(path_dot, sheet_name='Major Storm Events', skiprows=2, skipfooter=4, index_col=0)
-gdf_fld = gpd.read_file(path_fld_loss)
+gdf_fld = gpd.read_file(path_cst_loss)
 
 #%% calculate annual loss
 dot_loss_tot = [utils.convert_USD(x, ref_year) for x in df_dot.loc['Total Costs', :].values]
