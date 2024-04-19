@@ -21,6 +21,7 @@ gdf_data = gpd.read_file(path_data)  # community centers
 
 #%% tract data
 gdf_data = utils.project_gdf(gdf_data)
+gdf_data['OBJECTID'] = gdf_data.index
 gdf_tract['area_ft2'] = gdf_tract['geometry'].area
 
 #%% make shapefile with 1/2 mile radius
