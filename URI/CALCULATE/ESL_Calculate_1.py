@@ -57,8 +57,11 @@ def calculate_ESL(haz):
         list_E_col.append(this_name)
         plotting.plot_notebook(gdf_ESL, column=this_name, title=haz + ': ' + this_factor,
                                legend='Loss USD', cmap='Greens', type='raw')
+    # rename the columns in new Boundary tract file.    
+    gdf_ESL.rename(columns={"nta2020":"NEIGHBORHO"}, inplace=True)
+    gdf_ESL.rename(columns={"cdta2020":"PUMA"}, inplace=True)
 
-    list_all_col = list_E_col.copy() + ['BCT_txt', 'geometry', 'BOROCODE', 'NEIGHBORHO', 'PUMA']
+    list_all_col = list_E_col.copy() + ['BCT_txt', 'geometry', 'borocode', 'NEIGHBORHO', 'PUMA']
     gdf_ESL = gdf_ESL[list_all_col]
     gdf_ESL.rename(columns={'NEIGHBORHO':'NTA'}, inplace=True)
 
@@ -79,9 +82,12 @@ def calculate_ESL(haz):
     df_norm.drop(columns={'geometry'}, inplace=True)
     gdf_ESL = gdf_ESL.merge(df_norm, on='BCT_txt', how='left')
 
+    # Fill na wil 0 in gdf_ESL
+    gdf_ESL = gdf_ESL.fillna(0)
+
     #%% calculate normalized values
     def divide_zero(x, y):
-        if y==0:
+        if y==0 or y!=y or x!=x: # handling na and 0.
             return 0
         else:
             return x / y

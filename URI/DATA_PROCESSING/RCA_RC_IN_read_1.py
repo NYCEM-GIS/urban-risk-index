@@ -30,6 +30,8 @@ list_hazards = (('EXH', 'Heat'),
                 ('CST', 'Coastal Storm'),  # Coastal Storm, na
                 ('FLD', 'Flooding'))  # Coastal Erosion, na
 
+#%% Data preprocessing: Take only rows where CIMS TYPE is not na.
+df_activation = df_activation[df_activation['CIMS TYPE'].notna()]
 
 #%%
 df_count = pd.DataFrame(index=np.arange(len(list_abbrv)),

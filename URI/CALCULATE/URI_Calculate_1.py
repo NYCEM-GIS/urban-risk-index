@@ -38,6 +38,9 @@ def calculate_URI(haz):
     #%% calculate URI
     gdf_URI[haz + 'U_RN'] = gdf_URI[haz+'E_RNTT'] * gdf_URI['S_R'] / gdf_URI[haz+'R_RTTTT']
 
+    # Fill na wil 0 in gdf_ESL
+    gdf_URI = gdf_URI.fillna(0)
+
     #%% calculate normalization
     def divide_zero(x, y):
         if y == 0:

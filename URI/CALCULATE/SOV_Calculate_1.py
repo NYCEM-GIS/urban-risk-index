@@ -25,7 +25,13 @@ def calculate_SOV():
     gdf_sovi = gpd.read_file(path_sovi)
     #reproject
     gdf_tract = utils.project_gdf(gdf_sovi)
-    gdf_tract['BCT_txt'] = gdf_tract['FIPS']
+
+    # Define a function to extract substrings
+    def extract_substring(text, start_index, end_index):
+        return text[start_index:end_index]
+    
+    # Creating BCT_txt column from FIPS
+    gdf_tract['BCT_txt'] = gdf_tract['FIPS'].apply(lambda x: extract_substring(x, 4, 11)) # BCT_txt is equal to the last 7 digits of the FIPS value
 
     #%% normalize result to scale of 0.01 to 0.99
     gdf_tract['SOV_rank'] = utils.normalize_rank_percentile(gdf_tract['RPL_THEMES'].values,
