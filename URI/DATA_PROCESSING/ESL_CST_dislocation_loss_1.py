@@ -144,7 +144,7 @@ gdf_tract.fillna(value={'Loss_USD': 0}, inplace=True)
 gdf_tract.to_file(path_results)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CRN: Dislocation Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: Dislocation Loss',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme

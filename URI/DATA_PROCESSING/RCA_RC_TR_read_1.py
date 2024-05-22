@@ -16,14 +16,14 @@ path_output = params.PATHNAMES.at['RCA_RC_TR_score', 'Value']
 
 #%% LOAD DATA
 df_transit_score = pd.read_csv(path_transit_score)
-
-#%% modify tracts a
 gdf_tract = utils.get_blank_tract()
 
 #%% modify walkscore and merge to tract shapefile
 temp = df_transit_score['BCT_txt']
 df_transit_score['BCT_txt'] = [str(x) for x in temp]
 gdf_tract = gdf_tract.merge(df_transit_score[['BCT_txt', 'transitscore']], on='BCT_txt', how='left')
+
+gdf_tract.fillna(gdf_tract['transitscore'].median(), inplace=True)
 
 #%% calculate score
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='transitscore')

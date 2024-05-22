@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #%%
-path_params = r'C:\Users\ss63525\NYCEM_Miniconda\URI_Calculator_v1_0\5_PARAMS\URI_PARAMS_v_1_1.xlsx'
+path_params = r'C:\Users\hsprague\miniconda\URI_Calculator_v1_1\5_PARAMS\URI_PARAMS_v_1_1.xlsx'
 
 #%% create params variable
 

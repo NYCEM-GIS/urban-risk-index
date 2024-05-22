@@ -16,14 +16,14 @@ path_output = params.PATHNAMES.at['RCA_RC_BI_score', 'Value']
 
 #%% LOAD DATA
 df_bike_score = pd.read_csv(path_bike_score)
-
-#%% load tracts to get centroid lat/longs
 gdf_tract = utils.get_blank_tract()
 
 #%% load walkscore and merge to tract shapefile
 temp = df_bike_score['BCT_txt']
 df_bike_score['BCT_txt'] = [str(x) for x in temp]
 gdf_tract = gdf_tract.merge(df_bike_score[['BCT_txt', 'bikescore']], on='BCT_txt', how='left')
+
+gdf_tract.fillna(gdf_tract['bikescore'].median(), inplace=True)
 
 #%% calculate score
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='bikescore')

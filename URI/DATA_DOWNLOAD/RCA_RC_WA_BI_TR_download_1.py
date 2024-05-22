@@ -22,7 +22,7 @@ for i, idx in enumerate(gdf_tract.index):
     params_api = {
         'lat': lat,
         'lon': lon,
-        'wsapikey': '279d12ceda7c0b0337fc51767356c243',
+        'wsapikey': '67cbd2d08447b6d1d2c51a14deeace3c',
         'format': 'json',
         'transit': 1,
         'bike': 1}

@@ -2,6 +2,7 @@
 
 #%% read packages
 import geopandas as gpd
+import pandas as pd
 import URI.MISC.params_1 as params
 import URI.MISC.plotting_1 as plotting
 import URI.MISC.utils_1 as utils
@@ -10,22 +11,36 @@ utils.set_home()
 
 def calculate_ALL(list_abbrev_haz):
     #%% open and merge all URI shapefiles
-    for i, haz in enumerate(list_abbrev_haz):
-        path_haz = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\Tract\URI_{}_tract.shp'.format(haz, haz)
-        if i==0:
-            gdf_all = gpd.read_file(path_haz)
-            len_check = len(gdf_all.columns)
-        else:
-            gdf_haz = gpd.read_file(path_haz)
-            list_col_keep = [col for col in gdf_haz.columns if haz in col]
-            list_col_keep.append('BCT_txt')
-            gdf_all = gdf_all.merge(gdf_haz[list_col_keep], on='BCT_txt', how='left')
-            len_check += len(gdf_haz[list_col_keep].columns)
+    path_haz_dict = {haz: params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + fr'\URI\Tract\URI_{haz}_tract.shp' for haz in list_abbrev_haz}
+    gdf_all_dict = {haz: gpd.read_file(path_haz_dict[haz]).set_index('BCT_txt') for haz in path_haz_dict.keys()}
+    gdf_all = utils.get_blank_tract()
+    # gdf_all = gpd.GeoDataFrame(pd.concat(gdf_all_list, axis=1))
+    print('did it work???')
+    # for i, haz in enumerate(list_abbrev_haz):
+    #     print(haz)
+    #     path_haz = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\Tract\URI_{}_tract.shp'.format(haz, haz)
+    #     if i==0:
+    #         gdf_all = gpd.read_file(path_haz)
+    #         len_check = len(gdf_all.columns)
+    #     else:
+    #         gdf_haz = gpd.read_file(path_haz)
+    #         list_col_keep = [col for col in gdf_haz.columns if haz in col]
+    #         list_col_keep.append('BCT_txt')
+    #         gdf_all = gdf_all.merge(gdf_haz[list_col_keep], on='BCT_txt', how='left')
+    #         len_check += len(gdf_haz[list_col_keep].columns)
 
     #%% calculate ESL sum total all hazards
-    list_col = [haz + 'E_RNTT' for haz in list_abbrev_haz]
-    gdf_all['ALLE_RNTT'] = gdf_all[list_col].sum(axis=1)
-
+    # list_col = [haz + 'E_RNTT' for haz in list_abbrev_haz]
+    list_rntt_series = [gdf_all_dict[haz][[haz + 'E_RNTT']] for haz in list_abbrev_haz]
+    test = pd.concat(list_rntt_series, axis=1)
+    print(test.head())
+    print('WHATUP LUCA')
+    print(test.shape)
+    check = test.sum(axis=1)
+    print(check.head())
+    print(check.shape)
+    gdf_all['ALLE_RNTT'] = check
+    print('DID I GET TO HERE')
     #%% cacluate all hazard average RCA
     list_col_RCA = [col for col in gdf_all.columns if 'R_RTTTT' in col]
     gdf_all['ALLR_RTTTT'] = gdf_all[list_col_RCA].mean(axis=1)

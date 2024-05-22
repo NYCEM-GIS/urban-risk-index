@@ -9,12 +9,13 @@ import URI.MISC.plotting_1 as plotting
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
+path_hazus = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Storms Probabilistic Runs\100yr\100\results.shp"
 # Output paths
 path_output = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()
-df_hazus = gpd.read_file(r".\\1_RAW_INPUTS\Hazus - Loss Estimation Data\Coastal Storms\Coastal Storms Probabilistic Runs\100yr\100\results.shp")
+df_hazus = gpd.read_file(path_hazus)
 
 #%% convert from 2007 to URI dollars, multiply by 1000
 df_hazus['Loss_USD'] = utils.convert_USD(df_hazus.EconLoss, 2007) * 1000.

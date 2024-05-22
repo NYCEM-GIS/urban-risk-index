@@ -32,8 +32,8 @@ gdf_flood_data_list = [gdf_flood_bronx, gdf_flood_kings, gdf_flood_manhattan, gd
 gdf_flood_data_by_tract_list = []
 
 for fld_file in gdf_flood_data_list:
-    fld_file['tract'] = fld_file['block'][:11]  # Tract ID is equal to the first 11 digits of the block id
-    fld_file_by_tract = fld_file[['tract', 'EconLoss', 'geometry']].dissolve(by='tract', as_index=False)
+    fld_file['tract'] = fld_file['block'].str[0:11]  # Tract ID is equal to the first 11 digits of the block id
+    fld_file_by_tract = fld_file[['tract', 'EconLoss', 'geometry']].dissolve(by='tract', as_index=False, aggfunc='sum')
     gdf_flood_data_by_tract_list.append(fld_file_by_tract)
 
 gdf_flood = gpd.GeoDataFrame(pd.concat(gdf_flood_data_by_tract_list, ignore_index=True))
@@ -44,6 +44,7 @@ gdf_flood.Loss_USD = utils.convert_USD(gdf_flood.Loss_USD.values, 2018)
 
 #%% merge with tracts
 gdf_tract = gdf_tract.merge(gdf_flood[['tract', 'Loss_USD']], left_on='geoid', right_on=['tract'], how='left')
+gdf_tract['Loss_USD'] = gdf_tract['Loss_USD'].fillna(0)
 
 #%% save as output
 gdf_tract.to_file(path_output)

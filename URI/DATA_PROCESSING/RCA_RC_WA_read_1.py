@@ -23,6 +23,8 @@ temp = df_walk_score['BCT_txt']
 df_walk_score['BCT_txt'] = [str(x) for x in temp]
 gdf_tract = gdf_tract.merge(df_walk_score[['BCT_txt', 'walkscore']], on='BCT_txt', how='left')
 
+gdf_tract.fillna(gdf_tract['walkscore'].median(), inplace=True)
+
 #%% calculate score
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='walkscore')
 
