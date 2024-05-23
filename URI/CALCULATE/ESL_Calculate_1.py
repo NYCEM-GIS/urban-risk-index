@@ -58,12 +58,9 @@ def calculate_ESL(haz):
         plotting.plot_notebook(gdf_ESL, column=this_name, title=haz + ': ' + this_factor,
                                legend='Loss USD', cmap='Greens', type='raw')
     # rename the columns in new Boundary tract file.    
-    gdf_ESL.rename(columns={"nta2020":"NEIGHBORHO"}, inplace=True)
-    gdf_ESL.rename(columns={"cdta2020":"PUMA"}, inplace=True)
-
-    list_all_col = list_E_col.copy() + ['BCT_txt', 'geometry', 'borocode', 'NEIGHBORHO', 'PUMA']
+    list_all_col = list_E_col.copy() + ['BCT_txt', 'geometry', 'borocode', 'nta2020', 'cdta2020']
     gdf_ESL = gdf_ESL[list_all_col]
-    gdf_ESL.rename(columns={'NEIGHBORHO':'NTA'}, inplace=True)
+    # gdf_ESL.rename(columns={'nta2020':'NTA'}, inplace=True)
 
     #%% get sum of subcompponents
     list_subcomponents = np.unique(list_subcomponents)

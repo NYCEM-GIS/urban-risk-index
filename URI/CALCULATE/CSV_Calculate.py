@@ -14,8 +14,8 @@ nan_value = 'NA'
 def calculate_csv(list_abbrev_haz, list_geo, path_output):
 
      #%% loop through geographies
-    list_geo_tot = ['CITYWIDE', 'BOROCODE', 'PUMA', 'NTA', 'BCT_txt']
-    list_geo_folder_tot = ['Citywide', 'Borough', 'PUMA', 'NTA', 'Tract']
+    list_geo_tot = ['CITYWIDE', 'borocode', 'cdta2020', 'nta2020', 'BCT_txt']
+    list_geo_folder_tot = ['Citywide', 'Borough', 'CDTA', 'NTA', 'Tract']
     dct_geo_folder = {list_geo_tot[x]: list_geo_folder_tot[x] for x in range(len(list_geo_tot))}
     list_geo_folder = [dct_geo_folder[x] for x in list_geo]
 
@@ -23,8 +23,6 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
     for (geo_id, geo_name) in zip(list_geo, list_geo_folder):
 
     # #%%
-    #     geo_id = 'PUMA'
-    #     geo_name = 'PUMA'
         print('Tabulating csv for {}'.format(geo_name))
         #loop through each uri hazard
         count = 0
@@ -36,12 +34,6 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
 
             #loop through each column and add based on title
             list_col_add = [col for col in gdf_haz.columns if ((haz in col[0:3]) or ('S_' in col[0:2]))]
-            # #add haz to the front of the social vulnereability score
-            # for i, col in enumerate(list_col_add):
-            #     if col[0]=='S':
-            #         update_col = haz + col
-            #         list_col_add[i] = update_col
-            #         print(update_col)
 
             for col in list_col_add:
 
@@ -202,6 +194,6 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
 #%%
 if __name__ == '__main__':
     list_abbrev_haz = ['EXH', 'WIW']
-    list_geo = ['CITYWIDE', 'BOROCODE', 'PUMA', 'NTA', 'BCT_txt']
+    list_geo = ['CITYWIDE', 'borocode', 'cdta2020', 'nta2020', 'BCT_txt']
     path_output = r'C://temp//'
     calculate_csv(list_abbrev_haz, list_geo, path_output)

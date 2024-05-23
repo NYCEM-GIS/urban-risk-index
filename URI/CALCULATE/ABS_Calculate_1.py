@@ -13,8 +13,8 @@ utils.set_home()
 
 def calculate_ABS(list_abbrev_haz):
 
-    list_geo = ['BOROCODE', 'PUMA', 'NTA', 'BCT_txt']
-    list_geo_folder = ['Borough', 'PUMA', 'NTA', 'Tract']
+    list_geo = ['borocode', 'cdta2020', 'nta2020', 'BCT_txt']
+    list_geo_folder = ['Borough', 'CDTA', 'NTA', 'Tract']
     list_geo_keep = []
     for (geo_id, geo_name) in zip(list_geo, list_geo_folder):
         print(geo_name, end=' ')

@@ -20,16 +20,20 @@ utils.set_home()
 
 def calculate_SOV():
 
-    #%% load cdc covi score at tract level and reproject
+    #%% EXTRACT PARAMETERS
     path_sovi = params.PATHNAMES.at['SOV_tract', 'Value']
+    path_FIPS = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+
+    #%% LOAD DATA
+    df_FIPS = pd.read_excel(path_FIPS, index_col='FIPS')
     gdf_sovi = gpd.read_file(path_sovi)
-    #reproject
+    
+    df_FIPS.index = df_FIPS.index.astype(str)
     gdf_tract = utils.project_gdf(gdf_sovi)
-    # Filter to NYC
-    gdf_tract = gdf_tract[gdf_tract['COUNTY'].isin(['Bronx', 'Kings', 'New York', 'Queens', 'Richmond'])]
+    gdf_tract = gdf_tract.merge(df_FIPS, left_on='STCNTY', right_index=True, how='inner')
 
     # Creating BCT_txt column from FIPS
-    gdf_tract['BCT_txt'] = gdf_tract['FIPS'].str[4:11]  # BCT_txt is equal to the last 7 digits of the FIPS value
+    gdf_tract['BCT_txt'] = gdf_tract['Bor_ID'].astype(str) + gdf_tract['FIPS'].str[5:11]
 
     #%% normalize result to scale of 0.01 to 0.99
     gdf_tract['SOV_rank'] = utils.normalize_rank_percentile(gdf_tract['RPL_THEMES'].values,
@@ -45,13 +49,6 @@ def calculate_SOV():
     #%% plot results
     plotting.plot_notebook(gdf_tract, column='S_S', title='ALL: Social Vulnerability',
                            legend='Score', cmap='Reds', type='score')
-
-    #%% use clustering to score 1,2,3,4,5
-    #assign median values to null data
-    # gdf_tract['RPL_THEMES_ADJ'] = gdf_tract['RPL_THEMES']
-    # gdf_tract.loc[gdf_tract['RPL_THEMES']==-999, 'RPL_THEMES_ADJ'] = gdf_tract.loc[gdf_tract['RPL_THEMES']!=-999, 'RPL_THEMES_ADJ'].median()
-    # gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='RPL_THEMES_ADJ', score_column='SOV',
-    #                                    n_cluster=5)
 
     #%% save results in every folder (same for all)
     path_results = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\SOV\Tract\\SOV_Tract.shp'
