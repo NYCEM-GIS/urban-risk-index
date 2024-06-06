@@ -5,7 +5,7 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Output paths
-path_walk_score = r'C:\Users\hsprague\ARCADIS\30194489 - NYCEM URI - Documents\Project\URI_Calculator_v1_1\2_PROCESSED_INPUTS\910_RCA_RC_WA_SCORE\scratch\walkscore_2024_pt1.csv'
+path_walk_score = r'C:\Users\hsprague\miniconda\URI_Calculator_v1_1\1_RAW_INPUTS\RCA_WALKSCORE\walkscore_1.csv'
 
 ##%% load tracts to get centroid lat/longs
 gdf_tract = utils.get_blank_tract()

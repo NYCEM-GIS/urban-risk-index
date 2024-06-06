@@ -12,13 +12,15 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_cdc = params.PATHNAMES.at['RCA_MHI_cdc_sov', 'Value']
+path_cdc = params.PATHNAMES.at['SOV_tract', 'Value']
 path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_RR_HI_score', 'Value']
 
 #%% LOAD DATA
-gdf_cdc = gpd.read_file(path_cdc)
+path_layer = os.path.basename(path_cdc)
+path_gdb = os.path.dirname(path_cdc)
+gdf_cdc = gpd.read_file(path_gdb, driver='FileGDB', layer=path_layer)
 df_fips = pd.read_excel(path_fips)
 
 #%% get tract data

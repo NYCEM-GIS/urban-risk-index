@@ -10,6 +10,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #%%
 path_params = r'C:\Users\hsprague\miniconda\URI_Calculator_v1_1\5_PARAMS\URI_PARAMS_v_1_1.xlsx'
+data_directory = r'path to data directory'
 
 #%% create params variable
 

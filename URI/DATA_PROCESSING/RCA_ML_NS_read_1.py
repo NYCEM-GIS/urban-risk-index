@@ -11,8 +11,7 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_shoreline_gdb = params.PATHNAMES.at['RCA_ML_NS_shoreline_gbd', 'Value']
-path_shoreline_layer = params.PATHNAMES.at['RCA_ML_NS_shoreline_layer', 'Value']
+path_shoreline = params.PATHNAMES.at['RCA_ML_NS_shoreline', 'Value']
 # Output paths
 path_output = params.PATHNAMES.at['RCA_ML_NS_score', 'Value']
 # Params
@@ -20,6 +19,8 @@ buffer = params.PARAMS.at['search_buffer_for_natural_shoreline_ft', 'Value']
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()
+path_shoreline_gdb = os.path.dirname(path_shoreline)
+path_shoreline_layer = os.path.basename(path_shoreline)
 gdf_shoreline = gpd.read_file(path_shoreline_gdb, driver='FileGDB', layer=path_shoreline_layer)
 gdf_shoreline = utils.project_gdf(gdf_shoreline)
 

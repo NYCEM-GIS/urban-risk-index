@@ -13,11 +13,9 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
 folder_scratch = params.PATHNAMES.at['ESL_CST_loss_dislocation_scratch', 'Value']
-if not os.path.exists(folder_scratch):
-    os.mkdir(folder_scratch)
-path_footprint_depths = os.path.join(folder_scratch, 'NYC_Buildings_composite_20200110_flood_depths_1.shp')
+path_footprint_depths = os.path.join(folder_scratch, 'NYC_Buildings_composite_20240223_flood_depths_1.shp')
+
 # Params
 floor_height = params.PARAMS.at['building_floor_height_ft', 'Value']  # assume floor dislocated every 10 ft
 flood_disp_height = params.PARAMS.at['building_floor_height_flood_threshold_ft', 'Value']  # assume displacement after 1 ft flooding
@@ -32,29 +30,7 @@ path_results = params.PATHNAMES.at['ESL_CST_dislocation_loss', 'Value']
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
-
-#%% make copy of building footprints  with hurricane depths, if it doesn't already exist
-if not os.path.exists(path_footprint_depths):
-    # open and project footprint shapefile
-    gdf_footprint = gpd.read_file(path_footprint)
-    gdf_depths = utils.project_gdf(gdf_footprint)
-    # loop through 4 cat types
-    for cat in np.arange(1, 5):
-        print(".....adding data for category {} storms".format(cat))
-        # get path to depth raster
-        path_C = params.PATHNAMES.at['ESL_CST_SLOSH_C{}'.format(cat), 'Value']
-        # save footprint file to temp location
-        path_temp = os.path.join(folder_scratch, 'temp.shp')
-        gdf_depths.to_file(path_temp)
-        # perform zonal stats
-        dict_c = zonal_stats(path_temp, path_C, stats="max")
-        # join results to footprint
-        gdf_depths['C{}_depth'.format(cat)] = [x['max'] for x in dict_c]
-    # save results
-    gdf_depths.to_file(path_footprint_depths)
-    print("Done")
-else:
-    gdf_depths = gpd.read_file(path_footprint_depths)
+gdf_depths = gpd.read_file(path_footprint_depths)
 
 #%%  get probabilities of coastal storm events
 # HMP guidelines says "According to these NHC probability models, New York City should

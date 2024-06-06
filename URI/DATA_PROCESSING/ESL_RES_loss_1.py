@@ -14,8 +14,7 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_covid = params.PATHNAMES.at['ESL_RES_COVID_deaths', 'Value']
-path_PVI_gdb = params.PATHNAMES.at['ESL_RES_PVI_gbd', 'Value']
-path_PVI_layer = params.PATHNAMES.at['ESL_RES_PVI_layer', 'Value']
+path_PVI = params.PATHNAMES.at['ESL_RES_PVI', 'Value']
 path_zcta = params.PATHNAMES.at['BOUNDARY_zcta', 'Value']
 
 # Params
@@ -48,6 +47,8 @@ path_loss_wages = params.PATHNAMES.at['ESL_RES_wages_loss', 'Value']
 
 #%% LOAD DATA
 gdf_tracts = utils.get_blank_tract(add_pop=True)
+path_PVI_gdb = os.path.dirname(path_PVI)
+path_PVI_layer = os.path.basename(path_PVI)
 gdf_PVI = gpd.read_file(path_PVI_gdb, drive='FileGDB', layer=path_PVI_layer)
 if update_data:
     url = r'https://raw.githubusercontent.com/nychealth/coronavirus-data/master/totals/data-by-modzcta.csv'

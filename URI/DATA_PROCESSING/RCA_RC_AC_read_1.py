@@ -14,8 +14,7 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_ac = params.PATHNAMES.at['RCA_RC_ACH_raw', 'Value']
-path_gbd = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce_gbd', 'Value']
-layer_gbd = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce_layer', 'Value']
+path_ac_taskforce = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce', 'Value']
 # Output paths
 path_results = params.PATHNAMES.at['RCA_RC_AC_score', 'Value']
 
@@ -24,6 +23,8 @@ column_ac = "DATA_VALUE"
 column_ac_out = "ac_per"
 
 #%% LOAD DATA
+path_gbd = os.path.dirname(path_ac_taskforce)
+layer_gbd = os.path.basename(path_ac_taskforce)
 gdf_tf = gpd.read_file(path_gbd, driver='FileGDB', layer=layer_gbd)
 
 #%% convert ac data to track average

@@ -26,7 +26,9 @@ def calculate_SOV():
 
     #%% LOAD DATA
     df_FIPS = pd.read_excel(path_FIPS, index_col='FIPS')
-    gdf_sovi = gpd.read_file(path_sovi)
+    path_layer = os.path.basename(path_sovi)
+    path_gdb = os.path.dirname(path_sovi)
+    gdf_sovi = gpd.read_file(path_gdb, driver='FileGDB', layer=path_layer)
     
     df_FIPS.index = df_FIPS.index.astype(str)
     gdf_tract = utils.project_gdf(gdf_sovi)
