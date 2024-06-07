@@ -13,8 +13,7 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-folder_scratch = params.PATHNAMES.at['ESL_CST_loss_dislocation_scratch', 'Value']
-path_footprint_depths = os.path.join(folder_scratch, 'NYC_Buildings_composite_20240223_flood_depths_1.shp')
+path_footprint_depths = params.PATHNAMES.at['ESL_CST_building_footprints_depth', 'Value']
 
 # Params
 floor_height = params.PARAMS.at['building_floor_height_ft', 'Value']  # assume floor dislocated every 10 ft

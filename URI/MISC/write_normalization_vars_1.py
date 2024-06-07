@@ -1,16 +1,8 @@
 """ Write table of possible normalization factors"""
 
 #%% read packages
-import sys
-import os
-print(os.getcwd())
-sys.path.extend(os.path.join(os.getcwd(), '4_CODE'))
 import numpy as np
-import pandas as pd
 import geopandas as gpd
-import matplotlib.pyplot as plt
-from census import Census
-from us import states
 from URI.MISC import params_1 as params
 from URI.MISC import utils_1 as utils
 utils.set_home()

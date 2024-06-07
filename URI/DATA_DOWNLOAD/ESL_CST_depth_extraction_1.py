@@ -15,10 +15,9 @@ t0 = time.time()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
-folder_scratch = params.PATHNAMES.at['ESL_CST_loss_dislocation_scratch', 'Value']
 
 # Output paths
-path_footprint_depths = os.path.join(folder_scratch, 'NYC_Buildings_composite_20240223_flood_depths_1.shp')
+path_footprint_depths = params.PATHNAMES.at['ESL_CST_building_footprints_depth', 'Value']
 
 #%% make copy of building footprints  with hurricane depths
 # open and project footprint shapefile
