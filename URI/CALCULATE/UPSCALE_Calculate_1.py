@@ -42,7 +42,7 @@ def calculate_UPSCALE(haz):
     gdf_tract = gdf_tract.merge(df_boro[['Borough', 'borocode']], left_on='borocode', right_on='borocode', how='left' )
     gdf_master = gdf_tract.copy()[['BCT_txt', 'POP', 'BLD_CNT', 'AREA_SQMI', 'FLOOR_SQFT', 'Borough',
                                    'borocode', 'cdta2020', 'nta2020','geometry']]
-    gdf_master.rename(columns={'BCT_txt':'GeoID', 'POP':'Pop_2010', 'BLD_CNT':'Bld_Count',
+    gdf_master.rename(columns={'BCT_txt':'GeoID', 'POP':'Pop_2020', 'BLD_CNT':'Bld_Count',
                                'AREA_SQMI':'Land_Area', 'FLOOR_SQFT':'Bldg_Area', 'Borough':'Boro_Name',
                                'borocode':'Boro_Code', 'nta2020':'NTA_Name'}, inplace=True)
     gdf_master['Geography'] = np.repeat('Tract', len(gdf_master))
@@ -71,7 +71,7 @@ def calculate_UPSCALE(haz):
         df_agg = df_norm.groupby(by=geo_id).sum()
         gdf_temp = gdf_new.merge(df_agg, left_on=geo_id, right_index=True, how='left')
         gdf_temp['GeoID'] = gdf_temp[geo_id]
-        gdf_temp.rename(columns={'POP':'Pop_2010', 'BLD_CNT':'Bld_Count', 'borocode':'Boro_Code', 'nta2020':'NTA_Name',
+        gdf_temp.rename(columns={'POP':'Pop_2020', 'BLD_CNT':'Bld_Count', 'borocode':'Boro_Code', 'nta2020':'NTA_Name',
                                'AREA_SQMI':'Land_Area', 'FLOOR_SQFT':'Bldg_Area'}, inplace=True)
         gdf_temp['Geography'] = np.repeat(geo_name, len(gdf_temp))
         gdf_temp['Boro_Name'] = np.repeat(np.nan, len(gdf_temp))

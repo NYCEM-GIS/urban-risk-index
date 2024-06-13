@@ -102,7 +102,7 @@ gdf_tract['Loss_USD'] = 0
 for i, bor in enumerate(gdf_tract.BOROCODE.unique()):
     gdf_tract_bor = gdf_tract.loc[gdf_tract.BOROCODE == bor, :].copy()
     # assign losses by population
-    gdf_tract_bor['Loss_USD'] = df_bor.at[int(bor), 'Loss_USD'] * gdf_tract_bor['pop_2010'] / gdf_tract_bor['pop_2010'].sum()
+    gdf_tract_bor['Loss_USD'] = df_bor.at[int(bor), 'Loss_USD'] * gdf_tract_bor['pop_2020'] / gdf_tract_bor['pop_2020'].sum()
     gdf_tract.loc[gdf_tract_bor.index, 'Loss_USD'] = gdf_tract_bor['Loss_USD']
 
 #%% #%% save results in

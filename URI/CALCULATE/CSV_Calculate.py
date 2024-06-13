@@ -42,7 +42,7 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                 list_col_keep = list_norm_keep + [col, geo_id]
                 df = gdf_haz[list_col_keep].copy()
 
-                df.rename(columns={geo_id:'GeoID', 'AREA_SQMI': 'Land_Area', 'FLOOR_SQFT':'Bldg_Area', 'POP':'Pop_2010',
+                df.rename(columns={geo_id:'GeoID', 'AREA_SQMI': 'Land_Area', 'FLOOR_SQFT':'Bldg_Area', 'POP':'Pop_2020',
                                             'BLD_CNT':'Bldg_Count', col:'Value'}, inplace=True)
 
                 # add hazard
