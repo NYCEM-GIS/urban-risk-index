@@ -1,14 +1,6 @@
 """ make plots for distribution, and notebooks"""
-
-import numpy as np
-import pandas as pd
-import geopandas as gpd
-import os
 import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 utils.set_home()
