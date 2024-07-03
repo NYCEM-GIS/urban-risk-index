@@ -76,7 +76,7 @@ def calculate_UPSCALE(haz):
         gdf_temp['Geography'] = np.repeat(geo_name, len(gdf_temp))
         gdf_temp['Boro_Name'] = np.repeat(np.nan, len(gdf_temp))
         gdf_temp.drop(columns={'CITYWIDE'}, inplace=True)
-        gdf_master = gdf_master.append(gdf_temp)
+        gdf_master = pd.concat([gdf_master, gdf_temp])
 
         #%% get sum of losses, risk scores, and normalization factors and merge
         list_col_norm = ['AREA_SQMI', 'FLOOR_SQFT', 'POP', 'BLD_CNT']

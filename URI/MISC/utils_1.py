@@ -119,9 +119,7 @@ def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
     gdf_buffer = gdf_data.copy()
     gdf_buffer['geometry'] = gdf_data['geometry'].buffer(distance=buffer_distance_ft)
     #create empty df to fill
-    df_fill = pd.DataFrame()
-    df_fill['BCT_txt'] = []
-    df_fill['Fraction_Covered'] = []
+    df_fill = pd.DataFrame(columns=['BCT_txt', 'Fraction_Covered'])
     # loop through each buffer, and add BCT_txt and area filled to list
     print("Calculating.", end='')
     for i, idx in enumerate(gdf_buffer.index):
@@ -130,7 +128,7 @@ def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
         this_intersect['area_intersect_ft2'] = this_intersect['geometry'].area
         this_intersect['Fraction_Covered'] = np.minimum(this_intersect['area_intersect_ft2'] / this_intersect['area_ft2'], 1.0)
         #add to df_fill
-        df_fill = df_fill.append(this_intersect[['BCT_txt', 'Fraction_Covered']])
+        df_fill = pd.concat([df_fill, this_intersect[['BCT_txt', 'Fraction_Covered']]])
         if i % 500 == 0:
             print(".", end=''),
     print('Done')

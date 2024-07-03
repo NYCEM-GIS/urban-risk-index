@@ -43,6 +43,8 @@ id_coastal = [df_coastalevents.at[idx, 'StormEventId'] for idx in df_coastaleven
 df_storms_cst = df_storms.loc[id_coastal, :]
 
 #%% cut off data
+df_storms_cst['StartDate'] = pd.to_datetime(df_storms_cst['StartDate'])
+df_storms_cst['EndDate'] = pd.to_datetime(df_storms_cst['EndDate'])
 df_storms_cst = df_storms_cst.loc[df_storms_cst['StartDate']>start_date]
 df_storms_cst = df_storms_cst.loc[df_storms_cst['EndDate']<end_date]
 

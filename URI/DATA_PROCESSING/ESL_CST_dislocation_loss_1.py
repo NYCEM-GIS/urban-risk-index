@@ -105,7 +105,7 @@ gdf_depths['Loss_USD'] = gdf_depths['C1_UDS_Loss_Displacement']*P_C1 + gdf_depth
 #%% get tract for each building
 gdf_points = gdf_depths.copy()
 gdf_points.geometry = gdf_points.geometry.centroid
-gdf_points = gpd.sjoin(gdf_points, gdf_tract[['BCT_txt', 'geometry']], how='left', op='within')
+gdf_points = gpd.sjoin(gdf_points, gdf_tract[['BCT_txt', 'geometry']], how='left', predicate='within')
 
 #%% aggregate to tract level and merge
 df_loss = pd.pivot_table(gdf_points, values='Loss_USD', index='BCT_txt', aggfunc=sum)

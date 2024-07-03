@@ -47,7 +47,7 @@ gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_Center', sco
 
 #%%assign 5 to everything in zone X of hurrican evac zone
 gdf_zone = gdf_zone.loc[gdf_zone.hurricane_ == 'X']
-gdf_tract_sjoin = gpd.sjoin(gdf_tract, gdf_zone, how='inner', op='within')
+gdf_tract_sjoin = gpd.sjoin(gdf_tract, gdf_zone, how='inner', predicate='within')
 gdf_tract_sjoin['Is_inland'] = 1
 gdf_tract = gdf_tract.merge(gdf_tract_sjoin[['BCT_txt', 'Is_inland']], how='left', on='BCT_txt')
 gdf_tract.loc[gdf_tract.Is_inland == 1, 'Score'] = 5

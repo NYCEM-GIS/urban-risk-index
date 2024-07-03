@@ -39,7 +39,7 @@ gdf_tract = gdf_tract.merge(gdf_tract_pop[['BCT_txt', 'pop_2020']], on='BCT_txt'
 gdf_tf = utils.project_gdf(gdf_tf)
 
 #%% get count within each tract
-gdf_join = gpd.sjoin(gdf_tf, gdf_tract, how='left', op='within')
+gdf_join = gpd.sjoin(gdf_tf, gdf_tract, how='left', predicate='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['field'], aggfunc=len)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')

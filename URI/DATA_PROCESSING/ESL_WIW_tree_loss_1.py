@@ -38,12 +38,15 @@ df_EventIds.index = df_EventIds.StormEventId
 
 #%% get storm events with this id after 2000
 df_Events.index = df_Events.Id
+df_Events['StartDate'] = pd.to_datetime(df_Events['StartDate'])
+df_Events['EndDate'] = pd.to_datetime(df_Events['EndDate'])
 df_Events = df_Events.loc[df_EventIds.index, :]
-df_Events = df_Events.loc[df_Events.StartDate >= '2009-01-01', :]
-df_Events = df_Events.loc[df_Events.StartDate < '2019-01-01', :]
+df_Events = df_Events.loc[df_Events.StartDate >= datetime.datetime(year=2009, month=1, day=1), :]
+df_Events = df_Events.loc[df_Events.EndDate < datetime.datetime(year=2019, month=1, day=1), :]
 
 #%% get tree service calls in this range
 df_tree['Is_Event'] = np.zeros(len(df_tree))
+df_tree['DateInitiated'] = pd.to_datetime(df_tree['DateInitiated'])
 for i, idx in enumerate(df_Events.index):
     start_date = df_Events.at[idx, 'StartDate']
     end_date = df_Events.at[idx, 'EndDate'] + datetime.timedelta(days=service_buffer)
@@ -66,7 +69,7 @@ gdf_tree.crs = "EPSG:4326"
 gdf_tree = utils.project_gdf(gdf_tree)
 
 #%% get count per tract of tree services
-gdf_join = gpd.sjoin(gdf_tree, gdf_tract, how='left', op='within')
+gdf_join = gpd.sjoin(gdf_tree, gdf_tract, how='left', predicate='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['Lat'], aggfunc=len)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')

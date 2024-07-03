@@ -172,7 +172,7 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                 if count == 0:
                     df_csv[geo_id] = df.copy()
                 else:
-                    df_csv[geo_id] =  df_csv[geo_id].append(df)
+                    df_csv[geo_id] =  pd.concat([df_csv[geo_id], df])
                 count += 1
 
         df_csv[geo_id].replace(nan_value, np.nan, inplace=True)

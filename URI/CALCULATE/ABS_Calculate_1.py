@@ -4,6 +4,7 @@
 
 #%% read packages
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
@@ -30,7 +31,7 @@ def calculate_ABS(list_abbrev_haz):
             if i==0:
                 gdf_stack = gdf_this.copy()
             else:
-                gdf_stack = gdf_stack.append(gdf_this)
+                gdf_stack = pd.concat([gdf_stack, gdf_this])
 
         #%% calculate score and percentile
         gdf_stack = utils.calculate_kmeans(gdf_stack, data_column='E_RNTT', score_column='E_ANTT')

@@ -16,7 +16,7 @@ path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
 gdf_footprint = gpd.read_file(path_footprint)
 
 #%% gdt building count
-gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', op='within')
+gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', predicate='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['BIN'], aggfunc=len)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
@@ -27,7 +27,7 @@ gdf_tract.rename(columns={"BIN":"Building_Count"}, inplace=True)
 #note this is conservatively high because num_floors is largest # in building group
 #ex: in co-op city, all buildings are marked as 33 floors, but some are only 4.
 gdf_footprint['Floor_sqft'] = gdf_footprint['Shape_Area'] * np.maximum(gdf_footprint['NumFloors'], 1)
-gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', op='within')
+gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', predicate='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['Floor_sqft'], aggfunc=sum)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')

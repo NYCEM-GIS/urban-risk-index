@@ -37,7 +37,8 @@ for i, idx in enumerate(gdf_cc_buffer.index):
     this_intersect['area_intersect_ft2'] = this_intersect['geometry'].area
     this_intersect['Fraction_Covered'] = np.minimum(this_intersect['area_intersect_ft2'] / this_intersect['area_ft2'], 1.0)
     # add to df_fill
-    df_fill = df_fill.append(this_intersect[['BCT_txt', 'Fraction_Covered']])
+    df_fill = pd.concat([df_fill, this_intersect[['BCT_txt', 'Fraction_Covered']]])
+
 
 #%% get the sum  by tract and join
 df_sum = df_fill.groupby(by='BCT_txt').sum()

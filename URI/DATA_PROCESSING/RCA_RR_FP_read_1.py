@@ -23,7 +23,7 @@ gdf_footprint = gpd.read_file(path_footprint)
 
 #%% count buildings by tract and save result in scratch
 #spatial join to get count
-gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', op='within')
+gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', predicate='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['BIN'], aggfunc=len)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
@@ -31,7 +31,7 @@ gdf_tract.fillna(value={'BIN': 0}, inplace=True)
 gdf_tract.rename(columns={"BIN": "Building_Count"}, inplace=True)
 
 #%%count number of policies by tract
-gdf_join = gpd.sjoin(gdf_fp, gdf_tract, how='left', op='within')
+gdf_join = gpd.sjoin(gdf_fp, gdf_tract, how='left', predicate='within')
 gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
 df_count = gdf_join.pivot_table(index='BCT_txt', values=['Type'], aggfunc=len)
 gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')

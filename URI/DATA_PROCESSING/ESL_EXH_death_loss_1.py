@@ -36,6 +36,8 @@ heat_events_bool = ['Heat' in x for x in df_stormevents['Name']]
 df_stormevents = df_stormevents.loc[heat_events_bool, :]
 
 #%% screen out using date range
+df_stormevents['StartDate'] = pd.to_datetime(df_stormevents['StartDate'])
+df_stormevents['EndDate'] = pd.to_datetime(df_stormevents['EndDate'])
 df_stormevents = df_stormevents.loc[df_stormevents['StartDate']>start_date]
 df_stormevents = df_stormevents.loc[df_stormevents['EndDate']<end_date]
 
