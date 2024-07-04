@@ -185,7 +185,7 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
     #%% combine
     for i, key in enumerate(df_csv.keys()):
         if i==0: df_master = df_csv[key].copy()
-        else: df_master = df_master.append(df_csv[key])
+        else: df_master = pd.concat([df_master, df_csv[key]])
     print('Saving master csv.')
     path_output = os.path.join(path_output, 'TBL_master.csv')
     df_master.to_csv(path_output)
