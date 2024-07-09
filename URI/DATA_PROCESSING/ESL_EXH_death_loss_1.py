@@ -9,21 +9,23 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_stormevents = params.PATHNAMES.at['stormevents_table', 'Value']
-path_stormeventsboroughs = params.PATHNAMES.at['stormeventsboroughs_table', 'Value']
-path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
+path_stormevents = PATHNAMES.stormevents_table
+path_stormeventsboroughs = PATHNAMES.stormeventsboroughs_table
+path_population_tract = PATHNAMES.population_by_tract
 # Hard-coded
-start_date = params.HARDCODED.at['heat_event_count_start_date', 'Value']
-end_date = params.HARDCODED.at['heat_event_count_end_date', 'Value']
+start_date = PARAMS['heat_event_count_start_date'].value
+end_date = PARAMS['heat_event_count_end_date'].value
 # Params
-deaths_year = params.PARAMS.at['EXH_deaths_per_year', 'Value']
-value_life = params.PARAMS.at['value_of_stat_life', 'Value']
+deaths_year = PARAMS['EXH_deaths_per_year'].value
+value_life = PARAMS['value_of_stat_life'].value
 # Output paths
-path_results = params.PATHNAMES.at['EXH_ESL_deaths_per_year_tract', 'Value']
+path_results = PATHNAMES.EXH_ESL_deaths_per_year_tract
 
 #%% LOAD DATA
 df_stormevents = pd.read_excel(path_stormevents)

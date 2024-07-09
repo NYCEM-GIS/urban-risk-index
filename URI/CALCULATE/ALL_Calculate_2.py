@@ -6,12 +6,13 @@ import pandas as pd
 import URI.MISC.params_1 as params
 import URI.MISC.plotting_1 as plotting
 import URI.MISC.utils_1 as utils
-
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 def calculate_ALL(list_abbrev_haz):
     #%% open and merge all URI shapefiles
-    path_haz_dict = {haz: params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + fr'\URI\Tract\URI_{haz}_tract.shp' for haz in list_abbrev_haz}
+    path_haz_dict = {haz: PATHNAMES.OUTPUTS_folder + fr'\URI\Tract\URI_{haz}_tract.shp' for haz in list_abbrev_haz}
     gdf_haz_dict = {haz: gpd.read_file(path_haz_dict[haz]).set_index('BCT_txt') for haz in path_haz_dict.keys()}
     gdf_all = utils.get_blank_tract()
     # for i, haz in enumerate(list_abbrev_haz):
@@ -102,7 +103,7 @@ def calculate_ALL(list_abbrev_haz):
     for haz in list_abbrev_haz:
         list_col_keep = [col for col in list_col_keep if haz not in col[0:3]]
     list_col_keep = list_norm_col + ['BCT_txt', 'borocode', 'cdta2020', 'nta2020', 'geometry', 'BLD_CNT'] + [col for col in gdf_all.columns if (('ALL' in col) or ('S_' in col))]
-    path_save = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\Tract\URI_ALL_Tract.shp'
+    path_save = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_ALL_Tract.shp'
     gdf_all[list_col_keep].to_file(path_save)
 
 
@@ -110,7 +111,7 @@ def calculate_ALL(list_abbrev_haz):
 if __name__ == '__main__':
 
     # %% open outputs path and get abbrev list
-    folder_outputs = params.PATHNAMES.at['OUTPUTS_folder', 'Value']
+    folder_outputs = PATHNAMES.OUTPUTS_folder
     list_abbrev_haz = params.ABBREVIATIONS.iloc[0:11, 0].values.tolist()
     list_abbrev_haz.remove('CYB')
 

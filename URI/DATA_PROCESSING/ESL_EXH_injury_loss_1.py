@@ -6,20 +6,22 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_hosp = params.PATHNAMES.at['ESL_EXH_hosp_data', 'Value']
-path_borid = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-path_hosp_2016 = params.PATHNAMES.at['ESL_EXH_hosp_2016', 'Value']
-path_emerg = params.PATHNAMES.at['ESL_EXH_emerg_data', 'Value']
-path_emerg_2016 = params.PATHNAMES.at['ESL_EXH_emerg_2016', 'Value']
+path_hosp = PATHNAMES.ESL_EXH_hosp_data
+path_borid = PATHNAMES.Borough_to_FIP
+path_hosp_2016 = PATHNAMES.ESL_EXH_hosp_2016
+path_emerg = PATHNAMES.ESL_EXH_emerg_data
+path_emerg_2016 = PATHNAMES.ESL_EXH_emerg_2016
 # Params
-loss_per_moderate_injury_2016 = params.PARAMS.at['value_moderate_injury', 'Value']
-loss_per_serious_injury_2016 = params.PARAMS.at['value_serious_injury', 'Value']
+loss_per_moderate_injury_2016 = PARAMS['value_moderate_injury'].value
+loss_per_serious_injury_2016 = PARAMS['value_serious_injury'].value
 # Output paths
-path_output = params.PATHNAMES.at['ESL_EXT_loss_injury', 'Value']
+path_output = PATHNAMES.ESL_EXT_loss_injury
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)

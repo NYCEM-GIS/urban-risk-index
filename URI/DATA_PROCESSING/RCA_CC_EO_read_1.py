@@ -8,13 +8,15 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_events = params.PATHNAMES.at['RCA_CC_EO_locations', 'Value']
+path_events = PATHNAMES.RCA_CC_EO_locations
 # Output paths
-path_output = params.PATHNAMES.at['RCA_CC_EO_score', 'Value']
+path_output = PATHNAMES.RCA_CC_EO_score
 
 #%% LOAD DATA
 df_events = pd.read_csv(path_events)

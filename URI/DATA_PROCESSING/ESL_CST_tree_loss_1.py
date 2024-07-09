@@ -6,19 +6,21 @@ import datetime
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_tree = params.PATHNAMES.at['HHC_TreeServices', 'Value']
-path_Events = params.PATHNAMES.at['stormevents_table', 'Value']
-path_EventTypes = params.PATHNAMES.at['HHC_eventtypes', 'Value']
-path_StormEventTypes = params.PATHNAMES.at['HHC_stormeventtypes', 'Value']
+path_tree = PATHNAMES.HHC_TreeServices
+path_Events = PATHNAMES.stormevents_table
+path_EventTypes = PATHNAMES.HHC_eventtypes
+path_StormEventTypes = PATHNAMES.HHC_stormeventtypes
 # Params
-service_buffer = params.PARAMS.at['buffer_period_tree_servicing_days', 'Value']
+service_buffer = PARAMS['buffer_period_tree_servicing_days'].value
 # Output paths
-path_results = params.PATHNAMES.at['ESL_CST_loss_tree', 'Value']
+path_results = PATHNAMES.ESL_CST_loss_tree
 
 #%% LOAD DATA
 df_tree = pd.read_excel(path_tree, parse_dates=['DateInitiated', 'DateCreated'])

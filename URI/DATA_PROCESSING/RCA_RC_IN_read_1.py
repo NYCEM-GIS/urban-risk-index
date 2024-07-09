@@ -6,16 +6,18 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_activation = params.PATHNAMES.at['RCA_RC_IE_activation', 'Value']
+path_activation = PATHNAMES.RCA_RC_IE_activation
 # Params
 # This represents all the hazard abbreviations, excluding SOV, RCA, ESL, and OTH
 list_abbrv = params.ABBREVIATIONS.iloc[0:11, 0].values
 # Output paths
-path_output = params.PATHNAMES.at['RCA_RC_IN_score', 'Value']
+path_output = PATHNAMES.RCA_RC_IN_score
 
 #%% LOAD DATA
 df_activation = pd.read_excel(path_activation, sheet_name='Summary')

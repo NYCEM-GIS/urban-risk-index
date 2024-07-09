@@ -6,17 +6,19 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_deaths = params.PATHNAMES.at['ESL_WIW_deaths_data', 'Value']
-path_hosp = params.PATHNAMES.at['ESL_WIW_hosp_data', 'Value']
-path_borid = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+path_deaths = PATHNAMES.ESL_WIW_deaths_data
+path_hosp = PATHNAMES.ESL_WIW_hosp_data
+path_borid = PATHNAMES.Borough_to_FIP
 # Params
-loss_per_death = params.PARAMS.at['value_of_stat_life', 'Value']
+loss_per_death = PARAMS['value_of_stat_life'].value
 # Output paths
-path_output = params.PATHNAMES.at['ESL_WIW_loss_deaths', 'Value']
+path_output = PATHNAMES.ESL_WIW_loss_deaths
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)

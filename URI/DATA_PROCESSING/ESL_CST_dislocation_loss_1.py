@@ -8,23 +8,25 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_footprint_depths = params.PATHNAMES.at['ESL_CST_building_footprints_depth', 'Value']
+path_footprint_depths = PATHNAMES.ESL_CST_building_footprints_depth
 
 # Params
-floor_height = params.PARAMS.at['building_floor_height_ft', 'Value']  # assume floor dislocated every 10 ft
-flood_disp_height = params.PARAMS.at['building_floor_height_flood_threshold_ft', 'Value']  # assume displacement after 1 ft flooding
-ave_displacement_days = params.PARAMS.at['average_duration_CST_displacement_days', 'Value']
-P_C1 = 1./params.PARAMS.at['RI_of_category_1_storm_yr', 'Value']
-P_C3 = 1./params.PARAMS.at['RI_of_category_3_storm_yr', 'Value']
-val_nyc_night_lodging = params.PARAMS.at['cost_nyc_night_lodging', 'Value']
-val_nyc_per_diem = params.PARAMS.at['cost_nyc_per_diem', 'Value']
-val_nyc_home_meal_per_day = params.PARAMS.at['cost_nyc_home_meals_per_day', 'Value']
+floor_height = PARAMS['building_floor_height_ft'].value  # assume floor dislocated every 10 ft
+flood_disp_height = PARAMS['building_floor_height_flood_threshold_ft'].value  # assume displacement after 1 ft flooding
+ave_displacement_days = PARAMS['average_duration_CST_displacement_days'].value
+P_C1 = 1./PARAMS['RI_of_category_1_storm_yr'].value
+P_C3 = 1./PARAMS['RI_of_category_3_storm_yr'].value
+val_nyc_night_lodging = PARAMS['cost_nyc_night_lodging'].value
+val_nyc_per_diem = PARAMS['cost_nyc_per_diem'].value
+val_nyc_home_meal_per_day = PARAMS['cost_nyc_home_meals_per_day'].value
 # Output Paths
-path_results = params.PATHNAMES.at['ESL_CST_dislocation_loss', 'Value']
+path_results = PATHNAMES.ESL_CST_dislocation_loss
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)

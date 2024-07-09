@@ -7,6 +7,8 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
@@ -17,7 +19,7 @@ path_flood_manhattan = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\New 
 path_flood_queens = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Queens\Queens_100PFIRM\results.shp"
 path_flood_richmond = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Richmond\Richmond_100PFIRM\results.shp"
 # Output paths
-path_output = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
+path_output = PATHNAMES.ESL_FLD_hazus_loss
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()

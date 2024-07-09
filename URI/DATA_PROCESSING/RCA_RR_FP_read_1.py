@@ -6,15 +6,17 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_fp = params.PATHNAMES.at['RCA_RR_FP_raw', 'Value']
-path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
+path_fp = PATHNAMES.RCA_RR_FP_raw
+path_footprint = PATHNAMES.ESL_CST_building_footprints
 
 # Output paths
-path_results = params.PATHNAMES.at['RCA_RR_FP_score', 'Value']
+path_results = PATHNAMES.RCA_RR_FP_score
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()

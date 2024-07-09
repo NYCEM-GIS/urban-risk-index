@@ -8,13 +8,15 @@ from shapely.ops import nearest_points
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_hospital = params.PATHNAMES.at['RCA_RC_EMA_raw', 'Value']
+path_hospital = PATHNAMES.RCA_RC_EMA_raw
 # Output paths
-path_output = params.PATHNAMES.at['RCA_RC_EM_score', 'Value']
+path_output = PATHNAMES.RCA_RC_EM_score
 
 #%% LOAD DATA
 gdf_hospital = gpd.read_file(path_hospital)

@@ -7,6 +7,8 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
@@ -14,7 +16,7 @@ utils.set_home()
 value_loss_2016 = 81136410.00  # from spreadsheet
 value_loss = utils.convert_USD(value_loss_2016, 2016)
 # Output paths
-path_results = params.PATHNAMES.at['ESL_CRN_death_loss', 'Value']
+path_results = PATHNAMES.ESL_CRN_death_loss
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)

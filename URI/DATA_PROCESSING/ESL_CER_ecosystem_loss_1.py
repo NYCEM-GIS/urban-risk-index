@@ -6,22 +6,24 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_shoreline = params.PATHNAMES.at['ESL_CER_CEHA_length', 'Value'] 
+path_shoreline = PATHNAMES.ESL_CER_CEHA_length
 # Params
-value_per_ft2 = params.PARAMS.at['value_per_acre_marine', 'Value'] / 43560.
+value_per_ft2 = PARAMS['value_per_acre_marine'].value / 43560.
 list_locations = ['Rockaway_East', 'Rockaway_West', 'Rockaway_Middle',
                   'Coney_Island',
                   'Annandale_Staten_Island', 'Oakwood_Beach_Staten_Island', 'South_Shore_Staten_Island']
 dict_erosion_rate_ft_yr = {}
 for loc in list_locations:
     param_name = 'erosion_rate_' + loc + '_ft_yr'
-    dict_erosion_rate_ft_yr[loc] = params.PARAMS.at[param_name, 'Value']
+    dict_erosion_rate_ft_yr[loc] = PARAMS[param_name].value
 # Output Paths
-path_output = params.PATHNAMES.at['ESL_CER_ecosystem_loss', 'Value']
+path_output = PATHNAMES.ESL_CER_ecosystem_loss
 
 
 #%% LOAD DATA

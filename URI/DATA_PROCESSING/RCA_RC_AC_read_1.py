@@ -9,14 +9,16 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_ac = params.PATHNAMES.at['RCA_RC_ACH_raw', 'Value']
-path_ac_taskforce = params.PATHNAMES.at['RCA_RC_AC_ac_taskforce', 'Value']
+path_ac = PATHNAMES.RCA_RC_ACH_raw
+path_ac_taskforce = PATHNAMES.RCA_RC_AC_ac_taskforce
 # Output paths
-path_results = params.PATHNAMES.at['RCA_RC_AC_score', 'Value']
+path_results = PATHNAMES.RCA_RC_AC_score
 
 # Air conditioining
 column_ac = "DATA_VALUE"

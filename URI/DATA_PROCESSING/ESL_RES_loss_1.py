@@ -9,16 +9,18 @@ import matplotlib.pyplot as plt
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_covid = params.PATHNAMES.at['ESL_RES_COVID_deaths', 'Value']
-path_PVI = params.PATHNAMES.at['ESL_RES_PVI', 'Value']
-path_zcta = params.PATHNAMES.at['BOUNDARY_zcta', 'Value']
+path_covid = PATHNAMES.ESL_RES_COVID_deaths
+path_PVI = PATHNAMES.ESL_RES_PVI
+path_zcta = PATHNAMES.BOUNDARY_zcta
 
 # Params
-Loss_life = params.PARAMS.at['value_of_stat_life', 'Value']
+Loss_life = PARAMS['value_of_stat_life'].value
 # Hard-coded
 P_mild = 0.049
 P_severe = 0.01
@@ -40,10 +42,10 @@ Loss_econ_severe = utils.convert_USD(Loss_econ_severe_2019, 2019)
 update_data = False  # set to True to update data
 
 # Output paths
-path_loss_death = params.PATHNAMES.at['ESL_RES_death_loss', 'Value']
-path_loss_economy = params.PATHNAMES.at['ESL_RES_economy_loss', 'Value']
-path_loss_injury = params.PATHNAMES.at['ESL_RES_injury_loss', 'Value']
-path_loss_wages = params.PATHNAMES.at['ESL_RES_wages_loss', 'Value']
+path_loss_death = PATHNAMES.ESL_RES_death_loss
+path_loss_economy = PATHNAMES.ESL_RES_economy_loss
+path_loss_injury = PATHNAMES.ESL_RES_injury_loss
+path_loss_wages = PATHNAMES.ESL_RES_wages_loss
 
 #%% LOAD DATA
 gdf_tracts = utils.get_blank_tract(add_pop=True)

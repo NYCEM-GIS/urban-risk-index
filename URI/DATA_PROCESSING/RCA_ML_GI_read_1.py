@@ -8,13 +8,15 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_gi = params.PATHNAMES.at['RCA_ML_GI_raw', 'Value']
+path_gi = PATHNAMES.RCA_ML_GI_raw
 # Output paths
-path_output = params.PATHNAMES.at['RCA_ML_GI_score', 'Value']
+path_output = PATHNAMES.RCA_ML_GI_score
 
 #%% LOAD DATA
 gdf_gi = gpd.read_file(path_gi)

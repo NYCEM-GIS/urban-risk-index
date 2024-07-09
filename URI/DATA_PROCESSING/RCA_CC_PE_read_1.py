@@ -9,14 +9,16 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_data = params.PATHNAMES.at['RCA_CC_PE_data', 'Value']
-path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+path_data = PATHNAMES.RCA_CC_PE_data
+path_fips = PATHNAMES.Borough_to_FIP
 # Output paths
-path_output = params.PATHNAMES.at['RCA_CC_PE_score', 'Value']
+path_output = PATHNAMES.RCA_CC_PE_score
 
 #%% LOAD DATA
 df_data = pd.read_excel(path_data)

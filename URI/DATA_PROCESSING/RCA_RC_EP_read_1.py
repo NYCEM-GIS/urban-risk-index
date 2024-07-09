@@ -7,14 +7,16 @@ from shapely.ops import nearest_points
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_center = params.PATHNAMES.at['RCA_RC_EP_raw', 'Value']
-path_zone = params.PATHNAMES.at['RCA_RC_EP_evac_zones', 'Value']
+path_center = PATHNAMES.RCA_RC_EP_raw
+path_zone = PATHNAMES.RCA_RC_EP_evac_zones
 # Output paths
-path_output = params.PATHNAMES.at['RCA_RC_EP_score', 'Value']
+path_output = PATHNAMES.RCA_RC_EP_score
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()

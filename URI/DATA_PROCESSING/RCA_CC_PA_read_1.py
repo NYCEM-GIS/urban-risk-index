@@ -9,12 +9,14 @@ from us import states
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 import requests
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # output paths
-path_output = params.PATHNAMES.at['RCA_CC_PA_score', 'Value']
+path_output = PATHNAMES.RCA_CC_PA_score
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()

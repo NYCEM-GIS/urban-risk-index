@@ -9,12 +9,14 @@ import scipy.stats as stats
 from sklearn.cluster import KMeans
 from URI.MISC import params_1 as params
 from shapely.ops import nearest_points
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 
 
 
 #%% set home directory
 def set_home():
-    os.chdir(params.PATHNAMES.at['home', 'Value'])
+    os.chdir(PATHNAMES.home)
 set_home()
 
 #%% create readme
@@ -46,9 +48,9 @@ def normalize_rank_percentile(values, list_input_null_values=None, output_null_v
 #%% convert value to 2018 dollars using consumer price index (CPI)
 def convert_USD(base_value, base_year: int):
     #get target year from parameters
-    target_year = params.SETTINGS.at['target_year', 'Value']
+    target_year = PARAMS['target_year'].value
     #load CPI index
-    path_CPI = params.PATHNAMES.at['CPI_table', 'Value']
+    path_CPI = PATHNAMES.CPI_table
     df_CPI = pd.read_excel(path_CPI, skiprows=10,
                            index_col=0, parse_dates=True)
     #get the yearly average
@@ -142,15 +144,15 @@ def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
 
 #%%
 def project_gdf(gdf):
-    epsg = params.SETTINGS.at['epsg', 'Value']
+    epsg = PARAMS['epsg'].value
     gdf = gdf.to_crs(epsg=epsg)
     return gdf
 
 
 #%%
 def get_blank_tract(add_pop=False):
-    path_tract = params.PATHNAMES.at['BOUNDARY_tract', 'Value']
-    list_exclude = params.HARDCODED.at['list_excluded_tracts', 'Value']
+    path_tract = PATHNAMES.BOUNDARY_tract
+    list_exclude = PARAMS['list_excluded_tracts'].value
     gdf_tract = gpd.read_file(path_tract)
     bool_keep = [x not in list_exclude for x in gdf_tract['boroct2020']]
     gdf_tract = gdf_tract.loc[bool_keep, :].copy()
@@ -158,7 +160,7 @@ def get_blank_tract(add_pop=False):
     gdf_tract = project_gdf(gdf_tract)
     gdf_tract.index = np.arange(len(gdf_tract))
     if add_pop:
-        path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
+        path_population_tract = PATHNAMES.population_by_tract
         df_pop = pd.read_excel(path_population_tract, skiprows=5)
         df_pop.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
         df_pop.rename(columns={2020: 'pop_2020'}, inplace=True)

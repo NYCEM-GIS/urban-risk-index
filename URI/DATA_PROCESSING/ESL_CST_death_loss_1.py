@@ -8,22 +8,24 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_eventtypes = params.PATHNAMES.at['HHC_eventtypes', 'Value']
-path_stormeventtypes = params.PATHNAMES.at['HHC_stormeventtypes', 'Value']
-path_storms = params.PATHNAMES.at['stormevents_table', 'Value']
-path_FLD_loss = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
-path_HIW_loss = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
-path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
+path_eventtypes = PATHNAMES.HHC_eventtypes
+path_stormeventtypes = PATHNAMES.HHC_stormeventtypes
+path_storms = PATHNAMES.stormevents_table
+path_FLD_loss = PATHNAMES.ESL_FLD_hazus_loss
+path_HIW_loss = PATHNAMES.ESL_CST_hazus_loss
+path_population_tract = PATHNAMES.population_by_tract
 # Hard-coded
-start_date = params.HARDCODED.at['hhc_event_count_start_date', 'Value']
-end_date = params.HARDCODED.at['hhc_event_count_end_date', 'Value']
+start_date = PARAMS['hhc_event_count_start_date'].value
+end_date = PARAMS['hhc_event_count_end_date'].value
 n_years = (end_date - start_date).days / 365.25
 # Output paths
-path_output = params.PATHNAMES.at['ESL_CST_deaths_loss', 'Value']
+path_output = PATHNAMES.ESL_CST_deaths_loss
 
 #%% LOAD DATA
 df_types = pd.read_excel(path_eventtypes)

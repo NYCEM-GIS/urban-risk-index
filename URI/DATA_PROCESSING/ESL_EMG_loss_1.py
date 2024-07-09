@@ -5,13 +5,15 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_loss = params.PATHNAMES.at['ESL_EMG_loss', 'Value']
+path_loss = PATHNAMES.ESL_EMG_loss
 # Params
-loss_per_death = params.PARAMS.at['value_of_stat_life', 'Value']
+loss_per_death = PARAMS['value_of_stat_life'].value
 loss_per_death = utils.convert_USD(loss_per_death, 2022)
 # Hard-coded
 N_outbreaks = 7.

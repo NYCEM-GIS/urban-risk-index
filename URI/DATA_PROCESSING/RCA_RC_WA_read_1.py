@@ -6,13 +6,15 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_walk_score = params.PATHNAMES.at['RCA_RC_WA_walkscore_csv', 'Value']
+path_walk_score = PATHNAMES.RCA_RC_WA_walkscore_csv
 # Output paths
-path_output = params.PATHNAMES.at['RCA_RC_WA_score', 'Value']
+path_output = PATHNAMES.RCA_RC_WA_score
 
 #%% LOAD DATA
 df_walk_score = pd.read_csv(path_walk_score)

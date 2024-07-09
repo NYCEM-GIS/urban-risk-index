@@ -8,15 +8,17 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-layer_sc = params.PATHNAMES.at['RCA_RC_SC_layer', 'Value']
+layer_sc = PATHNAMES.RCA_RC_SC_layer
 # Params
-buffer_radius = params.PARAMS.at['search_buffer_for_shelter_capacity_ft', 'Value']
+buffer_radius = PARAMS['search_buffer_for_shelter_capacity_ft'].value
 # Output paths
-path_output = params.PATHNAMES.at['RCA_RC_SC_score', 'Value']
+path_output = PATHNAMES.RCA_RC_SC_score
 
 # Relevant input field names
 fn_long_term_capacity = 'Long_term_'  # URI 1.0 - "Long_term_capacity"

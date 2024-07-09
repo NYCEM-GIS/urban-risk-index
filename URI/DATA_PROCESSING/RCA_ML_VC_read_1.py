@@ -7,14 +7,16 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_veg = params.PATHNAMES.at['RCA_ML_VC_table', 'Value']
-path_nta = params.PATHNAMES.at['BOUNDARY_neighborhood', 'Value']
+path_veg = PATHNAMES.RCA_ML_VC_table
+path_nta = PATHNAMES.BOUNDARY_neighborhood
 # Output paths
-path_output = params.PATHNAMES.at['RCA_ML_VC_score', 'Value']
+path_output = PATHNAMES.RCA_ML_VC_score
 
 #%% LOAD DATA
 df_veg = pd.read_excel(path_veg)

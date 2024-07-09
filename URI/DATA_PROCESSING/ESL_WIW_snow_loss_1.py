@@ -8,14 +8,16 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_snow = params.PATHNAMES.at['ESL_WIW_snow_data', 'Value']
-path_road = params.PATHNAMES.at['ESL_WIW_road_cover', 'Value']
+path_snow = PATHNAMES.ESL_WIW_snow_data
+path_road = PATHNAMES.ESL_WIW_road_cover
 # Output paths
-path_output = params.PATHNAMES.at['ESL_WIW_loss_snow', 'Value']
+path_output = PATHNAMES.ESL_WIW_loss_snow
 
 #%% LOAD DATA
 df_snow = pd.read_excel(path_snow, sheet_name='Duplicate')

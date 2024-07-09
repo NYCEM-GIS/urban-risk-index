@@ -10,11 +10,13 @@ import requests
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Output paths
-path_output = params.PATHNAMES.at['RCA_RR_HO_score', 'Value']
+path_output = PATHNAMES.RCA_RR_HO_score
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()

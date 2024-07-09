@@ -7,11 +7,13 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Output paths
-path_results = params.PATHNAMES.at['ESL_CYB_econ_loss', 'Value']
+path_results = PATHNAMES.ESL_CYB_econ_loss
 # Hard-coded
 value_loss_2019 = 663.966 * 1000000   #from spreadsheet
 value_loss = utils.convert_USD(value_loss_2019, 2019)

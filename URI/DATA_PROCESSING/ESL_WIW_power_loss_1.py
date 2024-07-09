@@ -7,17 +7,18 @@ import datetime
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
-
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_outages = params.PATHNAMES.at['ESL_CST_outages_data', 'Value']
+path_outages = PATHNAMES.ESL_CST_outages_data
 # Params
-outage_buffer  = params.PARAMS.at['buffer_period_power_outage_days', 'Value']
-USD_per_hr_power_out = params.PARAMS.at['loss_day_power', 'Value'] / 24.
+outage_buffer  = PARAMS['buffer_period_power_outage_days'].value
+USD_per_hr_power_out = PARAMS['loss_day_power'].value / 24.
 # Output paths
-path_results = params.PATHNAMES.at['ESL_WIW_loss_power', 'Value']
+path_results = PATHNAMES.ESL_WIW_loss_power
 
 #%% LOAD DATA
 path_tree = r'\\surly.mcs.local\Projects\CCSI\TECH\2020_NYCURI\Working_Dano\1_RAW_INPUTS\OTH_HH_C\TreeServices.xlsx'

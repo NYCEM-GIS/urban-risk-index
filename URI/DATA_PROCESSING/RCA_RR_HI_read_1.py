@@ -8,14 +8,16 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_cdc = params.PATHNAMES.at['SOV_tract', 'Value']
-path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+path_cdc = PATHNAMES.SOV_tract
+path_fips = PATHNAMES.Borough_to_FIP
 # Output paths
-path_output = params.PATHNAMES.at['RCA_RR_HI_score', 'Value']
+path_output = PATHNAMES.RCA_RR_HI_score
 
 #%% LOAD DATA
 path_layer = os.path.basename(path_cdc)

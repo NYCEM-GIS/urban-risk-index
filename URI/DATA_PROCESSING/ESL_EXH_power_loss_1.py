@@ -9,16 +9,18 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
+path_population_tract = PATHNAMES.population_by_tract
 # Params
-yearly_outage = params.PARAMS.at['EXH_outage_person_hrs_per_year', 'Value']
-loss_outage_hr = params.PARAMS.at['loss_day_power', 'Value'] / 24.
+yearly_outage = PARAMS['EXH_outage_person_hrs_per_year'].value
+loss_outage_hr = PARAMS['loss_day_power'].value / 24.
 # Output paths
-path_output = params.PATHNAMES.at['ESL_EXH_loss_power', 'Value']
+path_output = PATHNAMES.ESL_EXH_loss_power
 
 #%% LOAD DATA
 df_pop = pd.read_excel(path_population_tract, skiprows=5)

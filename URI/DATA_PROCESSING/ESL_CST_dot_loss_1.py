@@ -4,7 +4,7 @@
 
 #%% read packages
 import sys; 
-sys.path.extend([r'C:\Users\hsprague\miniconda\URI_Calculator_v1_1_reduced\4_CODE'])
+sys.path.extend([r'C:\Users\ss63525\NYCEM_Miniconda\URI_Calculator_v1_1_TEMPLATE_v4\URI_Calculator_v1_1_TEMPLATE\4_CODE'])
 import numpy as np
 import pandas as pd
 import geopandas as gpd
