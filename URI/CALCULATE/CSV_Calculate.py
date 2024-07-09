@@ -8,6 +8,8 @@ import geopandas as gpd
 import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 nan_value = 'NA'
 
@@ -28,7 +30,7 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
         count = 0
         for haz in list_abbrev_haz:
             print('.', end='')
-            path_haz = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
+            path_haz = PATHNAMES.OUTPUTS_folder + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
             gdf_haz = gpd.read_file(path_haz)
             if geo_id == 'CITYWIDE':gdf_haz['CITYWIDE'] = np.repeat(int(1), len(gdf_haz))
 

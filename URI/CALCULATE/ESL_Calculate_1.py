@@ -51,7 +51,7 @@ def calculate_ESL(haz):
         print("..........Category:  {}".format(this_subcomponent))
         print(" ")
         # add consequence
-        path_consequence = PATHNAMES.this_path
+        path_consequence = getattr(PATHNAMES, this_path)
         gdf_consequence = gpd.read_file(path_consequence)[['BCT_txt', 'Loss_USD']]
         this_name = haz + 'E_' + this_rank + this_norm + this_subcomponent_abbrv + this_abbrv
         gdf_consequence.rename(columns={"Loss_USD":this_name}, inplace=True)

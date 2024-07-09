@@ -13,6 +13,7 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_hosp = PATHNAMES.ESL_WIW_hosp_data
+path_borid = PATHNAMES.Borough_to_FIP
 path_hosp_2016 = PATHNAMES.ESL_WIW_hosp_2016
 path_emerg = PATHNAMES.ESL_WIW_emerg_data
 path_emerg_2016 = PATHNAMES.ESL_WIW_emerg_2016
