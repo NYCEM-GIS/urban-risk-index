@@ -9,21 +9,20 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
-# from URI.PARAMS.pathnames import PATHNAMES 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_dot = params.PATHNAMES.at['ESL_CST_dot_table', 'Value']
-path_cst_loss = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
+path_dot = PATHNAMES.ESL_CST_dot_table
+path_cst_loss = PATHNAMES.ESL_CST_hazus_loss
 # Settings
 ref_year = PARAMS['target_year'].value
 # Output paths
-path_output = params.PATHNAMES.at['ESL_CST_loss_dot', 'Value']
+path_output = PATHNAMES.ESL_CST_loss_dot
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)

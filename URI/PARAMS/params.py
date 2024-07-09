@@ -1,9 +1,10 @@
 class params:
-  def __init__(self, label=None, value=None, source=None, source_year=None, comment=None, unit=None, type=None):
+  def __init__(self, label=None, value=None, source=None, source_year=None, description=None, comment=None, unit=None, type=None):
     self.label = label
     self.value = value
     self.source = source
     self.source_year = source_year
+    self.description = description
     self.comment = comment
     self.unit = unit
     self.type = type
@@ -50,7 +51,8 @@ add_params(
     value = [5990100, 5008900],
     source = "",
     source_year = "",
-    comment = "Tract number of tracts to exclude.  990100 is Hoffman and Swinburne island, which are not inhabited. 8900 is a pier on Staten Island and is no longer a tract in the 2020 census data",
+    description = "Tract IDs to be excluded from analysis.",
+    comment = "990100 is Hoffman and Swinburne island, which are not inhabited. 8900 is a pier on Staten Island and is no longer a tract in the 2020 census data.",
     unit = "",
     type = "HARDCODED",
 )
@@ -97,6 +99,7 @@ add_params(
     value = True,
     source = "",
     source_year = "",
+    description = "Flag for making plots in Jupyter Notebooks.",
     comment = "Set to True to make plots, False otherwise.",
     unit = "",
     type = "SETTINGS",
@@ -111,3 +114,14 @@ add_params(
 #     type = "",
 # )
 print(PARAMS["make_plots"].value)
+
+# PATHNAMES - NOT USED, JUST EXAMPLE FOR URI 3.0. SEE path_names.py FOR USE IN URI 2.1
+add_params(
+    label = "Example",
+    value = r'.\1_RAW_INPUTS\BOUNDARY_BOROUGH_FIPS\Borough_FIPS_1.xlsx',
+    source = "Newman Library of Baruch College, https://guides.newman.baruch.cuny.edu/nyc_data",
+    source_year = "2021",
+    comment = "Lookup table that associates borough code with borough name and FIPS code.",
+    unit = "N/A",
+    type = "PATHNAMES",
+)
