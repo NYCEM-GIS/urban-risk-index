@@ -1,5 +1,5 @@
 class params:
-  def __init__(self, label, value, source, source_year, comment, unit, type):
+  def __init__(self, label=None, value=None, source=None, source_year=None, comment=None, unit=None, type=None):
     self.label = label
     self.value = value
     self.source = source
@@ -9,16 +9,13 @@ class params:
     self.type = type
   
 
-
-params_dict = {}
-
-param_variables = {}
+PARAMS = {}
 
 
 def add_params(**kwargs):
     """Create a new params instance, and add it to the index."""
 
-    param_variables[kwargs["label"]] = params(**kwargs)
+    PARAMS[kwargs["label"]] = params(**kwargs)
 
 
 add_params(
@@ -35,7 +32,7 @@ add_params(
     value = "1/01/2000",
     source = "",
     source_year = "",
-    comment = "start date for counting extreme heat events in HH&C to determine liklihood",
+    comment = "Start date for counting extreme heat events in HH&C to determine liklihood",
     unit = "",
     type = "HARDCODED",
 )
@@ -44,7 +41,7 @@ add_params(
     value = "31/12/2019",
     source = "",
     source_year = "",
-    comment = "end date for counting extreme heat events in HH&C to determine likilhood",
+    comment = "End date for counting extreme heat events in HH&C to determine likilhood",
     unit = "",
     type = "HARDCODED",
 )
@@ -53,7 +50,7 @@ add_params(
     value = [5990100, 5008900],
     source = "",
     source_year = "",
-    comment = "tract number of tracts to exclude.  990100 is Hoffman and Swinburne island, which are not inhabited. 8900 is a pier on Staten Island and is no longer a tract in the 2020 census data",
+    comment = "Tract number of tracts to exclude.  990100 is Hoffman and Swinburne island, which are not inhabited. 8900 is a pier on Staten Island and is no longer a tract in the 2020 census data",
     unit = "",
     type = "HARDCODED",
 )
@@ -75,6 +72,8 @@ add_params(
     unit = "",
     type = "HARDCODED",
 )
+
+# SETTINGS
 add_params(
     label = "epsg",
     value = 2263,
@@ -95,10 +94,10 @@ add_params(
 )
 add_params(
     label = "make_plots",
-    value = "TRUE",
+    value = True,
     source = "",
     source_year = "",
-    comment = "Set to True to make plots, False otherwise.  ",
+    comment = "Set to True to make plots, False otherwise.",
     unit = "",
     type = "SETTINGS",
 )
@@ -111,4 +110,4 @@ add_params(
 #     unit = "",
 #     type = "",
 # )
-print(param_variables["make_plots"].value)
+print(PARAMS["make_plots"].value)

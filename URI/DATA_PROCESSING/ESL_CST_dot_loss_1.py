@@ -3,6 +3,8 @@
 
 
 #%% read packages
+import sys; 
+sys.path.extend([r'C:\Users\hsprague\miniconda\URI_Calculator_v1_1_reduced\4_CODE'])
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -10,6 +12,8 @@ import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+# from URI.PARAMS.pathnames import PATHNAMES 
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
@@ -17,7 +21,7 @@ utils.set_home()
 path_dot = params.PATHNAMES.at['ESL_CST_dot_table', 'Value']
 path_cst_loss = params.PATHNAMES.at['ESL_CST_hazus_loss', 'Value']
 # Settings
-ref_year = params.SETTINGS.at['target_year', 'Value']
+ref_year = PARAMS['target_year'].value
 # Output paths
 path_output = params.PATHNAMES.at['ESL_CST_loss_dot', 'Value']
 
