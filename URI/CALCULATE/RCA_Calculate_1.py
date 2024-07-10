@@ -36,7 +36,7 @@ def calculate_RCA(haz):
         component = list_component[j]
         haz_specific = list_haz_specific[j]
         try:
-            path_score = params.PATHNAMES.at['RCA_{}_{}_score'.format(component, code), 'Value']
+            path_score = getattr(PATHNAMES, 'RCA_{}_{}_score'.format(component, code))
             factor_weight = params.MITIGATION.loc[params.MITIGATION['Factor Code'] == code, haz].values[0]
             if factor_weight > 0:
                 list_code_valid.append(code)
@@ -51,7 +51,7 @@ def calculate_RCA(haz):
         code = list_code_valid[j]
         component = list_component_valid[j]
         haz_specific = list_haz_specific_valid[j]
-        path_score = params.PATHNAMES.at['RCA_{}_{}_score'.format(component, code), 'Value']
+        path_score = getattr(PATHNAMES, 'RCA_{}_{}_score'.format(component, code))
         if haz_specific == 'No':
             source_column_name = 'Score'
         elif haz_specific == 'Yes':
@@ -113,7 +113,7 @@ def calculate_RCA(haz):
     #%%
 
     # save as output
-    path_output = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\RCA\\Tract\\RCA_{}_Tract.shp'.format(haz)
+    path_output = PATHNAMES.OUTPUTS_folder + r'\\RCA\\Tract\\RCA_{}_Tract.shp'.format(haz)
     gdf_tract.to_file(path_output)
 
     #  document result with readme

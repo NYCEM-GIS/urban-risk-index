@@ -4,6 +4,8 @@ import geopandas as gpd
 import URI.MISC.plotting_1 as plotting
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% define functions
@@ -19,14 +21,14 @@ def calculate_URI(haz):
 
     print('Calculating {}'.format(haz))
     # open SOV, RCA, ESL
-    path_ESL = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\ESL\Tract\\ESL_{}_tract.shp'.format(haz, haz)
+    path_ESL = PATHNAMES.OUTPUTS_folder + r'\ESL\Tract\\ESL_{}_tract.shp'.format(haz, haz)
     gdf_ESL = gpd.read_file(path_ESL)
 
-    path_SOV = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\SOV\Tract\\SOV_tract.shp'.format( haz)
+    path_SOV = PATHNAMES.OUTPUTS_folder + r'\SOV\Tract\\SOV_tract.shp'.format( haz)
     df_SOV = gpd.read_file(path_SOV)
     df_SOV.drop(columns={'geometry'}, inplace=True)
 
-    path_RCA = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\RCA\Tract\\RCA_{}_tract.shp'.format(haz, haz)
+    path_RCA = PATHNAMES.OUTPUTS_folder + r'\RCA\Tract\\RCA_{}_tract.shp'.format(haz, haz)
     df_RCA = gpd.read_file(path_RCA)
     df_RCA.drop(columns={'geometry'}, inplace=True)
 
@@ -69,7 +71,7 @@ def calculate_URI(haz):
                            legend='Score', cmap='Purples', type='score')
 
     #%% save in Tract
-    path_save_tract = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\Tract\URI_{}_Tract.shp'.format(haz, haz)
+    path_save_tract = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_{}_Tract.shp'.format(haz, haz)
     gdf_URI.to_file(path_save_tract)
 
 
@@ -77,7 +79,7 @@ def calculate_URI(haz):
 if __name__ == '__main__':
 
     # %% open outputs path and get abbrev list and mitigation table
-    folder_outputs = params.PATHNAMES.at['OUTPUTS_folder', 'Value']
+    folder_outputs = PATHNAMES.OUTPUTS_folder
     list_abbrev_haz = params.ABBREVIATIONS.iloc[0:11, 0].values.tolist()
 
     #run script

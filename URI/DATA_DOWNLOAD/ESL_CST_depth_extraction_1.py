@@ -9,15 +9,17 @@ import os
 from rasterstats import zonal_stats
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 import time
 utils.set_home()
 t0 = time.time()
 #%% EXTRACT PARAMETERS
 # Input paths
-path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
+path_footprint = PATHNAMES.ESL_CST_building_footprints
 
 # Output paths
-path_footprint_depths = params.PATHNAMES.at['ESL_CST_building_footprints_depth', 'Value']
+path_footprint_depths = PATHNAMES.ESL_CST_building_footprints_depth
 
 #%% make copy of building footprints  with hurricane depths
 # open and project footprint shapefile
@@ -34,7 +36,7 @@ for cat in np.arange(1, 5):
     t1 = time.time()
     print(".....adding data for category {} storms".format(cat))
     # get path to depth raster
-    path_C = params.PATHNAMES.at['ESL_CST_SLOSH_C{}'.format(cat), 'Value']
+    path_C = getattr(PATHNAMES,'ESL_CST_SLOSH_C{}'.format(cat))
     # perform zonal stats
     dict_c = zonal_stats(path_temp, path_C, stats="max")
     # join results to footprint

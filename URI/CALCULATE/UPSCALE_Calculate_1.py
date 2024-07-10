@@ -12,6 +12,8 @@ import requests
 import URI.MISC.plotting_1 as plotting
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% define weighted avereage
@@ -26,17 +28,17 @@ def calculate_UPSCALE(haz):
     print('Upscaling {}.....'.format(haz), end="")
 
     #%% open tract uri
-    path_uri = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\Tract\URI_{}_tract.shp'.format(haz)
+    path_uri = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_{}_tract.shp'.format(haz)
     gdf_uri = gpd.read_file(path_uri)
 
     #%% create tract and master
     gdf_tract = utils.get_blank_tract()
-    path_norm = params.PATHNAMES.at['OTH_normalize_values', 'Value']
+    path_norm = PATHNAMES.OTH_normalize_values
     df_norm = gpd.read_file(path_norm)
     df_norm.drop(columns={'geometry'}, inplace=True)
     gdf_tract = gdf_tract.merge(df_norm, on='BCT_txt', how='left')
     #add borough name
-    path_boro = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+    path_boro = PATHNAMES.Borough_to_FIP
     df_boro = pd.read_excel(path_boro)
     df_boro['borocode'] = [str(x) for x in df_boro['Bor_ID']]
     gdf_tract = gdf_tract.merge(df_boro[['Borough', 'borocode']], left_on='borocode', right_on='borocode', how='left' )
@@ -63,7 +65,7 @@ def calculate_UPSCALE(haz):
         gdf_new  = gdf_new[list_geo_keep + ['geometry']].dissolve(by=geo_id)
         gdf_new[geo_id] = gdf_new.index
         gdf_new.index.name = 'Index'
-        path_new = params.PATHNAMES.at['TBL_{}_shp'.format(geo_name), 'Value']
+        path_new = getattr(PATHNAMES,'TBL_{}_shp'.format(geo_name))
         gdf_new.to_file(path_new)
 
         #add normalization to master
@@ -89,7 +91,7 @@ def calculate_UPSCALE(haz):
         #%% if haz==ALL and geo_id==CITYWIDE, add in CYB losses and URI score
         if haz=='ALL':
             if geo_id=='CITYWIDE':
-                path_CYB = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\Tract\URI_{}_tract.shp'.format('CYB')
+                path_CYB = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_{}_tract.shp'.format('CYB')
                 gdf_CYB = gpd.read_file(path_CYB)
                 list_col_add = [col for col in gdf_new.columns if (('E_RN' in col) or ('U_RN' in col))]
                 for col in list_col_add:
@@ -134,7 +136,7 @@ def calculate_UPSCALE(haz):
         if geo_id=='CITYWIDE': gdf_new.drop(columns={'CITYWIDE'}, inplace=True)
 
         #%% save in Tract
-        path_output = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
+        path_output = PATHNAMES.OUTPUTS_folder + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
         gdf_new.to_file(path_output)
 
         #%% plot
@@ -143,7 +145,7 @@ def calculate_UPSCALE(haz):
                                    legend='Score', cmap='Purples', type='score')
 
         #%% save master shapefile for tableau
-        path_master = params.PATHNAMES.at['TBL_MASTER_shp', 'Value']
+        path_master = PATHNAMES.TBL_MASTER_shp
         gdf_master.to_file(path_master)
 
 
@@ -163,7 +165,7 @@ def calculate_UPSCALE(haz):
 if __name__ == '__main__':
 
     # %% open outputs path and get abbrev list
-    folder_outputs = params.PATHNAMES.at['OUTPUTS_folder', 'Value']
+    folder_outputs = PATHNAMES.OUTPUTS_folder
     list_abbrev_haz = params.ABBREVIATIONS.iloc[0:11, 0].values.tolist()
 
     #run script

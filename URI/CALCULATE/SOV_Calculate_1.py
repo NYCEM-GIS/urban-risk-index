@@ -14,15 +14,16 @@ import matplotlib.pyplot as plt
 import URI.MISC.utils_1 as utils
 import URI.MISC.params_1 as params
 import URI.MISC.plotting_1 as plotting
-#import URI.MISC.params_1 as params
-#import URI.MISC.utils_1 as utils
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
+
 utils.set_home()
 
 def calculate_SOV():
 
     #%% EXTRACT PARAMETERS
-    path_sovi = params.PATHNAMES.at['SOV_tract', 'Value']
-    path_FIPS = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+    path_sovi = PATHNAMES.SOV_tract
+    path_FIPS = PATHNAMES.Borough_to_FIP
 
     #%% LOAD DATA
     df_FIPS = pd.read_excel(path_FIPS, index_col='FIPS')
@@ -53,7 +54,7 @@ def calculate_SOV():
                            legend='Score', cmap='Reds', type='score')
 
     #%% save results in every folder (same for all)
-    path_results = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\SOV\Tract\\SOV_Tract.shp'
+    path_results = PATHNAMES.OUTPUTS_folder + r'\\SOV\Tract\\SOV_Tract.shp'
     gdf_tract[['BCT_txt', 'S_R', 'S_S', 'S_P', 'geometry']].to_file(path_results)
 
     #%%  document result with readme
