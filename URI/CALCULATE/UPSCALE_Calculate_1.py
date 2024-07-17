@@ -21,7 +21,7 @@ def weight_ave(x, weights):
     if weights.sum() != 0:
         result = np.average(x, weights=weights)
     else:
-        result = 3
+        result = 3  # HMS: Should this be lowest value rather than mid value?
     return result
 
 def calculate_UPSCALE(haz):
@@ -30,6 +30,8 @@ def calculate_UPSCALE(haz):
     #%% open tract uri
     path_uri = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_{}_tract.shp'.format(haz)
     gdf_uri = gpd.read_file(path_uri)
+    # add citywide id
+    gdf_uri['CITYWIDE'] = 1
 
     #%% create tract and master
     gdf_tract = utils.get_blank_tract()
@@ -50,18 +52,17 @@ def calculate_UPSCALE(haz):
     gdf_master['Geography'] = np.repeat('Tract', len(gdf_master))
 
     #%% select upscale key
-    list_geo = ['CITYWIDE', 'borocode', 'cdta2020', 'nta2020', ]
+    list_geo = ['CITYWIDE', 'borocode', 'cdta2020', 'nta2020']
     list_geo_folder = ['CITYWIDE', 'Borough', 'CDTA', 'NTA']
     list_geo_keep = []
     for (geo_id, geo_name) in zip(list_geo, list_geo_folder):
         print(geo_name, end=' ')
         list_geo_keep.append(geo_id)
-        # add citywide id
-        gdf_uri['CITYWIDE'] = [int(1) for x in np.arange(len(gdf_uri))]
 
         #%% get new dissolved shapefile with only geo_id
+        # HMS: DON'T NEED TO DO THIS FOR EACH HAZARD. COULD JUST REPLACE WITH PATH TO FILE AND LOAD 
         gdf_new = gdf_uri.copy()
-        gdf_new.geometry = gdf_new.buffer(0)
+        # gdf_new.geometry = gdf_new.buffer(0)  # HMS: This doesn't seem to be doing anything
         gdf_new  = gdf_new[list_geo_keep + ['geometry']].dissolve(by=geo_id)
         gdf_new[geo_id] = gdf_new.index
         gdf_new.index.name = 'Index'
@@ -87,15 +88,6 @@ def calculate_UPSCALE(haz):
         list_col_keep = [geo_id] + list_col_norm + list_col_loss + list_col_uri
         df_sum = gdf_uri[list_col_keep].groupby(by=geo_id).sum()
         gdf_new = gdf_new.merge(df_sum, left_on=geo_id, right_index=True, how='left')
-
-        #%% if haz==ALL and geo_id==CITYWIDE, add in CYB losses and URI score
-        if haz=='ALL':
-            if geo_id=='CITYWIDE':
-                path_CYB = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_{}_tract.shp'.format('CYB')
-                gdf_CYB = gpd.read_file(path_CYB)
-                list_col_add = [col for col in gdf_new.columns if (('E_RN' in col) or ('U_RN' in col))]
-                for col in list_col_add:
-                    gdf_new[col] = gdf_new[col] + gdf_CYB[col.replace('ALL', 'CYB')].sum()
 
         #%% get pop weighted average of SOV and RCA raw scores, merge
         gdf_uri.index = np.arange(len(gdf_uri))
@@ -144,10 +136,6 @@ def calculate_UPSCALE(haz):
             plotting.plot_notebook(gdf_new, column=haz+'U_SN', title=haz + ': Urban Risk Index ({})'.format(geo_name),
                                    legend='Score', cmap='Purples', type='score')
 
-        #%% save master shapefile for tableau
-        path_master = PATHNAMES.TBL_MASTER_shp
-        gdf_master.to_file(path_master)
-
 
         #%%  document result with readme
         try:
@@ -159,6 +147,10 @@ def calculate_UPSCALE(haz):
             utils.write_readme(path_readme, text)
         except:
             pass
+
+    #%% save master shapefile for tableau
+    path_master = PATHNAMES.TBL_MASTER_shp
+    gdf_master.to_file(path_master)
     print("Done.")
 
 #%% main

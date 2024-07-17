@@ -62,7 +62,6 @@ def calculate_ESL(haz):
     # rename the columns in new Boundary tract file.    
     list_all_col = list_E_col.copy() + ['BCT_txt', 'geometry', 'borocode', 'nta2020', 'cdta2020']
     gdf_ESL = gdf_ESL[list_all_col]
-    # gdf_ESL.rename(columns={'nta2020':'NTA'}, inplace=True)
 
     #%% get sum of subcompponents
     list_subcomponents = np.unique(list_subcomponents)
