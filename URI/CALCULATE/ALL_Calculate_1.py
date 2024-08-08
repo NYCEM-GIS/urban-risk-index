@@ -13,7 +13,6 @@ utils.set_home()
 def calculate_ALL(list_abbrev_haz):
     #%% open and merge all URI shapefiles
     for i, haz in enumerate(list_abbrev_haz):
-        print(haz)
         path_haz = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_{}_tract.shp'.format(haz, haz)
         if i==0:
             gdf_all = gpd.read_file(path_haz)

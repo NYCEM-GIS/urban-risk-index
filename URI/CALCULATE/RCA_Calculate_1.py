@@ -36,7 +36,7 @@ def calculate_RCA(haz):
         component = list_component[j]
         haz_specific = list_haz_specific[j]
         try:
-            path_score = getattr(PATHNAMES, 'RCA_{}_{}_score'.format(component, code))
+            path_score = getattr(PATHNAMES, 'RCA_{}_{}_score'.format(component, code))  ### Not used
             factor_weight = params.MITIGATION.loc[params.MITIGATION['Factor Code'] == code, haz].values[0]
             if factor_weight > 0:
                 list_code_valid.append(code)

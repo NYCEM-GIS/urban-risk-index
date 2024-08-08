@@ -389,7 +389,7 @@ ABBREVIATIONS = {}
 def add_abbre(**kwargs):
     """Create a new params instance, and add it to the index."""
 
-    ABBREVIATIONS[kwargs["label"]] = abbreviations(**kwargs)
+    ABBREVIATIONS[kwargs["abbreviation"]] = abbreviations(**kwargs)
 
 
 add_abbre(
