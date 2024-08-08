@@ -22,13 +22,6 @@ def add_params(**kwargs):
     PARAMS[kwargs["label"]] = params(**kwargs)
 
 # HARDCODED
-
-add_params(
-    label = "null_value",
-    value = "-999 or '-999'",
-    type = "HARDCODED",
-)
-
 add_params(
     label = "heat_event_count_start_date",
     value = datetime.date(year=2000, month=1, day=1),
