@@ -5,7 +5,6 @@
 import pandas as pd
 import geopandas as gpd
 import os
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
@@ -53,7 +52,7 @@ df_storms_cst = df_storms_cst.loc[df_storms_cst['EndDate']<end_date]
 #%% count fatalities and injuries
 n_deaths = df_storms_cst['Fatalities'].sum() / n_years
 n_injuries = df_storms_cst['Injuries'].sum() / n_years
-loss_deaths = params.PARAMS.at['value_of_stat_life', 'Value'] * n_deaths
+loss_deaths = PARAMS.at['value_of_stat_life', 'Value'] * n_deaths
 #no injuries
 loss_deaths_total = utils.convert_USD(loss_deaths, 2022)
 

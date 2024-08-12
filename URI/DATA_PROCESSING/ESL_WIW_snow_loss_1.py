@@ -30,14 +30,18 @@ df_snow.index = np.arange(2007, 2024)
 df_snow['Snow Remove Cost'] = [utils.convert_USD(df_snow.at[idx, 'Snow Removal Cost'], idx) for idx in df_snow.index]
 ave_cost_year = df_snow['Snow Remove Cost'].mean() * 1000000
 
+print(df_road.columns)
+print(gdf_tract.columns)
+
+
 #%% get length of road in each tract
 df_road.index = np.arange(len(df_road))
-df_road['BCT_TXT'] = [str(df_road.at[idx, 'BCT_TXT']) for idx in df_road.index]
-gdf_tract = gdf_tract.merge(df_road, on='BCT_TXT', how='left')
+df_road['BCT_txt'] = [str(df_road.at[idx, 'BCT_txt']) for idx in df_road.index]
+gdf_tract = gdf_tract.merge(df_road, on='BCT_txt', how='left')
 
 
-#%% distribute based on area
-gdf_tract['Loss_USD'] = ave_cost_year * gdf_tract['Length'] / gdf_tract['Length'].sum()
+#%% distribute based on critical snow route length
+gdf_tract['Loss_USD'] = ave_cost_year * gdf_tract['Critical_Route_Length'] / gdf_tract['Critical_Route_Length'].sum()
 
 
 #%% save as output

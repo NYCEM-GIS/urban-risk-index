@@ -3,10 +3,9 @@
 import numpy as np
 import pandas as pd
 import os
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
-from URI.PARAMS.params import PARAMS 
+from URI.PARAMS.params import  PARAMS, ABBREVIATIONS
 import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
@@ -15,7 +14,7 @@ utils.set_home()
 path_activation = PATHNAMES.RCA_RC_IE_activation
 # Params
 # This represents all the hazard abbreviations, excluding SOV, RCA, ESL, and OTH
-list_abbrv = params.ABBREVIATIONS.iloc[0:11, 0].values
+list_abbrv = [x.abbreviation for x in ABBREVIATIONS.values() if x.category == "Hazard"]
 # Output paths
 path_output = PATHNAMES.RCA_RC_IN_score
 
