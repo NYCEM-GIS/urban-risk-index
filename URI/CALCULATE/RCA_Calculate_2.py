@@ -27,24 +27,17 @@ def calculate_RCA(haz):
     list_code = params.MITIGATION.loc[:, 'Factor Code'].values
     list_component = params.MITIGATION.loc[:, 'Component Code'].values
     list_component_name = params.MITIGATION.loc[:, 'RC Component'].values
-    list_haz_specific = params.MITIGATION.loc[:, 'Hazard Specific'].values
+    
+    # Load hazard specipic only rows where weight > 0
     list_code_valid = []
     list_code_weight = []
     list_component_valid = []
     list_haz_specific_valid = []
-    for j, code in enumerate(list_code):
-        component = list_component[j]
-        haz_specific = list_haz_specific[j]
-        try:
-            path_score = getattr(PATHNAMES, 'RCA_{}_{}_score'.format(component, code))  ### Not used
-            factor_weight = params.MITIGATION.loc[params.MITIGATION['Factor Code'] == code, haz].values[0]
-            if factor_weight > 0:
-                list_code_valid.append(code)
-                list_code_weight.append(factor_weight)
-                list_component_valid.append(component)
-                list_haz_specific_valid.append(haz_specific)
-        except:
-            print("Missing score for code {}".format(code))
+    applicable_fo_haz_df = params.MITIGATION[params.MITIGATION[haz] > 0]
+    list_code_valid = applicable_fo_haz_df['Factor Code'].values
+    list_component_valid = applicable_fo_haz_df['Component Code'].values
+    list_code_weight = applicable_fo_haz_df[haz].values
+    list_haz_specific_valid = applicable_fo_haz_df['Hazard Specific'].values
 
     #add all valid codes into gdf
     for j in np.arange(len(list_code_valid)):
@@ -64,24 +57,22 @@ def calculate_RCA(haz):
 
     # calculate subcomponents
     list_component_uniq = list(dict.fromkeys(list_component))
-    list_component_name_uniq = list(dict.fromkeys(list_component_name))
-    dct_component = {list_component_uniq[x]: list_component_name_uniq[x] for x in range(len(list_component_uniq))}
-    for j, component in enumerate(list_component_uniq):
-        output = [idx for idx, comp in enumerate(list_component_valid) if comp==component]
-        this_code = ['{}_'.format(component) + list_code_valid[x] for x in output]
-        this_code_weight = [list_code_weight[x] for x in output]
-        if len(this_code)==0:
-            gdf_tract['{}'.format(component)] = np.zeros(len(gdf_tract))
+    for component in list_component_uniq:
+        if component in list_component_valid:
+            output = [idx for idx, comp in enumerate(list_component_valid) if comp==component]
+            this_code = ['{}_'.format(component) + list_code_valid[x] for x in output]
+            this_code_weight = [list_code_weight[x] for x in output]
+            gdf_tract['{}'.format(component)] = np.average(gdf_tract.loc[:, this_code], weights=this_code_weight, axis=1)        
+            
         else:
-            gdf_tract['{}'.format(component)] = np.average(gdf_tract.loc[:, this_code], weights=this_code_weight, axis=1)
+            gdf_tract['{}'.format(component)] = np.zeros(len(gdf_tract))
+
         list_col_keep.append('{}'.format(component))
 
     #calculate final RCA
     #CHANGE TO divede by 4.0 when RC data is available
     gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/len(np.unique(list_component_valid))
     list_col_keep.append('RCA')
-    # print('.....min:{}'.format(gdf_tract['RCA'].min()))
-    # print('.....max:{}'.format(gdf_tract['RCA'].max()))
 
     #%% rename columns
     gdf_tract = gdf_tract[list_col_keep].copy()
@@ -103,6 +94,9 @@ def calculate_RCA(haz):
         gdf_tract = utils.calculate_percentile(gdf_tract, data_column=col, score_column=percentile_col)
 
     #%% plot in notebook
+    list_component_name_uniq = list(dict.fromkeys(list_component_name))
+    dct_component = {list_component_uniq[x]: list_component_name_uniq[x] for x in range(len(list_component_uniq))}
+
     for code in dct_component.keys():
         name = dct_component[code]
         plotting.plot_notebook(gdf_tract, column=haz+'R_S'+code+'TT', title=haz + ': ' + name,
