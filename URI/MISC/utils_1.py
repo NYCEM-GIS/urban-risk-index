@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 from sklearn.cluster import KMeans
-from URI.MISC import params_1 as params
 from shapely.ops import nearest_points
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES

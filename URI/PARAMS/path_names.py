@@ -1,4 +1,4 @@
-home = r'C:\Users\hsprague\miniconda\URI_Calculator_v1_1_reduced'
+home = r'C:\Users\YLuo\VSCode\URI_Calculator_v1_1_TEMPLATE_v4\URI_Calculator_v1_1_TEMPLATE'
 Borough_to_FIP = r'.\1_RAW_INPUTS\BOUNDARY_BOROUGH_FIPS\Borough_FIPS_1.xlsx'
 BOUNDARY_tract = r'.\1_RAW_INPUTS\BOUNDARY_CENSUS_TRACT\CSCL_CensusTract2020.shp'
 BOUNDARY_zcta = r'.\1_RAW_INPUTS\BOUNDARY_MODZCTA\Modified Zip Code Tabulation Areas (MODZCTA)_20240219\geo_export_aa48aecc-01c6-4716-aa5f-d1164dd631c8.shp'

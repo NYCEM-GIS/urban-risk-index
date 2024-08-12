@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
@@ -25,21 +24,21 @@ df_road = pd.read_csv(path_road)
 
 #%% tracts 
 gdf_tract = utils.get_blank_tract()
-gdf_tract['area_ft2'] = gdf_tract.geometry.area
 
 #%%get costs based on 2018 dollars
 df_snow.index = np.arange(2007, 2024)
 df_snow['Snow Remove Cost'] = [utils.convert_USD(df_snow.at[idx, 'Snow Removal Cost'], idx) for idx in df_snow.index]
 ave_cost_year = df_snow['Snow Remove Cost'].mean() * 1000000
 
-#%% get area of road in each tract
+#%% get length of road in each tract
 df_road.index = np.arange(len(df_road))
-df_road['BCT_txt'] = [str(df_road.at[idx, 'BCT_TXT']) for idx in df_road.index]
-gdf_tract = gdf_tract.merge(df_road, on='BCT_txt', how='left')
+df_road['BCT_TXT'] = [str(df_road.at[idx, 'BCT_TXT']) for idx in df_road.index]
+gdf_tract = gdf_tract.merge(df_road, on='BCT_TXT', how='left')
+
 
 #%% distribute based on area
-gdf_tract['road_area_ft2'] = gdf_tract['area_ft2'] * gdf_tract['MEAN']
-gdf_tract['Loss_USD'] = ave_cost_year * gdf_tract['road_area_ft2'] / gdf_tract['road_area_ft2'].sum()
+gdf_tract['Loss_USD'] = ave_cost_year * gdf_tract['Length'] / gdf_tract['Length'].sum()
+
 
 #%% save as output
 gdf_tract.to_file(path_output)
