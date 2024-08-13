@@ -7,8 +7,6 @@ import pandas as pd
 import geopandas as gpd
 import os
 import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
 
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
@@ -20,20 +18,29 @@ utils.set_home()
 #%% calculate RCA
 def calculate_RCA(haz):
 
+    if haz == 'RCA':
+        resilience_df_path = PATHNAMES.PARAM_Folder + '\Resilience Capacity.csv'
+    else:
+        resilience_df_path = PATHNAMES.PARAM_Folder + '\Hazard Resilience Capacity.csv'
+
+    resilience_df = pd.read_csv(resilience_df_path,skiprows=1)
+
     # %% open tract
     gdf_tract = utils.get_blank_tract()
     list_col_keep = ['BCT_txt', 'geometry']
     #find codes and their components with valid data
-    list_code = params.MITIGATION.loc[:, 'Factor Code'].values
-    list_component = params.MITIGATION.loc[:, 'Component Code'].values
-    list_component_name = params.MITIGATION.loc[:, 'RC Component'].values
+    list_component = resilience_df ['Component Code'].values
+    list_component_name = resilience_df['RC Component'].values
     
+    # list_component = params.MITIGATION.loc[:, 'Component Code'].values
+    # list_component_name = params.MITIGATION.loc[:, 'RC Component'].values
     # Load hazard specipic only rows where weight > 0
     list_code_valid = []
     list_code_weight = []
     list_component_valid = []
     list_haz_specific_valid = []
-    applicable_fo_haz_df = params.MITIGATION[params.MITIGATION[haz] > 0]
+    applicable_fo_haz_df = resilience_df[resilience_df[haz] > 0]
+    # applicable_fo_haz_df = params.MITIGATION[params.MITIGATION[haz] > 0]
     list_code_valid = applicable_fo_haz_df['Factor Code'].values
     list_component_valid = applicable_fo_haz_df['Component Code'].values
     list_code_weight = applicable_fo_haz_df[haz].values
@@ -59,9 +66,9 @@ def calculate_RCA(haz):
     list_component_uniq = list(dict.fromkeys(list_component))
     for component in list_component_uniq:
         if component in list_component_valid:
-            output = [idx for idx, comp in enumerate(list_component_valid) if comp==component]
-            this_code = ['{}_'.format(component) + list_code_valid[x] for x in output]
-            this_code_weight = [list_code_weight[x] for x in output]
+            valid_index = [idx for idx, comp in enumerate(list_component_valid) if comp==component]
+            this_code = ['{}_'.format(component) + list_code_valid[x] for x in valid_index]
+            this_code_weight = [list_code_weight[x] for x in valid_index]
             gdf_tract['{}'.format(component)] = np.average(gdf_tract.loc[:, this_code], weights=this_code_weight, axis=1)        
             
         else:

@@ -1,0 +1,9 @@
+﻿,,,,,,
+RC Component,Component Code,RC Factor,Factor Code,Hazard Specific,Type,RCA
+Community Capital,CC,Community Infrastructure,CI,No,Resilience Capacity,1
+Community Capital,CC,Education and Outreach,EO,No,Resilience Capacity,1
+Community Capital,CC,Place Attachment,PA,No,Resilience Capacity,1
+Community Capital,CC,Political Engagement,PE,No,Resilience Capacity,1
+Response Capacity,RC,Bikability,BI,No,Resilience Capacity,1
+Response Capacity,RC,Transit,TR,No,Resilience Capacity,1
+Response Capacity,RC,Walkability,WA,No,Resilience Capacity,1
