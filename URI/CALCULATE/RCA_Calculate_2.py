@@ -19,9 +19,9 @@ utils.set_home()
 def calculate_RCA(haz):
 
     if haz == 'RCA':
-        resilience_df_path = PATHNAMES.PARAM_Folder + '\Resilience Capacity.csv'
+        resilience_df_path = PATHNAMES.Resilience_Capacity_path
     else:
-        resilience_df_path = PATHNAMES.PARAM_Folder + '\Hazard Resilience Capacity.csv'
+        resilience_df_path = PATHNAMES.Hazard_Resilience_Capacity_path 
 
     resilience_df = pd.read_csv(resilience_df_path,skiprows=1)
 
