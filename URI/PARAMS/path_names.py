@@ -15,6 +15,7 @@ ESL_EXH_emerg_2016 = r'.\1_RAW_INPUTS\EXH_INJURIES\Heat Stress Emergency Departm
 ESL_EXH_emerg_data = r'.\1_RAW_INPUTS\EXH_INJURIES\Trends in Heat Stress Emergency Department Visits - Age-Adjusted Rate.csv'
 ESL_EXH_hosp_2016 = r'.\1_RAW_INPUTS\EXH_INJURIES\Heat Stress Hospitalizations.csv'
 ESL_EXH_hosp_data = r'.\1_RAW_INPUTS\EXH_INJURIES\Trends in Heat Stress Hospitalizations - Age-Adjusted Rate.csv'
+ESL_EXH_ecostress_2020 = r'.\1_RAW_INPUTS\EXH_INJURIES\ZonalStats_Ecostress_CT.csv'
 CPI_table = r'.\1_RAW_INPUTS\OTH_CPI\CPIAUCNS.xls'
 boroughs_table = r'.\1_RAW_INPUTS\OTH_HH_C\Boroughs.xlsx'
 ESL_CST_outages_data = r'.\1_RAW_INPUTS\OTH_HH_C\ElectricalOutages.xlsx'

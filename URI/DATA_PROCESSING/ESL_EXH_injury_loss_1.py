@@ -16,6 +16,7 @@ path_borid = PATHNAMES.Borough_to_FIP
 path_hosp_2016 = PATHNAMES.ESL_EXH_hosp_2016
 path_emerg = PATHNAMES.ESL_EXH_emerg_data
 path_emerg_2016 = PATHNAMES.ESL_EXH_emerg_2016
+path_ecostress = PATHNAMES.ESL_EXH_ecostress_2020
 # Params
 loss_per_moderate_injury_2016 = PARAMS['value_moderate_injury'].value
 loss_per_serious_injury_2016 = PARAMS['value_serious_injury'].value
@@ -29,6 +30,13 @@ df_borid = pd.read_excel(path_borid)
 df_hosp_2016 = pd.read_csv(path_hosp_2016, skiprows=6, skipfooter=23, engine='python')
 df_emerg = pd.read_csv(path_emerg, skiprows=14, skipfooter=5, engine='python')
 df_emerg_2016 = pd.read_csv(path_emerg_2016, skiprows=6, skipfooter=23, engine='python')
+df_ecostress = pd.read_csv(path_ecostress)
+
+#%% Merge Ecostress data with tract-level data
+gdf_tract['BCT_txt'] = gdf_tract['BCT_txt'].astype(int)
+gdf_tract = gdf_tract.merge(df_ecostress[['boroct2020', 'PCT90']], 
+                            left_on='BCT_txt', right_on='boroct2020', how='inner')
+gdf_tract['Weighting_Factor'] = gdf_tract['PCT90'] * gdf_tract['pop_2020']
 
 #%% load hospitalizations.  These are the most severe injuries
 # keep only the borough estimates
@@ -94,6 +102,9 @@ gdf_tract['N_emerg_uniq'] = gdf_tract['N_emerg'] - gdf_tract['N_hosp']
 loss_moderate_total = utils.convert_USD(loss_per_moderate_injury_2016, 2016)
 loss_serious_total = utils.convert_USD(loss_per_serious_injury_2016, 2016)
 gdf_tract['Loss_USD'] = gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_emerg_uniq'] * loss_moderate_total
+
+# Apply weighting factor to losses
+gdf_tract['Loss_USD'] = (gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_emerg_uniq'] * loss_moderate_total) * gdf_tract['Weighting_Factor']
 
 #%% save as output
 gdf_tract.to_file(path_output)
