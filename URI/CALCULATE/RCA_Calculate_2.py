@@ -28,19 +28,17 @@ def calculate_RCA(haz):
     # %% open tract
     gdf_tract = utils.get_blank_tract()
     list_col_keep = ['BCT_txt', 'geometry']
+   
     #find codes and their components with valid data
     list_component = resilience_df ['Component Code'].values
     list_component_name = resilience_df['RC Component'].values
-    
-    # list_component = params.MITIGATION.loc[:, 'Component Code'].values
-    # list_component_name = params.MITIGATION.loc[:, 'RC Component'].values
+
     # Load hazard specipic only rows where weight > 0
     list_code_valid = []
     list_code_weight = []
     list_component_valid = []
     list_haz_specific_valid = []
     applicable_fo_haz_df = resilience_df[resilience_df[haz] > 0]
-    # applicable_fo_haz_df = params.MITIGATION[params.MITIGATION[haz] > 0]
     list_code_valid = applicable_fo_haz_df['Factor Code'].values
     list_component_valid = applicable_fo_haz_df['Component Code'].values
     list_code_weight = applicable_fo_haz_df[haz].values
