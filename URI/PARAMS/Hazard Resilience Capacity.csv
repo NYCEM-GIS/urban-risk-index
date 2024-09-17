@@ -1,13 +1,13 @@
-﻿,,,,,,Coastal Erosion,Coastal Storm Surge,Earthquakes,Extreme Heat,Coastal Storm Winds,Winter Weather,,,,,,,,,
-RC Component,Component Code,RC Factor,Factor Code,Hazard Specific,Type,CER,CST,ERQ,EXH,HIW,WIW,,,,,,,,,
-Mitigation Landscape,ML,Green Infrastructure,GI,No,Hazard Resilience,0,0,0,0,0,0,,,,,,,,,
-Mitigation Landscape,ML,Mitigation Investments,MI,Yes,Hazard Resilience,1,1,1,1,1,1,,,,,,,,,
-Mitigation Landscape,ML,Parks with Water Feature,PW,No,Hazard Resilience,0,0,0,1,0,0,,,,,,,,,
-Mitigation Landscape,ML,Vegetative Cover,VC,No,Hazard Resilience,0,0,0,1,0,0,,,,,,,,,
-Response Capacity,RC,Air Conditioning in the Home,AC,No,Hazard Resilience,0,0,0,1,0,0,,,,,,,,,
-Response Capacity,RC,Cooling Centers,CC,No,Hazard Resilience,0,0,0,1,0,0,,,,,,,,,
-Response Capacity,RC,Emergency Medical Access,EM,Yes,Hazard Resilience,0,1,1,1,1,1,,,,,,,,,
-Response Capacity,RC,Evacuation Potential,EP,No,Hazard Resilience,0,1,1,0,0,0,,,,,,,,,
-Response Capacity,RC,Institutional Experience,IN,Yes,Hazard Resilience,0,1,1,1,1,1,,,,,,,,,
-Response Capacity,RC,Shelter Capacity,SC,No,Hazard Resilience,0,1,0,0,0,0,,,,,,,,,
-Recovery Resources,RR,Flood Insurance Coverage,FP,No,Hazard Resilience,1,1,0,0,0,0,,,,,,,,,
+﻿,,,,,,Coastal Erosion,Coastal Storm Surge,Earthquakes,Extreme Heat,Coastal Storm Winds,Winter Weather
+RC Component,Component Code,RC Factor,Factor Code,Hazard Specific,Type,CER,CST,ERQ,EXH,HIW,WIW
+Mitigation Landscape,ML,Green Infrastructure,GI,No,Hazard Resilience,0,0,0,0,0,0
+Mitigation Landscape,ML,Mitigation Investments,MI,Yes,Hazard Resilience,1,1,1,1,1,1
+Mitigation Landscape,ML,Parks with Water Feature,PW,No,Hazard Resilience,0,0,0,1,0,0
+Mitigation Landscape,ML,Vegetative Cover,VC,No,Hazard Resilience,0,0,0,1,0,0
+Response Capacity,RC,Air Conditioning in the Home,AC,No,Hazard Resilience,0,0,0,1,0,0
+Response Capacity,RC,Cooling Centers,CC,No,Hazard Resilience,0,0,0,1,0,0
+Response Capacity,RC,Emergency Medical Access,EM,Yes,Hazard Resilience,0,1,1,1,1,1
+Response Capacity,RC,Evacuation Potential,EP,No,Hazard Resilience,0,1,1,0,0,0
+Response Capacity,RC,Institutional Experience,IN,Yes,Hazard Resilience,0,1,1,1,1,1
+Response Capacity,RC,Shelter Capacity,SC,No,Hazard Resilience,0,1,0,0,0,0
+Recovery Resources,RR,Flood Insurance Coverage,FP,No,Hazard Resilience,1,1,0,0,0,0
