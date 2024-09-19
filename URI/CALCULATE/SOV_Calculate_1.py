@@ -14,32 +14,29 @@ import matplotlib.pyplot as plt
 import URI.MISC.utils_1 as utils
 import URI.MISC.params_1 as params
 import URI.MISC.plotting_1 as plotting
-#import URI.MISC.params_1 as params
-#import URI.MISC.utils_1 as utils
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
+
 utils.set_home()
 
 def calculate_SOV():
 
-    #%% load cdc covi score at tract level and reproject
-    path_sovi = params.PATHNAMES.at['SOV_tract', 'Value']
-    gdf_sovi = gpd.read_file(path_sovi)
-    #reproject
-    epsg = params.SETTINGS.at['epsg', 'Value']
-    gdf_sovi = gdf_sovi.to_crs(epsg=epsg)
+    #%% EXTRACT PARAMETERS
+    path_sovi = PATHNAMES.SOV_tract
+    path_FIPS = PATHNAMES.Borough_to_FIP
 
-    #%%load FIPS data
-    path_FIPS = params.PATHNAMES.at['Borough_to_FIP', 'Value']
-    df_FIPS = pd.read_excel(path_FIPS)
+    #%% LOAD DATA
+    df_FIPS = pd.read_excel(path_FIPS, index_col='FIPS')
+    path_layer = os.path.basename(path_sovi)
+    path_gdb = os.path.dirname(path_sovi)
+    gdf_sovi = gpd.read_file(path_gdb, driver='FileGDB', layer=path_layer)
+    
+    df_FIPS.index = df_FIPS.index.astype(str)
+    gdf_tract = utils.project_gdf(gdf_sovi)
+    gdf_tract = gdf_tract.merge(df_FIPS, left_on='STCNTY', right_index=True, how='inner')
 
-    #%% load the census block and dissolve to census track
-    path_block = params.PATHNAMES.at['census_blocks', 'Value']
-    gdf_block = gpd.read_file(path_block)
-    gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False,
-                                                            aggfunc='first')
-    gdf_tract['BoroCode_Int'] = [int(gdf_tract.at[x, 'BoroCode']) for x in gdf_tract.index]
-    gdf_tract = gdf_tract.merge(df_FIPS, left_on='BoroCode_Int', right_on='Bor_ID', how='inner')
-    gdf_tract['FIPS_CT'] = [str(gdf_tract.at[idx, 'FIPS']) + str(gdf_tract.at[idx, 'BCT_txt'])[1:] for idx in gdf_tract.index]
-    gdf_tract = gdf_tract.merge(gdf_sovi[['FIPS', 'RPL_THEMES']], left_on='FIPS_CT', right_on='FIPS', how='left')
+    # Creating BCT_txt column from FIPS
+    gdf_tract['BCT_txt'] = gdf_tract['Bor_ID'].astype(str) + gdf_tract['FIPS'].str[5:11]
 
     #%% normalize result to scale of 0.01 to 0.99
     gdf_tract['SOV_rank'] = utils.normalize_rank_percentile(gdf_tract['RPL_THEMES'].values,
@@ -56,15 +53,8 @@ def calculate_SOV():
     plotting.plot_notebook(gdf_tract, column='S_S', title='ALL: Social Vulnerability',
                            legend='Score', cmap='Reds', type='score')
 
-    #%% use clustering to score 1,2,3,4,5
-    #assign median values to null data
-    # gdf_tract['RPL_THEMES_ADJ'] = gdf_tract['RPL_THEMES']
-    # gdf_tract.loc[gdf_tract['RPL_THEMES']==-999, 'RPL_THEMES_ADJ'] = gdf_tract.loc[gdf_tract['RPL_THEMES']!=-999, 'RPL_THEMES_ADJ'].median()
-    # gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='RPL_THEMES_ADJ', score_column='SOV',
-    #                                    n_cluster=5)
-
     #%% save results in every folder (same for all)
-    path_results = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\\SOV\Tract\\SOV_Tract.shp'
+    path_results = PATHNAMES.OUTPUTS_folder + r'\\SOV\Tract\\SOV_Tract.shp'
     gdf_tract[['BCT_txt', 'S_R', 'S_S', 'S_P', 'geometry']].to_file(path_results)
 
     #%%  document result with readme

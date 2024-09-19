@@ -1,142 +1,123 @@
 """
-calculate the total economic loss due to deaths from EXH
+calculate the total economic loss due to deaths from extreme heat (EXH)
 """
 
 #%% load packages
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
+#%% EXTRACT PARAMETERS
+# Input paths
+path_stormevents = PATHNAMES.stormevents_table
+path_stormeventsboroughs = PATHNAMES.stormeventsboroughs_table
+path_population_tract = PATHNAMES.population_by_tract
+path_ecostress = PATHNAMES.ESL_EXH_ecostress_2020
+# Hard-coded
+start_date = PARAMS['heat_event_count_start_date'].value
+end_date = PARAMS['heat_event_count_end_date'].value
+# Params
+deaths_year = PARAMS['EXH_deaths_per_year'].value
+value_life = PARAMS['value_of_stat_life'].value
+# Output paths
+path_results = PATHNAMES.EXH_ESL_deaths_per_year_tract
 
-#### GET EVENT FREQUENCY
-
-#%% open all storm events
-#open storm events
-path_stormevents = params.PATHNAMES.at['stormevents_table', 'Value']
-path_stormeventsboroughs = params.PATHNAMES.at['stormeventsboroughs_table', 'Value']
+#%% LOAD DATA
 df_stormevents = pd.read_excel(path_stormevents)
 df_stormeventsboroughs = pd.read_excel(path_stormeventsboroughs)
+df_population = pd.read_excel(path_population_tract, skiprows=5)
+df_ecostress = pd.read_csv(path_ecostress)
+gdf_tract = utils.get_blank_tract(add_pop=True)
 
 #%% screen out heat events
 heat_events_bool = ['Heat' in x for x in df_stormevents['Name']]
 df_stormevents = df_stormevents.loc[heat_events_bool, :]
 
 #%% screen out using date range
-#get start, end date
-start_date = params.HARDCODED.at['heat_event_count_start_date', 'Value']
-end_date = params.HARDCODED.at['heat_event_count_end_date', 'Value']
+df_stormevents['StartDate'] = pd.to_datetime(df_stormevents['StartDate']).dt.date
+df_stormevents['EndDate'] = pd.to_datetime(df_stormevents['EndDate']).dt.date
 df_stormevents = df_stormevents.loc[df_stormevents['StartDate']>start_date]
 df_stormevents = df_stormevents.loc[df_stormevents['EndDate']<end_date]
 
 #%% get the count per borough
 #make empty dataframe to populate with borough count
 df_borcount = pd.DataFrame(index=[1, 2, 3, 4, 5],
-                           data={'Heat_Events_Per_Year':np.zeros(5)})
-#loop through event storm event id in borough count list.
-#if is a stormevent with extreme heat, add 1
+                           data={'Heat_Events_Per_Year': np.zeros(5)})
+# loop through event storm event id in borough count list.
+# if is a stormevent with extreme heat, add 1
 for idx in df_stormeventsboroughs.index:
     this_stormeventid = df_stormeventsboroughs.at[idx, 'StormEventId']
     if this_stormeventid in df_stormevents['Id'].values:
         this_borid = int(df_stormeventsboroughs.at[idx, 'BoroughId'])
-        df_borcount.at[this_borid,'Heat_Events_Per_Year'] += 1
+        df_borcount.at[this_borid, 'Heat_Events_Per_Year'] += 1
 
 #%% convert to annual rate of extreme heat events per year
 n_years = (end_date - start_date).days / 365.25
 df_borrate = df_borcount / n_years
-df_borrate.index  = [str(x) for x in df_borrate.index]
+df_borrate.index = [str(x) for x in df_borrate.index]
 
-#%% save annual rate for the death rate calculation
-path_borough_event_rate = params.PATHNAMES.at['EXH_events_per_borough', 'Value']
-df_borrate.to_csv(path_borough_event_rate)
-
-#%% populate block dataset
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_block = pd.merge(gdf_block, df_borrate, left_on='BoroCode', right_index=True, how='inner')
-
-#reproject
-epsg = params.SETTINGS.at['epsg', 'Value']
-gdf_block = gdf_block.to_crs(epsg = epsg)
-
-#%% dissolve to tract level
-gdf_tract = gdf_block[['BCT_txt', 'geometry', 'Heat_Events_Per_Year']].dissolve(by='BCT_txt', aggfunc='mean')
-
-#%% save results in
-path_results = params.PATHNAMES.at['EXH_events_per_year_tracts', 'Value']
-gdf_tract.to_file(path_results)
-
-#### GET ANNUAL DEATH BY TRACT
-
-#%% get number of deaths per year
-deaths_year = params.PARAMS.at['EXH_deaths_per_year', 'Value']
-
-#%% get the number of events per borough.  Note this is calculated by EXH_frequency_1.py
-path_borough_event_rate = params.PATHNAMES.at['EXH_events_per_borough', 'Value']
-df_borrate = pd.read_csv(path_borough_event_rate)
+#%% populate tract dataset
+gdf_events_per_year = pd.merge(gdf_tract, df_borrate, left_on='borocode', right_index=True, how='inner')
 
 #%% load population
-path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
-df_population = pd.read_excel(path_population_tract, skiprows=5)
-df_population.dropna(inplace=True, subset=['2010 DCP Borough Code', '2010 Census Tract'])
+df_population.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
 
 #%% get population for each borough
 #get borough population
-df_population_borough = df_population.groupby('2010 DCP Borough Code').sum()[2010]
+df_population_borough = df_population.groupby('2020 DCP Borough Code').sum()[2020]
 
 #%%calculate m =  # deaths due to extreme heat per 1000 people
-x  = df_population_borough.values
+x = df_population_borough.values
 y = df_borrate['Heat_Events_Per_Year'].values
 numerator = deaths_year
 denominator = np.array([x[i] * y[i] for i in np.arange(len(x))]).sum()/1000.
 m = numerator / denominator
 
-#%% import block and dissolve to tract
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-
 #%%find id for join on population
-df_population['BCT_ID'] = [str(int(df_population['2010 DCP Borough Code'].iloc[i])) + \
-                           str(int(df_population['2010 Census Tract'].iloc[i])).zfill(6) for i in np.arange(len(df_population))]
+df_population['BCT_ID'] = [str(int(df_population['2020 DCP Borough Code'].iloc[i])) + \
+                           str(int(df_population['2020 Census Tract'].iloc[i])).zfill(6) for i in np.arange(len(df_population))]
 
-gdf_tract = gdf_tract.merge(df_population[[2010, 'BCT_ID']], left_on='BCT_txt', right_on='BCT_ID', how='inner')
+gdf_deaths_per_event = gdf_tract.merge(df_population[[2020, 'BCT_ID']], left_on='BCT_txt', right_on='BCT_ID', how='inner')
 
 #%% calculate number of deaths per heat event
-gdf_tract['deaths_per_event'] = [m*x/1000. for x in gdf_tract[2010]]
+gdf_deaths_per_event['deaths_per_event'] = [m*x/1000. for x in gdf_deaths_per_event[2020]]
 
-#%% raname columns 2010
-gdf_tract.rename(columns={2010:'Pop2010'}, inplace=True)
+#%% raname columns 2020
+gdf_deaths_per_event.rename(columns={2020: 'Pop2020'}, inplace=True)
 
-#%% save results in
-path_results = params.PATHNAMES.at['EXH_deaths_per_event', 'Value']
-gdf_tract.to_file(path_results)
+#%% merge Ecostress data with gdf_events_per_year to get PCT90 into the events dataframe
+gdf_events_per_year['BCT_txt'] = gdf_events_per_year['BCT_txt'].astype(str)
+df_ecostress['boroct2020'] = df_ecostress['boroct2020'].astype(str)
+gdf_events_per_year = gdf_events_per_year.merge(gdf_deaths_per_event[['BCT_txt', 'Pop2020']], on='BCT_txt', how='left')
+gdf_events_per_year = gdf_events_per_year.merge(df_ecostress[['boroct2020', 'PCT90']], 
+                                                left_on='BCT_txt', right_on='boroct2020', how='inner')
 
-#### GET LOSS BY TRACT
+#%% Calculate Weighting Factor using Ecostress PCT90
+gdf_events_per_year['Weighting_Factor'] = gdf_events_per_year['PCT90'] * gdf_events_per_year['Pop2020']
 
-#%% load the event rate, death rate, and cost per death
-path_events_per_year = params.PATHNAMES.at['EXH_events_per_year_tracts', 'Value']
-gdf_events_per_year = gpd.read_file(path_events_per_year)
-path_deaths_per_event = params.PATHNAMES.at['EXH_deaths_per_event', 'Value']
-gdf_deaths_per_event = gpd.read_file(path_deaths_per_event)
-value_life_2016 = params.PARAMS.at['value_of_stat_life_2016', 'Value']
+#%% Recalculate number of deaths per heat event with weighting factor
+gdf_deaths_per_event['deaths_per_event_weighted'] = gdf_deaths_per_event['deaths_per_event'] * gdf_events_per_year['Weighting_Factor']
 
-#%% convert value of lost life to 2019 value
-value_life = utils.convert_USD(value_life_2016, 2016)
-
-#%% mere into single dataframe and calculate
+#%% Merge into single dataframe and calculate weighted losses
 gdf_loss = gdf_events_per_year.merge(gdf_deaths_per_event.drop(columns='geometry'), on='BCT_txt', how='left')
-gdf_loss['deaths_year'] = gdf_loss['Heat_Event'] * gdf_loss['deaths_per']
+gdf_loss['deaths_year'] = gdf_loss['Heat_Events_Per_Year'] * gdf_loss['deaths_per_event_weighted']
 gdf_loss['Loss_USD'] = gdf_loss['deaths_year'] * value_life
 
+#%% convert value of lost life to 2019 value
+value_life = utils.convert_USD(value_life, 2022)
+
+#%% mere into single dataframe and calculate
+#gdf_loss = gdf_events_per_year.merge(gdf_deaths_per_event.drop(columns='geometry'), on='BCT_txt', how='left')
+#gdf_loss['deaths_year'] = gdf_loss['Heat_Events_Per_Year'] * gdf_loss['deaths_per_event']
+#gdf_loss['Loss_USD'] = gdf_loss['deaths_year'] * value_life
+
+
 #%% save results in
-path_results = params.PATHNAMES.at['EXH_ESL_deaths_per_year_tract', 'Value']
 gdf_loss.to_file(path_results)
 
 #%% plot
@@ -156,7 +137,4 @@ except:
 
 #%% output complete message
 print("Finished calculating EXH loss due to excess deaths.")
-
-
-
 

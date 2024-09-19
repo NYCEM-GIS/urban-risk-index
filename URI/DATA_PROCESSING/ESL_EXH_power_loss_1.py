@@ -3,47 +3,56 @@ distributed by population
 """
 
 #%% load packages
-import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
-#%% load params
-#number of outages hours per year across NYC due to heat
-yearly_outage = params.PARAMS.at['EXH_outage_person_hrs_per_year', 'Value']
-#loss per outage hour per person affected
-loss_outage_hr = params.PARAMS.at['loss_day_power_2016', 'Value'] / 24.
+#%% EXTRACT PARAMETERS
+# Input paths
+path_population_tract = PATHNAMES.population_by_tract
+path_ecostress = PATHNAMES.ESL_EXH_ecostress_2020
+# Params
+yearly_outage = PARAMS['EXH_outage_person_hrs_per_year'].value
+loss_outage_hr = PARAMS['loss_day_power'].value / 24.
+# Output paths
+path_output = PATHNAMES.ESL_EXH_loss_power
+
+#%% LOAD DATA
+df_pop = pd.read_excel(path_population_tract, skiprows=5)
+df_ecostress = pd.read_csv(path_ecostress)
 
 #%%calculate total loss
 yearly_loss = yearly_outage * loss_outage_hr
 
-#%%  open tract
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
+#%%  get tract
+gdf_tract = utils.get_blank_tract()
 
 #%% open population and join
-path_population_tract = params.PATHNAMES.at['population_by_tract', 'Value']
-df_pop = pd.read_excel(path_population_tract, skiprows=5)
-df_pop.dropna(inplace=True, subset=['2010 DCP Borough Code', '2010 Census Tract'])
-df_pop.rename(columns={2010:'pop_2010'}, inplace=True)
-df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2010 DCP Borough Code'])) + str(int(df_pop.at[x,'2010 Census Tract'])).zfill(6) for x in df_pop.index]
-gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2010']], on='BCT_txt', how='left')
+df_pop.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
+df_pop.rename(columns={2020: 'pop_2020'}, inplace=True)
+df_pop['BCT_txt'] = [str(int(df_pop.at[x, '2020 DCP Borough Code'])) + str(int(df_pop.at[x,'2020 Census Tract'])).zfill(6) for x in df_pop.index]
+gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2020']], on='BCT_txt', how='left')
+
+#%% Merge Ecostress data with tract-level data
+gdf_tract['BCT_txt'] = gdf_tract['BCT_txt'].astype(int)
+gdf_tract = gdf_tract.merge(df_ecostress[['boroct2020', 'PCT90']], 
+                            left_on='BCT_txt', right_on='boroct2020', how='inner')
+
+# Calculate Weighting Factor using Ecostress PCT90
+gdf_tract['Weighting_Factor'] = gdf_tract['PCT90'] * gdf_tract['pop_2020']
 
 #%% distribute cost to each tract by population
-pop_total = gdf_tract['pop_2010'].sum()
-gdf_tract['Loss_2016'] = yearly_loss * gdf_tract['pop_2010'] / pop_total
+pop_total_weighted = gdf_tract['Weighting_Factor'].sum()
+gdf_tract['Loss_2016'] = yearly_loss * gdf_tract['Weighting_Factor'] / pop_total_weighted
 gdf_tract['Loss_USD'] = utils.convert_USD(gdf_tract['Loss_2016'], 2016).values
 
+
 #%% save as output
-path_output = params.PATHNAMES.at['ESL_EXH_loss_power', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

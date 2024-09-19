@@ -6,6 +6,8 @@ import geopandas as gpd
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 
@@ -49,7 +51,7 @@ def calculate_ESL(haz):
         print("..........Category:  {}".format(this_subcomponent))
         print(" ")
         # add consequence
-        path_consequence = params.PATHNAMES.at[this_path, 'Value']
+        path_consequence = getattr(PATHNAMES, this_path)
         gdf_consequence = gpd.read_file(path_consequence)[['BCT_txt', 'Loss_USD']]
         this_name = haz + 'E_' + this_rank + this_norm + this_subcomponent_abbrv + this_abbrv
         gdf_consequence.rename(columns={"Loss_USD":this_name}, inplace=True)
@@ -57,10 +59,9 @@ def calculate_ESL(haz):
         list_E_col.append(this_name)
         plotting.plot_notebook(gdf_ESL, column=this_name, title=haz + ': ' + this_factor,
                                legend='Loss USD', cmap='Greens', type='raw')
-
-    list_all_col = list_E_col.copy() + ['BCT_txt', 'geometry', 'BOROCODE', 'NEIGHBORHO', 'PUMA']
+    # rename the columns in new Boundary tract file.    
+    list_all_col = list_E_col.copy() + ['BCT_txt', 'geometry', 'borocode', 'nta2020', 'cdta2020']
     gdf_ESL = gdf_ESL[list_all_col]
-    gdf_ESL.rename(columns={'NEIGHBORHO':'NTA'}, inplace=True)
 
     #%% get sum of subcompponents
     list_subcomponents = np.unique(list_subcomponents)
@@ -74,14 +75,17 @@ def calculate_ESL(haz):
     gdf_ESL[this_col] = gdf_ESL[list_E_col].sum(axis=1)
 
     #%% add normalization factors
-    path_norm = params.PATHNAMES.at['OTH_normalize_values', 'Value']
+    path_norm = PATHNAMES.OTH_normalize_values
     df_norm = gpd.read_file(path_norm)
     df_norm.drop(columns={'geometry'}, inplace=True)
     gdf_ESL = gdf_ESL.merge(df_norm, on='BCT_txt', how='left')
 
+    # Fill na wil 0 in gdf_ESL
+    gdf_ESL = gdf_ESL.fillna(0)
+
     #%% calculate normalized values
     def divide_zero(x, y):
-        if y==0:
+        if y==0 or y!=y or x!=x: # handling na and 0.
             return 0
         else:
             return x / y
@@ -106,7 +110,7 @@ def calculate_ESL(haz):
 
 
     #%%
-    path_save = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\ESL\Tract\ESL_{}_Tract.shp'.format(haz, haz)
+    path_save = PATHNAMES.OUTPUTS_folder + r'\ESL\Tract\ESL_{}_Tract.shp'.format(haz, haz)
     gdf_ESL.to_file(path_save)
 
 
@@ -114,7 +118,7 @@ def calculate_ESL(haz):
 if __name__ == '__main__':
 
     # %% open outputs path and get abbrev list and mitigation table
-    folder_outputs = params.PATHNAMES.at['OUTPUTS_folder', 'Value']
+    folder_outputs = PATHNAMES.OUTPUTS_folder
     list_abbrev_haz = params.ABBREVIATIONS.iloc[0:11, 0].values.tolist()
 
     #run script

@@ -1,44 +1,35 @@
 """ get bikability score"""
 
 #%% read packages
-import numpy as np
 import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
+#%% EXTRACT PARAMETERS
+# Input paths
+path_transit_score = PATHNAMES.RCA_RC_TR_transitscore_csv
+# Output paths
+path_output = PATHNAMES.RCA_RC_TR_score
 
-#%% load tracts a
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = utils.project_gdf(gdf_tract)
-gdf_tract.index = np.arange(len(gdf_tract))
+#%% LOAD DATA
+df_transit_score = pd.read_csv(path_transit_score)
+gdf_tract = utils.get_blank_tract()
 
-gdf_tract_wgs = gdf_tract.to_crs(epsg=4326)
-gdf_tract['lat'] = gdf_tract_wgs.geometry.centroid.y
-gdf_tract['lon'] = gdf_tract_wgs.geometry.centroid.x
+#%% modify walkscore and merge to tract shapefile
+temp = df_transit_score['BCT_txt']
+df_transit_score['BCT_txt'] = [str(x) for x in temp]
+gdf_tract = gdf_tract.merge(df_transit_score[['BCT_txt', 'transitscore']], on='BCT_txt', how='left')
 
-
-#%% load walkscore and merge to tract shapefile
-path_transitscore = params.PATHNAMES.at['RCA_RC_TR_transitscore_csv', 'Value']
-df_transitscore  = pd.read_csv(path_transitscore)
-temp = df_transitscore['BCT_txt']
-df_transitscore['BCT_txt'] = [str(x) for x in temp]
-gdf_tract = gdf_tract.merge(df_transitscore[['BCT_txt', 'transitscore']], on='BCT_txt', how='left')
+gdf_tract.fillna(gdf_tract['transitscore'].median(), inplace=True)
 
 #%% calculate score
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='transitscore')
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RC_TR_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

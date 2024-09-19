@@ -5,45 +5,46 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
-#%% open cdc dataset
-path_cdc = params.PATHNAMES.at['RCA_MHI_cdc_sov', 'Value']
-gdf_cdc = gpd.read_file(path_cdc)
+#%% EXTRACT PARAMETERS
+# Input paths
+path_cdc = PATHNAMES.SOV_tract
+path_fips = PATHNAMES.Borough_to_FIP
+# Output paths
+path_output = PATHNAMES.RCA_RR_HI_score
 
-#%% load tract data
-epsg = params.SETTINGS.at['epsg', 'Value']
-path_block = params.PATHNAMES.at['census_blocks', 'Value']
-gdf_block = gpd.read_file(path_block)
-gdf_tract = gdf_block[['BCT_txt', 'BoroCode', 'geometry']].dissolve(by='BCT_txt', as_index=False)
-gdf_tract = gdf_tract.to_crs(epsg=epsg)
-
-#%% load fips data
-path_fips = params.PATHNAMES.at['Borough_to_FIP', 'Value']
+#%% LOAD DATA
+path_layer = os.path.basename(path_cdc)
+path_gdb = os.path.dirname(path_cdc)
+gdf_cdc = gpd.read_file(path_gdb, driver='FileGDB', layer=path_layer)
 df_fips = pd.read_excel(path_fips)
+
+#%% get tract data
+gdf_tract = utils.get_blank_tract()
+
+#%% modify fips data
 df_fips['Bor_ID_str'] = [str(df_fips.at[idx, 'Bor_ID']) for idx in df_fips.index]
 df_fips['FIPS_mod'] = ['3600' + df_fips.at[idx, 'Bor_ID_str'] for idx in df_fips.index]
 
 #add fips id number
-gdf_tract = gdf_tract.merge(df_fips, left_on='BoroCode', right_on='Bor_ID_str', how='left')
+gdf_tract = gdf_tract.merge(df_fips, left_on='borocode', right_on='Bor_ID_str', how='left')
 gdf_tract['FIPS_CT_txt'] = [str(gdf_tract.at[idx, 'FIPS']) + gdf_tract.at[idx, 'BCT_txt'][1:] for idx in gdf_tract.index]
 
 #%% merge displacement score
 gdf_tract = gdf_tract.merge(gdf_cdc[['FIPS', 'EP_UNINSUR']], left_on='FIPS_CT_txt', right_on='FIPS', how='left')
 #assign -999 values a value of 0
-gdf_tract.loc[gdf_tract['EP_UNINSUR']==-999, 'EP_UNINSUR'] = np.median(gdf_tract['EP_UNINSUR'])
+gdf_tract.loc[gdf_tract['EP_UNINSUR'] == -999, 'EP_UNINSUR'] = np.median(gdf_tract['EP_UNINSUR'])
 
 #%% assign to value of 1-5
 gdf_tract['EP_Insure'] = 100. - gdf_tract['EP_UNINSUR']
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='EP_Insure')
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RR_HI_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

@@ -5,121 +5,108 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
-import rasterio
-from rasterstats import zonal_stats
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
-import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
-#%% get traCT
+#%% EXTRACT PARAMETERS
+# Input paths
+path_footprint_depths = PATHNAMES.ESL_CST_building_footprints_depth
+
+# Params
+floor_height = PARAMS['building_floor_height_ft'].value  # assume floor dislocated every 10 ft
+flood_disp_height = PARAMS['building_floor_height_flood_threshold_ft'].value  # assume displacement after 1 ft flooding
+ave_displacement_days = PARAMS['average_duration_CST_displacement_days'].value
+P_C1 = 1./PARAMS['RI_of_category_1_storm_yr'].value
+P_C3 = 1./PARAMS['RI_of_category_3_storm_yr'].value
+val_nyc_night_lodging = PARAMS['cost_nyc_night_lodging'].value
+val_nyc_per_diem = PARAMS['cost_nyc_per_diem'].value
+val_nyc_home_meal_per_day = PARAMS['cost_nyc_home_meals_per_day'].value
+# Output Paths
+path_results = PATHNAMES.ESL_CST_dislocation_loss
+
+#%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
-
-#%% make scratch folder if doesn't already exist
-folder_scratch = params.PATHNAMES.at['ESL_CST_loss_dislocation_scratch', 'Value']
-if not os.path.exists(folder_scratch):
-    os.mkdir(folder_scratch)
-
-#%% import building footprints path name
-path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
-
-#%% make copy of building footprints  with hurricane depths, if it doesn't already exist
-path_footprint_depths = os.path.join(folder_scratch, 'NYC_Buildings_composite_20200110_flood_depths_1.shp')
-if not os.path.exists(path_footprint_depths):
-    #open and project footprint shapefile
-    gdf_footprint = gpd.read_file(path_footprint, driver='FileGBD', layer='NYC_Buildings_composite_20200110')
-    gdf_footprint = gdf_footprint.to_crs(gdf_tract.crs)
-    #loop through 4 cat types
-    for cat in np.arange(1,5):
-        print(".....adding data for category {} storms".format(cat))
-        #get path to depth raster
-        path_C = params.PATHNAMES.at['ESL_CST_SLOSH_C{}'.format(cat), 'Value']
-        #save footprint file to temp location
-        path_temp = os.path.join(folder_scratch, 'temp.shp')
-        gdf_footprint.to_file(path_temp)
-        #perform zonal stats
-        dict_c = zonal_stats(path_temp, path_C, stats="mean max")
-        #join results to footprint
-        gdf_footprint['C{}_depth'.format(cat)] = [x['max'] for x in dict_c]
-    #save results
-    gdf_footprint.to_file(path_footprint_depths)
-    print("Done")
-else:
-    gdf_depths = gpd.read_file(path_footprint_depths)
-
-#%% paramaters
-floor_height = params.PARAMS.at['building_floor_height_ft', 'Value']  #assume floor displocated every 10 ft
-flood_disp_height = params.PARAMS.at['building_floor_height_flood_threshold_ft', 'Value']  #assume displacement after 1 ft flooding
-ave_displacement_days = params.PARAMS.at['average_duration_CST_displacement_days', 'Value']
+gdf_depths = gpd.read_file(path_footprint_depths)
 
 #%%  get probabilities of coastal storm events
-#HMP guidelines says "According to these NHC probability models, New York City should
+# HMP guidelines says "According to these NHC probability models, New York City should
 # expect to experience a lower-category hurricane on average once every 19 years
 # and a major hurricane (Category 3 or greater) on average once every 74 years.
-#assume annual probablitliy of cat 1 is 1/19, and cat 3 is 1/74.  Don't consider 2 or 4
-P_C1 = 1./params.PARAMS.at['RI_of_category_1_storm_yr', 'Value']
-P_C3 = 1./params.PARAMS.at['RI_of_category_3_storm_yr', 'Value']
+# assume annual probability of cat 1 is 1/19, and cat 3 is 1/74.  Don't consider 2 or 4
 
 #%% get count of residential units.
 df_units = pd.pivot_table(gdf_depths, values='UnitsRes', index='BASE_BBL', aggfunc=len)
-df_units.rename(columns={'UnitsRes':'UnitsRes_Count'}, inplace=True)
+df_units.rename(columns={'UnitsRes': 'UnitsRes_Count'}, inplace=True)
 gdf_depths = gdf_depths.merge(df_units, left_on='BASE_BBL', right_index=True, how='left')
 gdf_depths['Units_Res_Per_Building'] = gdf_depths['UnitsRes'] / gdf_depths['UnitsRes_Count']
-N_persons_per_residence = gdf_tract['pop_2010'].sum() /  gdf_depths['Units_Res_Per_Building'].sum()
+N_persons_per_residence = gdf_tract['pop_2020'].sum() / gdf_depths['Units_Res_Per_Building'].sum()
 
 
 #%%  calculate N floors flooded
 def N_floors_flooded(N_floors, depth_flooding):
-    if np.isnan(depth_flooding)==True: depth_flooding=0
-    if np.isnan(N_floors) == True: N_floors = 0
+    if np.isnan(depth_flooding):
+        depth_flooding = 0
+    if np.isnan(N_floors):
+        N_floors = 0
     if N_floors == 0:
         results = 0
     else:
         max_n_floors_flooded = (depth_flooding // floor_height) + np.where( depth_flooding % floor_height >= 1.0, 1, 0)
         results = np.minimum(N_floors, max_n_floors_flooded )
     return results
-gdf_depths['C1_N_floors_flooded'] = gdf_depths.apply(lambda row : N_floors_flooded(row['NumFloors'],
-                                                                                row['C1_depth']), axis=1)
-gdf_depths['C3_N_floors_flooded'] = gdf_depths.apply(lambda row : N_floors_flooded(row['NumFloors'],
-                                                                                row['C2_depth']), axis=1)
+
+
+gdf_depths['C1_N_floors_flooded'] = gdf_depths.apply(
+    lambda row: N_floors_flooded(row['NumFloors'],
+                                 row['C1_depth']),
+    axis=1)
+gdf_depths['C3_N_floors_flooded'] = gdf_depths.apply(
+    lambda row: N_floors_flooded(row['NumFloors'],
+                                 row['C2_depth']),
+    axis=1)
+
 
 #%% calculate number of residential units flooded
 def N_residents_displaced(N_floors_flooded, N_floors, N_res_units):
-    if np.isnan(N_floors_flooded)==True: N_floors_flooded=0
-    if np.isnan(N_floors) == True: N_floors = 0
-    if np.isnan(N_res_units) == True: N_res_units = 0
-    if N_floors==0:
+    if np.isnan(N_floors_flooded):
+        N_floors_flooded = 0
+    if np.isnan(N_floors):
+        N_floors = 0
+    if np.isnan(N_res_units):
+        N_res_units = 0
+    if N_floors == 0:
         results = 0
-    elif N_floors_flooded==0:
+    elif N_floors_flooded == 0:
         results = 0
     else:
-        #results = (N_floors_flooded/N_floors) * N_res_units * N_persons_per_residence
         results = N_res_units * N_persons_per_residence
     return results
-gdf_depths['C1_N_residents_displaced'] = gdf_depths.apply(lambda row : N_residents_displaced(row['C1_N_floors_flooded'],
-                                                                                row['NumFloors'], row['Units_Res_Per_Building']), axis=1)
-gdf_depths['C3_N_residents_displaced'] = gdf_depths.apply(lambda row : N_residents_displaced(row['C3_N_floors_flooded'],
-                                                                                row['NumFloors'], row['Units_Res_Per_Building']), axis=1)
+
+
+gdf_depths['C1_N_residents_displaced'] = gdf_depths.apply(
+    lambda row: N_residents_displaced(row['C1_N_floors_flooded'],
+                                      row['NumFloors'],
+                                      row['Units_Res_Per_Building']),
+    axis=1)
+gdf_depths['C3_N_residents_displaced'] = gdf_depths.apply(
+    lambda row: N_residents_displaced(row['C3_N_floors_flooded'],
+                                      row['NumFloors'],
+                                      row['Units_Res_Per_Building']),
+    axis=1)
 
 #%% calculate displacement cost
-#assume values are today's dollars
-val_nyc_night_lodging = params.PARAMS.at['cost_nyc_night_lodging', 'Value']
-val_nyc_per_diem = params.PARAMS.at['cost_nyc_per_diem', 'Value']
-val_nyc_home_meal_per_day = params.PARAMS.at['cost_nyc_home_meals_per_day', 'Value']
-gdf_depths['C1_UDS_Loss_Displacement'] = gdf_depths['C1_N_residents_displaced'] * ave_displacement_days* (val_nyc_night_lodging/N_persons_per_residence + val_nyc_per_diem + val_nyc_home_meal_per_day)
-gdf_depths['C3_UDS_Loss_Displacement'] = gdf_depths['C3_N_residents_displaced'] * ave_displacement_days *(val_nyc_night_lodging/N_persons_per_residence + val_nyc_per_diem + val_nyc_home_meal_per_day)
-gdf_depths['Loss_USD'] = gdf_depths['C1_UDS_Loss_Displacement']*P_C1 + gdf_depths['C3_UDS_Loss_Displacement']  * P_C3
-
+# assume values are today's dollars
+gdf_depths['C1_UDS_Loss_Displacement'] = gdf_depths['C1_N_residents_displaced'] * ave_displacement_days * (val_nyc_night_lodging/N_persons_per_residence + val_nyc_per_diem + val_nyc_home_meal_per_day)
+gdf_depths['C3_UDS_Loss_Displacement'] = gdf_depths['C3_N_residents_displaced'] * ave_displacement_days * (val_nyc_night_lodging/N_persons_per_residence + val_nyc_per_diem + val_nyc_home_meal_per_day)
+gdf_depths['Loss_USD'] = gdf_depths['C1_UDS_Loss_Displacement']*P_C1 + gdf_depths['C3_UDS_Loss_Displacement'] * P_C3
 
 #%% get tract for each building
-gdf_points= gdf_depths.copy()
+gdf_points = gdf_depths.copy()
 gdf_points.geometry = gdf_points.geometry.centroid
-gdf_points = gpd.sjoin(gdf_points, gdf_tract[['BCT_txt', 'geometry']], how='left', op='within')
+gdf_points = gpd.sjoin(gdf_points, gdf_tract[['BCT_txt', 'geometry']], how='left', predicate='within')
 
 #%% aggregate to tract level and merge
 df_loss = pd.pivot_table(gdf_points, values='Loss_USD', index='BCT_txt', aggfunc=sum)
@@ -129,11 +116,10 @@ gdf_tract = gdf_tract.merge(df_loss, on='BCT_txt', how='left')
 gdf_tract.fillna(value={'Loss_USD': 0}, inplace=True)
 
 #%% save results in
-path_results = params.PATHNAMES.at['ESL_CST_dislocation_loss', 'Value']
 gdf_tract.to_file(path_results)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CRN: Dislocation Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: Dislocation Loss',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme
@@ -149,14 +135,6 @@ except:
 
 #%% output complete message
 print("Finished calculating CST dislocation Loss.")
-
-
-
-
-
-#%%
-
-
 
 
 

@@ -8,14 +8,16 @@ import geopandas as gpd
 import os
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 nan_value = 'NA'
 
 def calculate_csv(list_abbrev_haz, list_geo, path_output):
 
      #%% loop through geographies
-    list_geo_tot = ['CITYWIDE', 'BOROCODE', 'PUMA', 'NTA', 'BCT_txt']
-    list_geo_folder_tot = ['Citywide', 'Borough', 'PUMA', 'NTA', 'Tract']
+    list_geo_tot = ['CITYWIDE', 'borocode', 'cdta2020', 'nta2020', 'BCT_txt']
+    list_geo_folder_tot = ['Citywide', 'Borough', 'CDTA', 'NTA', 'Tract']
     dct_geo_folder = {list_geo_tot[x]: list_geo_folder_tot[x] for x in range(len(list_geo_tot))}
     list_geo_folder = [dct_geo_folder[x] for x in list_geo]
 
@@ -23,25 +25,17 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
     for (geo_id, geo_name) in zip(list_geo, list_geo_folder):
 
     # #%%
-    #     geo_id = 'PUMA'
-    #     geo_name = 'PUMA'
         print('Tabulating csv for {}'.format(geo_name))
         #loop through each uri hazard
         count = 0
         for haz in list_abbrev_haz:
             print('.', end='')
-            path_haz = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
+            path_haz = PATHNAMES.OUTPUTS_folder + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
             gdf_haz = gpd.read_file(path_haz)
             if geo_id == 'CITYWIDE':gdf_haz['CITYWIDE'] = np.repeat(int(1), len(gdf_haz))
 
             #loop through each column and add based on title
             list_col_add = [col for col in gdf_haz.columns if ((haz in col[0:3]) or ('S_' in col[0:2]))]
-            # #add haz to the front of the social vulnereability score
-            # for i, col in enumerate(list_col_add):
-            #     if col[0]=='S':
-            #         update_col = haz + col
-            #         list_col_add[i] = update_col
-            #         print(update_col)
 
             for col in list_col_add:
 
@@ -50,7 +44,7 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                 list_col_keep = list_norm_keep + [col, geo_id]
                 df = gdf_haz[list_col_keep].copy()
 
-                df.rename(columns={geo_id:'GeoID', 'AREA_SQMI': 'Land_Area', 'FLOOR_SQFT':'Bldg_Area', 'POP':'Pop_2010',
+                df.rename(columns={geo_id:'GeoID', 'AREA_SQMI': 'Land_Area', 'FLOOR_SQFT':'Bldg_Area', 'POP':'Pop_2020',
                                             'BLD_CNT':'Bldg_Count', col:'Value'}, inplace=True)
 
                 # add hazard
@@ -180,7 +174,7 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
                 if count == 0:
                     df_csv[geo_id] = df.copy()
                 else:
-                    df_csv[geo_id] =  df_csv[geo_id].append(df)
+                    df_csv[geo_id] =  pd.concat([df_csv[geo_id], df])
                 count += 1
 
         df_csv[geo_id].replace(nan_value, np.nan, inplace=True)
@@ -193,7 +187,7 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
     #%% combine
     for i, key in enumerate(df_csv.keys()):
         if i==0: df_master = df_csv[key].copy()
-        else: df_master = df_master.append(df_csv[key])
+        else: df_master = pd.concat([df_master, df_csv[key]])
     print('Saving master csv.')
     path_output = os.path.join(path_output, 'TBL_master.csv')
     df_master.to_csv(path_output)
@@ -202,6 +196,6 @@ def calculate_csv(list_abbrev_haz, list_geo, path_output):
 #%%
 if __name__ == '__main__':
     list_abbrev_haz = ['EXH', 'WIW']
-    list_geo = ['CITYWIDE', 'BOROCODE', 'PUMA', 'NTA', 'BCT_txt']
+    list_geo = ['CITYWIDE', 'borocode', 'cdta2020', 'nta2020', 'BCT_txt']
     path_output = r'C://temp//'
     calculate_csv(list_abbrev_haz, list_geo, path_output)

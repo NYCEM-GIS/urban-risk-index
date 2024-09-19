@@ -3,43 +3,44 @@
 
 
 #%% read packages
+import sys; 
+sys.path.extend([r'C:\Users\ss63525\NYCEM_Miniconda\URI_Calculator_v1_1_TEMPLATE_v4\URI_Calculator_v1_1_TEMPLATE\4_CODE'])
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
-import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
-#%% load tract
-gdf_tract = utils.get_blank_tract(add_pop=True)
+#%% EXTRACT PARAMETERS
+# Input paths
+path_dot = PATHNAMES.ESL_CST_dot_table
+path_cst_loss = PATHNAMES.ESL_CST_hazus_loss
+# Settings
+ref_year = PARAMS['target_year'].value
+# Output paths
+path_output = PATHNAMES.ESL_CST_loss_dot
 
-#%% load DOT table
-path_dot = params.PATHNAMES.at['ESL_CST_dot_table', 'Value']
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract(add_pop=True)
 df_dot = pd.read_excel(path_dot, sheet_name='Major Storm Events', skiprows=2, skipfooter=4, index_col=0)
+gdf_fld = gpd.read_file(path_cst_loss)
 
 #%% calculate annual loss
-ref_year = params.SETTINGS.at['target_year', 'Value']
 dot_loss_tot = [utils.convert_USD(x, ref_year) for x in df_dot.loc['Total Costs', :].values]
 dot_loss_ave = np.average(dot_loss_tot)
 
 #%% distribute loss according to flood damage
-#load flood damage
-path_fld_loss = params.PATHNAMES.at['ESL_FLD_hazus_loss', 'Value']
-gdf_fld = gpd.read_file(path_fld_loss)
+#flood damage
 gdf_tract = gdf_tract.merge(gdf_fld[['BCT_txt', 'Loss_USD']], on='BCT_txt', how='inner')
 #rename Loss_USD as weight
 gdf_tract.rename(columns={"Loss_USD":"weight"}, inplace=True)
 gdf_tract['Loss_USD'] = dot_loss_ave * gdf_tract['weight'] / gdf_tract['weight'].sum()
 
 #%% save as output
-path_output = params.PATHNAMES.at['ESL_CST_loss_dot', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

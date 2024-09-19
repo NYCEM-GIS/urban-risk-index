@@ -1,32 +1,29 @@
 """
-calculate the total economic loss due to deeaths from CRN
+calculate the total economic loss due to deaths from CRN
 """
 
 #%% load packages
-import numpy as np
-import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
-import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
-#%% load gdf_tracts
-gdf_tract = utils.get_blank_tract(add_pop=True)
-
-#%% convert value of lost life to 2019 value
-value_loss_2016 =  100815345.20  #from spreadsheet
+#%% EXTRACT PARAMETERS
+# Input paths
+path_results = PATHNAMES.ESL_CRN_injury_loss
+# Hard-coded
+value_loss_2016 = 100815345.20  # from spreadsheet
 value_loss = utils.convert_USD(value_loss_2016, 2016)
 
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract(add_pop=True)
+
 #%%distribute by population
-gdf_tract['Loss_USD'] = value_loss * gdf_tract['pop_2010'] / gdf_tract['pop_2010'].sum()
+gdf_tract['Loss_USD'] = value_loss * gdf_tract['pop_2020'] / gdf_tract['pop_2020'].sum()
 
 #%% save results in
-path_results = params.PATHNAMES.at['ESL_CRN_injury_loss', 'Value']
 gdf_tract.to_file(path_results)
 
 #%% plot

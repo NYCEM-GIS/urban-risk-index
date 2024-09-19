@@ -1,27 +1,29 @@
-""" read in the community infrastructure factor into tract level map"""
+""" read in the home ownership factor into tract level map"""
 
 #%% read packages
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
 from census import Census
 from us import states
 import requests
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
-import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
-#%% load tract
-gdf_tract = utils.get_blank_tract()
+#%% EXTRACT PARAMETERS
+# Output paths
+path_output = PATHNAMES.RCA_RR_HO_score
 
-#%% load place attachment data
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract()
 session = requests.Session()
 session.verify = False
 c = Census("fde2495ae880d06dc1acbdc40a96ba0cffbf5ae8", session=session)
+
+#%% place attachment data
 response_total = c.acs5.state_county_tract('B25026_001E', states.NY.fips, '*', Census.ALL)
 response_owners = c.acs5.state_county_tract('B25026_002E', states.NY.fips, '*', Census.ALL)
 list_tract1 = [x['tract'] for x in response_total]
@@ -31,17 +33,17 @@ list_total = [x['B25026_001E'] for x in response_total]
 list_tract2 = [x['tract'] for x in response_owners]
 list_owner = [x['B25026_002E'] for x in response_owners]
 
-
 #%%
-df = pd.DataFrame(index=np.arange(len(list_tract1)), data={'owner':list_owner,
-                                            'tot':list_total,
-                                           'tract':list_tract1,
-                                           'county':list_county,
-                                           'state':list_state})
-df['Stfid'] = [df.loc[x,"state"] + df.loc[x, 'county']+df.loc[x,'tract'] for x in df.index]
+df = pd.DataFrame(index=np.arange(len(list_tract1)),
+                  data={'owner': list_owner,
+                        'tot': list_total,
+                        'tract': list_tract1,
+                        'county': list_county,
+                        'state': list_state})
+df['Stfid'] = [df.loc[x, "state"] + df.loc[x, 'county']+df.loc[x, 'tract'] for x in df.index]
 
 #%% merge
-gdf_tract = gdf_tract.merge(df[['owner', 'Stfid', 'tot']], left_on='Stfid', right_on='Stfid', how='inner')
+gdf_tract = gdf_tract.merge(df[['owner', 'Stfid', 'tot']], left_on='geoid', right_on='Stfid', how='inner')
 
 #%%
 gdf_tract['percent_home_owner'] = gdf_tract['owner']/gdf_tract['tot'] * 100.
@@ -51,7 +53,6 @@ gdf_tract.fillna(0, inplace=True)
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='percent_home_owner', score_column='Score', n_cluster=5)
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_RR_HO_score', 'Value']
 gdf_tract.to_file(path_output)
 
 #%% plot

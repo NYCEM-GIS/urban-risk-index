@@ -1,40 +1,42 @@
-""" read in the community infrastructure factor into tract level map"""
+""" read in the emergency operations factor into tract level map"""
 
 #%% read packages
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
-#%% open education and outreach points
-path_events = params.PATHNAMES.at['RCA_CC_EO_locations', 'Value']
+#%% EXTRACT PARAMETERS
+# Input paths
+path_events = PATHNAMES.RCA_CC_EO_locations
+# Output paths
+path_output = PATHNAMES.RCA_CC_EO_score
+
+#%% LOAD DATA
 df_events = pd.read_csv(path_events)
-#create point map with lat and lon
-gdf_events = gpd.GeoDataFrame(df_events, geometry = gpd.points_from_xy(df_events.Longitude, df_events.Latitude),
+
+#%% open education and outreach points
+# create point map with lat and lon
+gdf_events = gpd.GeoDataFrame(df_events, geometry=gpd.points_from_xy(df_events.Longitude, df_events.Latitude),
                               crs=4326)
 gdf_events['Event_ID'] = np.arange(len(gdf_events))
-epsg = params.SETTINGS.at['epsg', 'Value']
-gdf_events = gdf_events.to_crs(epsg=epsg)
-#drop na values
+gdf_events = utils.project_gdf(gdf_events)
+# drop na values
 gdf_events.dropna(subset=['Latitude', 'Longitude'], inplace=True)
 
 #%% get count from tract
-#gdf_tract = utils.calculate_radial_count(gdf_events, column_key='Event_ID', buffer_distance_ft=2640)
-path_CC_EO = params.PATHNAMES.at['RCA_CC_EO_score', 'Value']
-gdf_tract = gpd.read_file(path_CC_EO)
+gdf_tract = utils.calculate_radial_count(gdf_events, column_key='Event_ID', buffer_distance_ft=2640)
 
 #%% calculate score with kmeans clustering
-gdf_result = utils.calculate_kmeans(gdf_tract, data_column='Fraction_C', score_column='Score',
+gdf_result = utils.calculate_kmeans(gdf_tract, data_column='Fraction_Covered', score_column='Score',
                                     n_cluster=5)
 
 #%% save as output
-path_output = params.PATHNAMES.at['RCA_CC_EO_score', 'Value']
 gdf_result.to_file(path_output)
 
 #%% plot

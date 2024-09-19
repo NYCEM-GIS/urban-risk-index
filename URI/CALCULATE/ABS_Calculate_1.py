@@ -4,17 +4,20 @@
 
 #%% read packages
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 
 def calculate_ABS(list_abbrev_haz):
 
-    list_geo = ['BOROCODE', 'PUMA', 'NTA', 'BCT_txt']
-    list_geo_folder = ['Borough', 'PUMA', 'NTA', 'Tract']
+    list_geo = ['borocode', 'cdta2020', 'nta2020', 'BCT_txt']
+    list_geo_folder = ['Borough', 'CDTA', 'NTA', 'Tract']
     list_geo_keep = []
     for (geo_id, geo_name) in zip(list_geo, list_geo_folder):
         print(geo_name, end=' ')
@@ -22,7 +25,7 @@ def calculate_ABS(list_abbrev_haz):
 
         #%% open and stack all URI shapefiles
         for i, haz in enumerate(list_abbrev_haz):
-            path_haz = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
+            path_haz = PATHNAMES.OUTPUTS_folder + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
             gdf_this = gpd.read_file(path_haz)
             gdf_this['Haz'] = np.repeat(haz, len(gdf_this))
             #remove hazard name from column titles so they can be stacked
@@ -30,7 +33,7 @@ def calculate_ABS(list_abbrev_haz):
             if i==0:
                 gdf_stack = gdf_this.copy()
             else:
-                gdf_stack = gdf_stack.append(gdf_this)
+                gdf_stack = pd.concat([gdf_stack, gdf_this])
 
         #%% calculate score and percentile
         gdf_stack = utils.calculate_kmeans(gdf_stack, data_column='E_RNTT', score_column='E_ANTT')
@@ -41,7 +44,7 @@ def calculate_ABS(list_abbrev_haz):
 
         #%% add absolute value to each URI shapefile
         for i, haz in enumerate(list_abbrev_haz):
-            path_uri = params.PATHNAMES.at['OUTPUTS_folder', 'Value'] + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
+            path_uri = PATHNAMES.OUTPUTS_folder + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)
             gdf_uri = gpd.read_file(path_uri)
             this_haz = gdf_stack.loc[gdf_stack['Haz']==haz].copy()[[geo_id] + [ 'E_ANTT', 'E_QNTT', 'U_AN', 'U_QN']]
             this_haz.columns = [x.replace('E_', haz + 'E_') for x in this_haz.columns]
@@ -58,7 +61,7 @@ def calculate_ABS(list_abbrev_haz):
 if __name__ == '__main__':
 
     # %% open outputs path and get abbrev list
-    folder_outputs = params.PATHNAMES.at['OUTPUTS_folder', 'Value']
+    folder_outputs = PATHNAMES.OUTPUTS_folder
     list_abbrev_haz = params.ABBREVIATIONS.iloc[0:11, 0].values.tolist()
     list_abbrev_haz.remove('CYB')
     list_abbrev_haz = ['EXH', 'WIW']

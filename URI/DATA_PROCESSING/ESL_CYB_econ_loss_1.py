@@ -3,31 +3,27 @@ calculate the total economic loss due to deeaths from CRN
 """
 
 #%% load packages
-import numpy as np
-import pandas as pd
-import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 import URI.MISC.plotting_1 as plotting
-import URI.MISC.plotting_1 as plotting
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
-#%% load gdf_tracts
-gdf_tract = utils.get_blank_tract(add_pop=True)
-
-#%% convert value of lost life to 2019 value
+#%% EXTRACT PARAMETERS
+# Output paths
+path_results = PATHNAMES.ESL_CYB_econ_loss
+# Hard-coded
 value_loss_2019 = 663.966 * 1000000   #from spreadsheet
 value_loss = utils.convert_USD(value_loss_2019, 2019)
+
+#%% LOAD DATA
+gdf_tract = utils.get_blank_tract(add_pop=True)
 
 #%%distribute by population
 gdf_tract['Loss_USD'] = value_loss / len(gdf_tract)
 
-
 #%% save results in
-path_results = params.PATHNAMES.at['ESL_CYB_econ_loss', 'Value']
 gdf_tract.to_file(path_results)
 
 #%% plot
