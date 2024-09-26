@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 home = r'C:\Users\YLuo\VSCode\URI_Calculator_v1_1_TEMPLATE_v4\URI_Calculator_v1_1_TEMPLATE'
+=======
+home = r'C:\Users\ss63525\NYCEM_Miniconda\URI_Calculator_v1_1_TEMPLATE_v4\URI_Calculator_v1_1_TEMPLATE'
+PARAM_Folder = r'.\4_CODE\URI\PARAMS'   
+>>>>>>> origin/uri_2.1_Shweta
 Borough_to_FIP = r'.\1_RAW_INPUTS\BOUNDARY_BOROUGH_FIPS\Borough_FIPS_1.xlsx'
 BOUNDARY_tract = r'.\1_RAW_INPUTS\BOUNDARY_CENSUS_TRACT\CSCL_CensusTract2020.shp'
 BOUNDARY_zcta = r'.\1_RAW_INPUTS\BOUNDARY_MODZCTA\Modified Zip Code Tabulation Areas (MODZCTA)_20240219\geo_export_aa48aecc-01c6-4716-aa5f-d1164dd631c8.shp'
@@ -79,6 +84,8 @@ RCA_RR_IE_score = r'.\2_PROCESSED_INPUTS\921_RCA_RR_IE_SCORE\RCA_RR_IE_score.shp
 RCA_RR_FP_score = r'.\2_PROCESSED_INPUTS\922_RCA_RR_FP_SCORE\RCA_RR_FP_score.shp'
 RCA_RR_HO_score = r'.\2_PROCESSED_INPUTS\923_RCA_RR_HO_SCORE\RCA_RR_HO_score.shp'
 RCA_RC_IN_score = r'.\2_PROCESSED_INPUTS\924_RCA_RC_INE_SCORE\RCA_RC_INE_score.shp'
+Resilience_Capacity_path = r'.\4_CODE\URI\PARAMS\Resilience Capacity.csv'
+Hazard_Resilience_Capacity_path = r'.\4_CODE\URI\PARAMS\Hazard Resilience Capacity.csv'
 EXH_ESL_deaths_per_year_tract = r'.\2_PROCESSED_INPUTS\2104_ESL_EXH_LOSS_DEATH\EXH_ESL_deaths_per_year_tract.shp'
 ESL_EXH_loss_power = r'.\2_PROCESSED_INPUTS\2105_ESL_EXH_LOSS_POWER\ESL_EXH_loss_power.shp'
 ESL_EXT_loss_injury = r'.\2_PROCESSED_INPUTS\2106_ESL_EXH_LOSS_INJURY\ESL_EXH_loss_injury.shp'
