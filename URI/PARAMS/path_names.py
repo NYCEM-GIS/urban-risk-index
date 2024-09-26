@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-home = r'C:\Users\YLuo\VSCode\URI_Calculator_v1_1_TEMPLATE_v4\URI_Calculator_v1_1_TEMPLATE'
-=======
-home = r'C:\Users\ss63525\NYCEM_Miniconda\URI_Calculator_v1_1_TEMPLATE_v4\URI_Calculator_v1_1_TEMPLATE'
+home = r'C:\Users\HSprague\vscode\URI_Calculator_v1_1_TEMPLATE'
 PARAM_Folder = r'.\4_CODE\URI\PARAMS'   
->>>>>>> origin/uri_2.1_Shweta
 Borough_to_FIP = r'.\1_RAW_INPUTS\BOUNDARY_BOROUGH_FIPS\Borough_FIPS_1.xlsx'
 BOUNDARY_tract = r'.\1_RAW_INPUTS\BOUNDARY_CENSUS_TRACT\CSCL_CensusTract2020.shp'
 BOUNDARY_zcta = r'.\1_RAW_INPUTS\BOUNDARY_MODZCTA\Modified Zip Code Tabulation Areas (MODZCTA)_20240219\geo_export_aa48aecc-01c6-4716-aa5f-d1164dd631c8.shp'
