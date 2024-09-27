@@ -10,7 +10,7 @@ import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
-path_hazus = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Storms Probabilistic Runs\100yr\100\results.shp"
+path_hazus = PATHNAMES.ESL_CSW_hazus_wind
 # Output paths
 path_output = PATHNAMES.ESL_CST_hazus_loss
 
@@ -28,7 +28,7 @@ gdf_tract = gdf_tract.merge(df_hazus[['tract', 'Loss_USD']], left_on='geoid', ri
 gdf_tract.to_file(path_output)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: HAZUS Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CSW: Building Damage',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme
@@ -43,4 +43,4 @@ except:
     pass
 
 #%% output complete message
-print("Finished calculating CST Hazus loss.")
+print("Finished calculating CSW Building Damage.")

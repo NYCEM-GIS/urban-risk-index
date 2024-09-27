@@ -3,7 +3,8 @@
 #%% read packages
 import numpy as np
 import geopandas as gpd
-from URI.MISC import params_1 as params
+from URI.PARAMS.params import PARAMS 
+import URI.PARAMS.path_names as PATHNAMES
 from URI.MISC import utils_1 as utils
 utils.set_home()
 
@@ -12,7 +13,7 @@ gdf_tract = utils.get_blank_tract(add_pop=True)
 
 #%% open footprint
 #open buildings
-path_footprint = params.PATHNAMES.at['ESL_CST_building_footprints', 'Value']
+path_footprint = PATHNAMES.ESL_CST_building_footprints
 gdf_footprint = gpd.read_file(path_footprint)
 
 #%% gdt building count
@@ -42,5 +43,5 @@ gdf_tract = gdf_tract[['BCT_txt', 'Sq_miles', 'Building_Count', 'Floor_sqft', 'p
 gdf_tract.rename(columns={"Sq_miles":"AREA_SQMI", "Building_Count":"BLD_CNT", "Floor_sqft":'FLOOR_SQFT', 'pop_2020':'POP'}, inplace=True)
 
 #%% save to other
-path_norm = params.PATHNAMES.at['OTH_normalize_values', 'Value']
+path_norm = PATHNAMES.OTH_normalize_values
 gdf_tract.to_file(path_norm)

@@ -39,8 +39,8 @@ df_EventIds.index = df_EventIds.StormEventId
 
 #%% get storm events with this id after 2009
 df_Events.index = df_Events.Id
-df_Events['StartDate'] = pd.to_datetime(df_Events['StartDate'])
-df_Events['EndDate'] = pd.to_datetime(df_Events['EndDate'])
+df_Events['StartDate'] = pd.to_datetime(df_Events['StartDate'], format='%m/%d/%Y %I:%M:%S %p')
+df_Events['EndDate'] = pd.to_datetime(df_Events['EndDate'], format='%m/%d/%Y %I:%M:%S %p')
 df_Events = df_Events.loc[df_EventIds.index, :]
 df_Events = df_Events.loc[df_Events.StartDate >= datetime.datetime(year=2009, month=1, day=1), :]
 df_Events = df_Events.loc[df_Events.EndDate < datetime.datetime(year=2019, month=1, day=1), :]
@@ -84,7 +84,7 @@ gdf_tract['Loss_USD'] = Loss_USD * gdf_tract['Tree_Service_Count'] / gdf_tract['
 gdf_tract.to_file(path_results)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: Tree Servicing Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CSW: Tree Servicing Loss',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme

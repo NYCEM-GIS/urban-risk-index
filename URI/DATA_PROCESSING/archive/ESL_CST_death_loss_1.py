@@ -44,15 +44,15 @@ id_coastal = [df_coastalevents.at[idx, 'StormEventId'] for idx in df_coastaleven
 df_storms_cst = df_storms.loc[id_coastal, :]
 
 #%% cut off data
-df_storms_cst['StartDate'] = pd.to_datetime(df_storms_cst['StartDate'])
-df_storms_cst['EndDate'] = pd.to_datetime(df_storms_cst['EndDate'])
+df_storms_cst['StartDate'] = pd.to_datetime(df_storms_cst['StartDate'], format='%m/%d/%Y %I:%M:%S %p')
+df_storms_cst['EndDate'] = pd.to_datetime(df_storms_cst['EndDate'], format='%m/%d/%Y %I:%M:%S %p')
 df_storms_cst = df_storms_cst.loc[df_storms_cst['StartDate']>start_date]
 df_storms_cst = df_storms_cst.loc[df_storms_cst['EndDate']<end_date]
 
 #%% count fatalities and injuries
 n_deaths = df_storms_cst['Fatalities'].sum() / n_years
 n_injuries = df_storms_cst['Injuries'].sum() / n_years
-loss_deaths = PARAMS.at['value_of_stat_life', 'Value'] * n_deaths
+loss_deaths = PARAMS['value_of_stat_life'].value * n_deaths
 #no injuries
 loss_deaths_total = utils.convert_USD(loss_deaths, 2022)
 

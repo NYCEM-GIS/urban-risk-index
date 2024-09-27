@@ -44,7 +44,7 @@ gdf_tract['Loss_USD'] = dot_loss_ave * gdf_tract['weight'] / gdf_tract['weight']
 gdf_tract.to_file(path_output)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CST: DOT Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CSF: DOT Loss',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme

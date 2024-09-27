@@ -10,14 +10,13 @@ import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
-path_erq_hazus = r'.\1_RAW_INPUTS\ERQ_HAZUS\Earthquakes (5.2M)\results.shp'
+path_erq_hazus = PATHNAMES.ESL_ERQ_hazus
 # Output paths
 path_output = PATHNAMES.ESL_ERQ_hazus_loss
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
 df_hazus = gpd.read_file(path_erq_hazus)
-
 
 #%% use tract to merge hazus data to tract
 gdf_tract = gdf_tract.merge(df_hazus[['tract', 'EconLoss']], left_on='geoid', right_on='tract', how='left')
@@ -32,7 +31,7 @@ gdf_tract['Loss_USD'] = gdf_tract['EconLoss'] * 1000.
 gdf_tract.to_file(path_output)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='ERQ: HAZUS Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='ERQ: Building Damage',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme
@@ -47,4 +46,4 @@ except:
     pass
 
 #%% output complete message
-print("Finished calculating ERQ Hazus loss.")
+print("Finished calculating ERQ Building Damage.")

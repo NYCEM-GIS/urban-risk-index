@@ -16,7 +16,7 @@ path_Events = PATHNAMES.stormevents_table
 path_EventTypes = PATHNAMES.HHC_eventtypes
 path_StormEventTypes = PATHNAMES.HHC_stormeventtypes
 # Params
-service_buffer = PARAMS['buffer_period_tree_servicing_days']
+service_buffer = PARAMS['buffer_period_tree_servicing_days'].value
 # Output paths
 path_results = PATHNAMES.ESL_WIW_loss_tree
 

@@ -1,4 +1,4 @@
-""" incorporate flooding damage due to coastal storms"""
+""" incorporate displacement costs due to coastal flooding"""
 
 #%% read packages
 import pandas as pd
@@ -12,13 +12,22 @@ utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_flood_bronx = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Bronx\Bronx_100PFIRM\results.shp"
-path_flood_kings = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Kings\Kings_100PFIRM\results.shp"
-path_flood_manhattan = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\New York\NewYork_100PFIRM\results.shp"
-path_flood_queens = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Queens\Queens_100PFIRM\results.shp"
-path_flood_richmond = r".\1_RAW_INPUTS\CST_HAZUS\Coastal Flooding 100 Year\Richmond\Richmond_100PFIRM\results.shp"
+path_flood_bronx = PATHNAMES.ESL_CSF_hazus_bronx
+path_flood_kings = PATHNAMES.ESL_CSF_hazus_kings
+path_flood_manhattan = PATHNAMES.ESL_CSF_hazus_manhattan
+path_flood_queens = PATHNAMES.ESL_CSF_hazus_queens
+path_flood_richmond = PATHNAMES.ESL_CSF_hazus_richmond
+
+# Parameters
+ave_displacement_days = PARAMS['average_duration_CST_displacement_days'].value
+val_nyc_night_lodging = PARAMS['cost_nyc_night_lodging'].value
+val_nyc_per_diem = PARAMS['cost_nyc_per_diem'].value
+val_nyc_home_meal_per_day = PARAMS['cost_nyc_home_meals_per_day'].value
+ave_persons_per_residence = PARAMS['ave_persons_per_residence'].value
+
 # Output paths
-path_output = PATHNAMES.ESL_FLD_hazus_loss
+path_output = PATHNAMES.ESL_CST_dislocation_loss
+path_results = PATHNAMES.ESL_CST_dislocation_loss
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()
@@ -34,14 +43,13 @@ gdf_flood_data_by_tract_list = []
 
 for fld_file in gdf_flood_data_list:
     fld_file['tract'] = fld_file['block'].str[0:11]  # Tract ID is equal to the first 11 digits of the block id
-    fld_file_by_tract = fld_file[['tract', 'EconLoss', 'geometry']].dissolve(by='tract', as_index=False, aggfunc='sum')
+    fld_file_by_tract = fld_file[['tract', 'DisplacedP', 'geometry']].dissolve(by='tract', as_index=False, aggfunc='sum')
     gdf_flood_data_by_tract_list.append(fld_file_by_tract)
 
 gdf_flood = gpd.GeoDataFrame(pd.concat(gdf_flood_data_by_tract_list, ignore_index=True))
-gdf_flood.rename(columns={'EconLoss': 'Loss_USD'}, inplace=True)
 
-##%% convert from 2018 dollars
-gdf_flood.Loss_USD = utils.convert_USD(gdf_flood.Loss_USD.values, 2018)
+# Displacement cost = cost of lodging and food minus average daily cost of food at home for duration of displacement per person
+gdf_flood['Loss_USD'] = gdf_flood['DisplacedP'] * ave_displacement_days * (val_nyc_night_lodging/ave_persons_per_residence + val_nyc_per_diem - val_nyc_home_meal_per_day)
 
 #%% merge with tracts
 gdf_tract = gdf_tract.merge(gdf_flood[['tract', 'Loss_USD']], left_on='geoid', right_on=['tract'], how='left')
@@ -51,7 +59,7 @@ gdf_tract['Loss_USD'] = gdf_tract['Loss_USD'].fillna(0)
 gdf_tract.to_file(path_output)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='FLD: HAZUS Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CSF: Dislocation Loss',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme
@@ -66,4 +74,4 @@ except:
     pass
 
 #%% output complete message
-print("Finished calculating FLD Hazus loss.")
+print("Finished calculating CSF dislocation loss.")

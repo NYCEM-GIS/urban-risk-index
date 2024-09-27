@@ -24,13 +24,13 @@ def add_params(**kwargs):
 # HARDCODED
 add_params(
     label = "heat_event_count_start_date",
-    value = datetime.date(year=2000, month=1, day=1),
+    value = datetime.datetime(year=2000, month=1, day=1),
     description = "Start date for counting extreme heat events in HH&C to determine liklihood",
     type = "HARDCODED",
 )
 add_params(
     label = "heat_event_count_end_date",
-    value =  datetime.date(year=2019, month=12, day=31),
+    value =  datetime.datetime(year=2019, month=12, day=31),
     description = "End date for counting extreme heat events in HH&C to determine likilhood",
     type = "HARDCODED",
 )
@@ -44,13 +44,13 @@ add_params(
 )
 add_params(
     label = "hhc_event_count_start_date",
-    value = datetime.date(year=2000, month=1, day=1),
+    value = datetime.datetime(year=2000, month=1, day=1),
     description = "Start date for  events in HH&C to determine liklihood",
     type = "HARDCODED",
 )
 add_params(
     label = "hhc_event_count_end_date",
-    value = datetime.date(year=2019, month=12, day=31),
+    value = datetime.datetime(year=2019, month=12, day=31),
     description = "End date for  events in HH&C to determine likilhood",
     type = "HARDCODED",
 )
@@ -137,6 +137,16 @@ add_params(
     source_year = 2023,
     description = "Cost of home meals for residents in NYC.",
     unit = "USD",
+    type = "PARAMS",
+)
+
+add_params(
+    label = "ave_persons_per_residence",
+    value = 2.43,
+    source = "US Census Beaureau",
+    source_year = 2020,
+    description = "Derived as the total population (8,804,190) divided by the total housing units (3,618,635) from the 2020 census",
+    unit = "people per household",
     type = "PARAMS",
 )
 

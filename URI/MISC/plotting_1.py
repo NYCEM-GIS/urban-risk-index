@@ -1,7 +1,6 @@
 """ make plots for distribution, and notebooks"""
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
