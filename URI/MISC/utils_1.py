@@ -190,6 +190,7 @@ def convert_to_tract_average(path_data, column_name, column_name_out,
     else:
         gdf_data = path_data.copy()
     gdf_tract = get_blank_tract()
+    gdf_data = project_gdf(gdf_data)
     # get spatial union, drop areas with no tract
     gdf_union = gpd.overlay(gdf_tract, gdf_data, how='union')
     gdf_union.dropna(subset=['BCT_txt'], inplace=True)

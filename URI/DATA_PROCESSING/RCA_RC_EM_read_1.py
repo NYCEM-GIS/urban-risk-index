@@ -29,7 +29,7 @@ gdf_hospital['OBJECTID'] = np.arange(len(gdf_hospital))
 gdf_centroid = gdf_tract.copy()
 gdf_centroid['geometry'] = gdf_tract['geometry'].centroid
 
-#%% get for each pt get the nearest hospital for winter weather
+#%% get for each pt get the nearest hospital for winter weather (has specialty for treating hypothermia)
 gdf_hospital_subset = gdf_hospital.loc[gdf_hospital['HYPOTHERMI'] == 1, :]
 pts3 = gdf_hospital_subset.geometry.unary_union
 
@@ -74,20 +74,15 @@ gdf_tract['Distance_RECEIVING'] = gdf_centroid.apply(lambda row: near(row.geomet
 #%% write scores.  Set reverse=True because low distance values are better
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_HYPO', score_column='Score_WIW', reverse=True)
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_EXH', reverse=True)
-gdf_tract['Score_RES'] = gdf_tract['Score_EXH']
-gdf_tract['Score_EMG'] = gdf_tract['Score_EXH']
-gdf_tract['Score_CRN'] = gdf_tract['Score_EXH']
-gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CST', reverse=True)
-gdf_tract['Score_CER'] = gdf_tract['Score_CST']
-gdf_tract['Score_HIW'] = gdf_tract['Score_CST']
-gdf_tract['Score_ERQ'] = gdf_tract['Score_CST']
-gdf_tract['Score_FLD'] = gdf_tract['Score_CST']
+gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CSW', reverse=True)
+gdf_tract['Score_ERQ'] = gdf_tract['Score_CSW']  # Distance to Trauma faciltiy
+gdf_tract['Score_CSF'] = gdf_tract['Score_CSW']  # Distance to Trauma faciltiy
 
 #%% save as output
 gdf_tract.to_file(path_output)
 
 #%% plot
-list_abbrev = ['EXH', 'WIW', 'CST', 'CER', 'RES', 'EMG', 'CRN', 'HIW', 'ERQ', 'FLD']
+list_abbrev = ['EXH', 'WIW', 'CSW', 'ERQ', 'CSF']
 for haz in list_abbrev:
     plotting.plot_notebook(gdf_tract, column='Score_'+haz, title='RCA_ML_MI: Emergency Capacity ({})'.format(haz),
                            legend='Score', cmap='Blues', type='score')

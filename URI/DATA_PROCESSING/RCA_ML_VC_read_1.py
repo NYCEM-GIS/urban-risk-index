@@ -19,19 +19,11 @@ path_output = PATHNAMES.RCA_ML_VC_score
 
 #%% LOAD DATA
 df_veg = pd.read_excel(path_veg)
-gdf_nta = gpd.read_file(path_nta)
+gdf_tract = utils.get_blank_tract()
 
-#%%neighborhood shapefile
-gdf_nta = utils.project_gdf(gdf_nta)
-
-#%% join veg data gdf_nta
-gdf_nta = gdf_nta.merge(df_veg, left_on='cdta2020', right_on='NTA Code', how='left')
-
-#%% fill in missing data with median value
-gdf_nta.fillna(value={'Pct Veg Cover': gdf_nta['Pct Veg Cover'].median()}, inplace=True)
-
-#%% perform overlay and average
-gdf_tract = utils.convert_to_tract_average(gdf_nta, column_name='Pct Veg Cover', column_name_out='Pct_Veg_Cover_Tract')
+#%% Join vegetative data to tracts
+df_veg['geoid'] = df_veg['geoid'].astype(str)
+gdf_tract = gdf_tract.merge(df_veg, left_on='geoid', right_on='geoid', how='left')
 
 #%% xconvert to score 1-5
 gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Pct_Veg_Cover_Tract', score_column='Score', n_cluster=5)

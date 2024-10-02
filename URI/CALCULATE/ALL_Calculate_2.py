@@ -3,7 +3,6 @@
 #%% read packages
 import geopandas as gpd
 import pandas as pd
-import URI.MISC.params_1 as params
 import URI.MISC.plotting_1 as plotting
 import URI.MISC.utils_1 as utils
 from URI.PARAMS.params import PARAMS 

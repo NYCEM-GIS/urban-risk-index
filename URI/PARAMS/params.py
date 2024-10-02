@@ -379,10 +379,11 @@ add_params(
 ## ABBREVIATIONS
  
 class abbreviations:
-  def __init__(self, abbreviation=None, definition=None, category=None):
+  def __init__(self, abbreviation=None, definition=None, category=None, status=None):
     self.abbreviation = abbreviation
     self.definition = definition
     self.category = category
+    self.status = status
 
   
 
@@ -445,66 +446,92 @@ add_abbre(
     abbreviation = "CER",
     definition = "Coastal Erosion",
     category = "Hazard",
+    status = 'Active'
 )
 
 add_abbre(
     abbreviation = "CRN",
     definition = "CBRN",
     category = "Hazard",
+    status = 'Deprecated'
 )
 
 add_abbre(
     abbreviation = "CST",
     definition = "Coastal Storm",
     category = "Hazard",
+    status = 'Deprecated'
+)
+
+add_abbre(
+    abbreviation = "CSW",
+    definition = "Coastal Storm Winds",
+    category = "Hazard",
+    status = 'Active'
+)
+
+add_abbre(
+    abbreviation = "CSF",
+    definition = "Coastal Flooding",
+    category = "Hazard",
+    status = 'Active'
 )
 
 add_abbre(
     abbreviation = "CYB",
     definition = "Cyber Threats",
     category = "Hazard",
+    status = 'Deprecated'
 )
 
 add_abbre(
     abbreviation = "EMG",
     definition = "Emerging Disease Epidemic",
     category = "Hazard",
+    status = 'Deprecated'
+
 )
 
 add_abbre(
     abbreviation = "ERQ",
     definition = "Earthquake",
     category = "Hazard",
+    status = 'Active'
 )
 
 add_abbre(
     abbreviation = "EXH",
     definition = "Extreme Heat",
     category = "Hazard",
+    status = 'Active'
 )
 
 add_abbre(
     abbreviation = "FLD",
     definition = "Flooding",
     category = "Hazard",
+    status = 'Pending'
 )
 
 add_abbre(
     abbreviation = "HIW",
     definition = "High Winds",
     category = "Hazard",
+    status = 'Deprecated'
 )
 
 add_abbre(
     abbreviation = "RES",
     definition = "Respiratory Disease Pandemic",
     category = "Hazard",
+    status = 'Deprecated'
 )
 
 add_abbre(
     abbreviation = "WIW",
     definition = "Winter Weather",
     category = "Hazard",
+    status = 'Active'
 )
 
 # Resilience Capacity Component

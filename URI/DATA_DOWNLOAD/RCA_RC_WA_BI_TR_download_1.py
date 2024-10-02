@@ -1,11 +1,12 @@
 import numpy as np
 import requests
 import URI.MISC.utils_1 as utils
+import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Output paths
-path_walk_score = r'C:\Users\hsprague\miniconda\URI_Calculator_v1_1\1_RAW_INPUTS\RCA_WALKSCORE\walkscore_1.csv'
+path_walk_score = PATHNAMES.RCA_RC_WA_walkscore_csv
 
 ##%% load tracts to get centroid lat/longs
 gdf_tract = utils.get_blank_tract()

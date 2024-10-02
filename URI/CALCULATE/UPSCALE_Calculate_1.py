@@ -8,9 +8,7 @@ import os
 import matplotlib.pyplot as plt
 from shapely.ops import nearest_points
 import requests
-
 import URI.MISC.plotting_1 as plotting
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES

@@ -13,8 +13,8 @@ utils.set_home()
 # Input paths
 path_activation = PATHNAMES.RCA_RC_IE_activation
 # Params
-# This represents all the hazard abbreviations, excluding SOV, RCA, ESL, and OTH
-list_abbrv = [x.abbreviation for x in ABBREVIATIONS.values() if x.category == "Hazard"]
+# This represents all the active hazards
+list_abbrv = [x.abbreviation for x in ABBREVIATIONS.values() if (x.category == "Hazard") and  (x.status == 'Active')]
 # Output paths
 path_output = PATHNAMES.RCA_RC_IN_score
 
@@ -26,10 +26,10 @@ gdf_tract = utils.get_blank_tract()
 print(df_activation.shape)
 
 #%% Get list of hazards and EOC activation keyword
-list_hazards = (('EXH', 'Heat'),
-                ('WIW', 'Winter Weather'),  # Winter Storm, na
-                ('CST', 'Coastal Storm'),  # Coastal Storm, na
-                ('FLD', 'Flooding'))  # Coastal Erosion, na
+list_hazards = {'EXH': ['Heat'],
+                'WIW': ['Winter Weather'], 
+                'CSW': ['Coastal Storm'],  
+                'CSF': ['Coastal Storm', 'Flooding']}
 
 #%% Data preprocessing: Take only rows where CIMS TYPE is not na.
 df_activation = df_activation[df_activation['CIMS TYPE'].notna()]
@@ -41,13 +41,13 @@ df_count = pd.DataFrame(index=np.arange(len(list_abbrv)),
                               'count_days': np.zeros(len(list_abbrv))})
 
 #%% loop through each hazard to get count
-for i in np.arange(len(list_hazards)):
-    abbrev = list_hazards[i][0]
-    name = list_hazards[i][1]
-    bool = [name in x for x in df_activation.loc[:, 'CIMS TYPE']]
-    this_activation = df_activation.loc[bool, :]
-    df_count.loc[df_count.abbrv == abbrev, 'count_events'] = len(this_activation)
-    df_count.loc[df_count.abbrv == abbrev, 'count_days'] = this_activation.DURATION.sum()
+
+for abbrev in list_hazards.keys():
+    keyword_list = list_hazards[abbrev]
+    df_activation[abbrev] = df_activation['CIMS TYPE'].str.contains('|'.join(keyword_list))
+    subset = df_activation[df_activation[abbrev]].copy()
+    df_count.loc[df_count.abbrv == abbrev, 'count_events'] = len(subset)
+    df_count.loc[df_count.abbrv == abbrev, 'count_days'] = subset.DURATION.sum()
 
 
 #%% calculate k-means cluster score

@@ -52,7 +52,7 @@ gdf_tract.to_file(path_output)
 
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CSF: Buildng Damage',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CSF: Building Damage',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme

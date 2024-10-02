@@ -41,8 +41,8 @@ df_Events.index = df_Events.Id
 df_Events['StartDate'] = pd.to_datetime(df_Events['StartDate'])
 df_Events['EndDate'] = pd.to_datetime(df_Events['EndDate'])
 df_Events = df_Events.loc[df_EventIds.index, :]
-df_Events = df_Events.loc[df_Events.StartDate >= datetime.datetime(year=2009, month=1, day=1), :]
-df_Events = df_Events.loc[df_Events.EndDate < datetime.datetime(year=2019, month=1, day=1), :]
+df_Events = df_Events.loc[df_Events.StartDate >= datetime.datetime(year=2014, month=1, day=1), :]
+df_Events = df_Events.loc[df_Events.EndDate < datetime.datetime(year=2024, month=1, day=1), :]
 
 #%% get tree service calls in this range
 df_tree['Is_Event'] = np.zeros(len(df_tree))
@@ -62,7 +62,7 @@ df_tree_2 = df_tree_1.loc[((df_tree_1.HHCImportType != 0) & (df_tree_1.HHCImport
 Loss_USD = len(df_tree_2) * 3500 / 10
 
 #%% plot distribution of tree services
-gdf_tree = gpd.GeoDataFrame(df_tree, geometry=gpd.points_from_xy(df_tree.Long, df_tree.Lat))
+gdf_tree = gpd.GeoDataFrame(df_tree_2, geometry=gpd.points_from_xy(df_tree_2.Long, df_tree_2.Lat))
 gdf_tree = gdf_tree.loc[gdf_tree.Lat !=0, :]
 gdf_tree = gdf_tree.loc[gdf_tree.Long !=0, :]
 gdf_tree.crs = "EPSG:4326"

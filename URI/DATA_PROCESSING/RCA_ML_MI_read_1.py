@@ -66,9 +66,8 @@ gdf_tract = utils.get_blank_tract()
 gdf_tract['area_ft2'] = gdf_tract['geometry'].area
 
 #%% create blank table to populate with investment values for each hazard
-list_hazards = ['CBRN', 'Coastal Erosion', 'Coastal Storms', 'Flooding',
-                'Earthquakes', 'Extreme Heat', 'Winter Weather', 'Winter Storms', 'Disease Outbreaks',
-                'Cyber Threats']
+list_hazards = ['Coastal Erosion', 'Coastal Storms', 'Flooding',
+                'Earthquakes', 'Extreme Heat', 'Winter Weather', 'Winter Storms']
 df_value = pd.DataFrame(index=gdf_tract['BCT_txt'], data=np.zeros([len(gdf_tract), len(list_hazards)]))
 df_value.columns = list_hazards
 
@@ -90,13 +89,11 @@ for i, idx in enumerate(gdf_buffer.index):
 print('Done')
 
 #%% update df_value columns to reflect hazard names
-list_abbrev = ['EXH', 'WIW', 'CST', 'CER', 'CYB', 'RES', 'EMG', 'CRN', 'HIW', 'ERQ', 'FLD']
-list_factors = [['Extreme Heat'], ['Winter Weather', 'Winter Storms'], ['Coastal Storms'], ['Coastal Erosion'],
-                ['Cyber Threats'], ['Disease Outbreaks'], ['Disease Outbreaks'], ['CBRN'], [], ['Earthquakes'],
-                ['Flooding']]
-list_multipliers = [1, 1, 1, 1, 1, .5, .5, 1, 1, 1, 1]  # needed to split disease outbreak in half
+list_abbrev = ['EXH', 'WIW', 'CSF', 'CER', 'CSW', 'ERQ']
+list_factors = [['Extreme Heat'], ['Winter Weather', 'Winter Storms'], ['Coastal Storms', 'Flooding'], ['Coastal Erosion'],
+                ['Coastal Storms'], ['Earthquakes']]
 for i, abbrev in enumerate(list_abbrev):
-    df_value[list_abbrev[i]] = df_value[list_factors[i]].sum(axis=1) * list_multipliers[i]
+    df_value[list_abbrev[i]] = df_value[list_factors[i]].sum(axis=1)
 
 #%% add to gdf
 gdf_tract = gdf_tract.merge(df_value, on='BCT_txt', how='left')
