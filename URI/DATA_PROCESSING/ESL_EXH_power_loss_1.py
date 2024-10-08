@@ -50,7 +50,7 @@ gdf_tract['Weighting_Factor'] = gdf_tract['PCT90'] * gdf_tract['pop_2020']
 pop_total_weighted = gdf_tract['Weighting_Factor'].sum()
 gdf_tract['Loss_2016'] = yearly_loss * gdf_tract['Weighting_Factor'] / pop_total_weighted
 gdf_tract['Loss_USD'] = utils.convert_USD(gdf_tract['Loss_2016'], 2016).values
-
+gdf_tract['BCT_txt'] = gdf_tract['BCT_txt'].astype(str)
 
 #%% save as output
 gdf_tract.to_file(path_output)

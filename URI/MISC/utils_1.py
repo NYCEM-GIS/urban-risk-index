@@ -226,6 +226,11 @@ def near(gdf, single_point, points_layer):
     distance = single_point.distance(gdf[nearest]['geometry'].iloc[0])
     return distance
 
+def divide_zero(x, y):
+    if y==0 or y!=y or x!=x: # handling na and 0.
+        return 0
+    else:
+        return x / y
 
 
 

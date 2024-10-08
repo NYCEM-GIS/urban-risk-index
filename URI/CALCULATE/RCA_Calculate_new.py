@@ -16,12 +16,11 @@ utils.set_home()
 #%% calculate RCA
 def calculate_RCA(haz):
     if haz == 'RCA':
-        resilience_df_path = PATHNAMES.Resilience_Capacity_path
-        resilience_df = pd.read_csv(resilience_df_path)
-
+        resilience_df_path = PATHNAMES.community_resilience_path
     else:
-        resilience_df_path = PATHNAMES.Hazard_Resilience_Capacity_path 
-        resilience_df = pd.read_csv(resilience_df_path,skiprows=1)
+        resilience_df_path = PATHNAMES.hazard_resilience_path 
+    
+    resilience_df = pd.read_csv(resilience_df_path)
 
     # %% open tract
     gdf_tract = utils.get_blank_tract()
@@ -30,24 +29,25 @@ def calculate_RCA(haz):
     #find codes and their components with valid data
     ### Load hazard specipic only rows where weight > 0
     applicable_to_haz_df = resilience_df[resilience_df[haz] > 0]
-    applicable_to_haz_df['source_column_name'] = applicable_to_haz_df.apply(lambda row: 'Score' if row['Hazard Specific'] == 'No' else 'Score_{}'.format(haz), axis=1)
-    applicable_to_haz_df['target_column_name'] = applicable_to_haz_df['Component Code']+'_'+applicable_to_haz_df['Factor Code']
+    applicable_to_haz_df['source_column_name'] = applicable_to_haz_df.apply(
+        lambda row: 'Score_{}'.format(haz) if row['Specific'] else 'Score', 
+        axis=1)
+    applicable_to_haz_df['target_column_name'] = applicable_to_haz_df['Subcomponent']+'_'+applicable_to_haz_df['Factor']
     
     # add all valid codes into gdf
     for index, row in applicable_to_haz_df.iterrows():
-        path_score = getattr(PATHNAMES, 'RCA_{}_{}_score'.format(row['Component Code'], row['Factor Code']))
+        path_score = getattr(PATHNAMES, 'RCA_{}_{}_score'.format(row['Subcomponent'], row['Factor']))
         gdf_score = gpd.read_file(path_score)
         gdf_tract = gdf_tract.merge(gdf_score[['BCT_txt', row['source_column_name']]], on='BCT_txt', how='left' )
         gdf_tract.rename(columns={row['source_column_name']:row['target_column_name']}, inplace=True)
         list_col_keep.append(row['target_column_name'])
-    
 
     # calculate subcomponents
-    list_component_uniq =  resilience_df['Component Code'].unique().tolist()
+    list_component_uniq =  resilience_df['Subcomponent'].unique().tolist()
 
     for component in list_component_uniq:
-        if component in applicable_to_haz_df['Component Code'].tolist():
-            condition = applicable_to_haz_df['Component Code'] == component
+        if component in applicable_to_haz_df['Subcomponent'].tolist():
+            condition = applicable_to_haz_df['Subcomponent'] == component
             this_code = applicable_to_haz_df[condition]['target_column_name'].tolist()
             this_code_weight = applicable_to_haz_df[condition][haz].tolist()
             gdf_tract['{}'.format(component)] = np.average(gdf_tract.loc[:, this_code], weights=this_code_weight, axis=1)        
@@ -59,7 +59,7 @@ def calculate_RCA(haz):
 
     #calculate final RCA
     #CHANGE TO divede by 4.0 when RC data is available
-    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/len(np.unique(applicable_to_haz_df['Component Code'].tolist()))
+    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/len(np.unique(applicable_to_haz_df['Subcomponent'].tolist()))
     list_col_keep.append('RCA')
 
     #%% rename columns
@@ -83,7 +83,7 @@ def calculate_RCA(haz):
 
     #%% plot in notebook
 
-    list_component_name_uniq = list(dict.fromkeys(resilience_df['RC Component'].values))
+    list_component_name_uniq = list(dict.fromkeys(resilience_df['Subcomponent'].values))
     dct_component = {list_component_uniq[x]: list_component_name_uniq[x] for x in range(len(list_component_uniq))}
 
     for code in dct_component.keys():
@@ -111,31 +111,3 @@ def calculate_RCA(haz):
 
     # output complete message
     print("Finished calculating RCA factor for {}.".format(haz))
-
-
-#%% main
-if __name__ == '__main__':
-
-    # %% open outputs path and get abbrev list and mitigation table
-    folder_outputs = params.PATHNAMES.at['OUTPUTS_folder', 'Value']
-    list_abbrev_haz = params.ABBREVIATIONS.iloc[0:11, 0].values.tolist()
-
-    #run script
-    #for haz in list_abbrev_haz[0:2]:
-    #    calculate_RCA(haz)
-    haz='FLD'
-    calculate_RCA(haz)
-
-
-
-
-
-
-
-
-
-
-
-
-
-

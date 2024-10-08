@@ -38,8 +38,11 @@ gdf_tract.fillna(value={'Floor_sqft': 0}, inplace=True)
 #%% add square miles
 gdf_tract['Sq_miles'] = gdf_tract.geometry.area / (5280.**2)
 
+#%% add a column of ones, for when we don't actually want to normalize a variable
+gdf_tract['ONE'] = 1
+
 #%% trim to only necessary
-gdf_tract = gdf_tract[['BCT_txt', 'Sq_miles', 'Building_Count', 'Floor_sqft', 'pop_2020', 'geometry']]
+gdf_tract = gdf_tract[['BCT_txt', 'Sq_miles', 'Building_Count', 'Floor_sqft', 'pop_2020', 'ONE', 'geometry']]
 gdf_tract.rename(columns={"Sq_miles":"AREA_SQMI", "Building_Count":"BLD_CNT", "Floor_sqft":'FLOOR_SQFT', 'pop_2020':'POP'}, inplace=True)
 
 #%% save to other

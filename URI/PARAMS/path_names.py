@@ -130,5 +130,6 @@ TBL_NTA_shp = r'.\3_OUTPUTS\TABLEAU\Tableau_URI_Neighborhood_shapefile.shp'
 TBL_output_csv = r'.\3_OUTPUTS\TABLEAU\\'
 
 # ----- PARAMS -------------------------------------------------------------------------------------------------------------
-Resilience_Capacity_path = r'.\4_CODE\URI\PARAMS\Resilience Capacity.csv'
-Hazard_Resilience_Capacity_path = r'.\4_CODE\URI\PARAMS\Hazard Resilience Capacity.csv'
+community_resilience_path = r'.\4_CODE\URI\PARAMS\resilience_capacity.csv'
+hazard_resilience_path = r'.\4_CODE\URI\PARAMS\hazard_resilience.csv'
+consequences_path = r'.\4_CODE\URI\PARAMS\consequences.csv'

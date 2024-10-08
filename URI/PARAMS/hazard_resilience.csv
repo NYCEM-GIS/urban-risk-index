@@ -1,0 +1,12 @@
+﻿Subcomponent,Factor,Specific,CER,CSF,CSW,ERQ,EXH,WIW
+ML,GI,0,0,1,0,0,0,0
+ML,MI,1,1,1,1,1,1,1
+ML,PW,0,0,0,0,0,1,0
+ML,VC,0,0,0,0,0,1,0
+RC,AC,0,0,0,0,0,1,0
+RC,CC,0,0,0,0,0,1,0
+RC,EM,1,0,1,1,1,1,1
+RC,EP,0,0,1,0,1,0,0
+RC,IN,1,0,1,1,1,1,1
+RC,SC,0,0,1,0,0,0,0
+RR,FP,0,1,1,0,0,0,0

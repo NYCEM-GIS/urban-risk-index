@@ -105,6 +105,7 @@ gdf_tract['Loss_USD'] = gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_
 
 # Apply weighting factor to losses
 gdf_tract['Loss_USD'] = (gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_emerg_uniq'] * loss_moderate_total) * gdf_tract['Weighting_Factor']
+gdf_tract['BCT_txt'] = gdf_tract['BCT_txt'].astype(str)
 
 #%% save as output
 gdf_tract.to_file(path_output)

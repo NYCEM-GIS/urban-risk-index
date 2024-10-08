@@ -27,7 +27,6 @@ ave_persons_per_residence = PARAMS['ave_persons_per_residence'].value
 
 # Output paths
 path_output = PATHNAMES.ESL_CST_dislocation_loss
-path_results = PATHNAMES.ESL_CST_dislocation_loss
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()
