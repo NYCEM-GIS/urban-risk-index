@@ -18,7 +18,7 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_dot = PATHNAMES.ESL_CST_dot_table
-path_cst_loss = PATHNAMES.ESL_CST_hazus_loss
+path_cst_loss = PATHNAMES.ESL_FLD_hazus_loss
 # Settings
 ref_year = PARAMS['target_year'].value
 # Output paths

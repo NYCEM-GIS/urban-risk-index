@@ -70,6 +70,7 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse
             df_result = df.copy()
             df_result[score_column] = np.ones(len(df))*3
         else:
+            zero_scores = df[data_column] == 0
             kmeans = KMeans(n_clusters=5)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -86,6 +87,9 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse
             # assign score to each cluster
             df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
             df_result.drop(columns={'Cluster_ID'}, inplace=True)
+            df_result.loc[zero_scores, score_column] = 0
+        
+        
         return df_result
 
 #%%

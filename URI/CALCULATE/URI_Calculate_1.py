@@ -20,53 +20,40 @@ def calculate_URI(haz):
 
     print('Calculating {}'.format(haz))
     # open SOV, RCA, ESL
-    path_ESL = PATHNAMES.OUTPUTS_folder + r'\ESL\Tract\\ESL_{}_tract.shp'.format(haz, haz)
+    path_ESL = PATHNAMES.OUTPUTS_folder + r'\ESL\Tract\\ESL_{}_tract.shp'.format(haz)
     gdf_ESL = gpd.read_file(path_ESL)
 
-    path_SOV = PATHNAMES.OUTPUTS_folder + r'\SOV\Tract\\SOV_tract.shp'.format( haz)
+    path_SOV = PATHNAMES.OUTPUTS_folder + r'\SOV\Tract\\SOV_tract.shp'
     df_SOV = gpd.read_file(path_SOV)
     df_SOV.drop(columns={'geometry'}, inplace=True)
 
-    path_RCA = PATHNAMES.OUTPUTS_folder + r'\RCA\Tract\\RCA_{}_tract.shp'.format(haz, haz)
+    path_RCA = PATHNAMES.OUTPUTS_folder + r'\RCA\Tract\\RCA_{}_tract.shp'.format(haz)
     df_RCA = gpd.read_file(path_RCA)
     df_RCA.drop(columns={'geometry'}, inplace=True)
+
+    path_COR = PATHNAMES.OUTPUTS_folder + r'\RCA\Tract\\RCA_COR_tract.shp'
+    df_COR = gpd.read_file(path_COR)
+    df_COR.drop(columns={'geometry'}, inplace=True)
+
 
     #%% assemble into single file and calculate URI
     gdf_URI = gdf_ESL.copy()
     gdf_URI = gdf_URI.merge(df_RCA, on='BCT_txt', how='left')
     gdf_URI = gdf_URI.merge(df_SOV, on='BCT_txt', how='left')
+    gdf_URI = gdf_URI.merge(df_COR, on='BCT_txt', how='left')
 
     #%% calculate URI
-    gdf_URI[haz + 'U_RN'] = gdf_URI[haz+'E_RNTT'] * gdf_URI['S_R'] / gdf_URI[haz+'R_RTTTT']
-
-    # Fill na wil 0 in gdf_ESL
+    raw_col = haz + 'U_RN'
+    score_col = haz + 'U_SN'
+    gdf_URI[raw_col] = gdf_URI[haz+'E_SXXT'] / gdf_URI[haz+'R_RTTTT'] * gdf_URI['S_R'] / gdf_URI['CORR_RTTTT']
     gdf_URI = gdf_URI.fillna(0)
+    gdf_URI = utils.calculate_kmeans(gdf_URI, data_column=raw_col, score_column=score_col)
 
-    #%% calculate normalization
-    def divide_zero(x, y):
-        if y == 0:
-            return 0
-        else:
-            return x / y
-    list_norm_col = ['AREA_SQMI', 'FLOOR_SQFT', 'POP']
-    list_abbrv = ['A', 'F', 'P']
-    for norm, abbrv in zip(list_norm_col, list_abbrv):
-        list_col = [col for col in gdf_URI if 'U_RN' in col]
-        for col in list_col:
-            new_col = col[0:6] + abbrv
-            gdf_URI[new_col] = gdf_URI.apply(lambda row: divide_zero(row[col], row[norm]), axis=1)
-
-    # %% calculate scores
-    list_col = [col for col in gdf_URI if 'U_R' in col]
-
-    for col in list_col:
-        score_col = col[0:5] + 'S' + col[6:]
-        gdf_URI = utils.calculate_kmeans(gdf_URI, data_column=col, score_column=score_col)
-        percentile_col = col[0:5] + 'P' + col[6:]
-        gdf_URI = utils.calculate_percentile(gdf_URI, data_column=col, score_column=percentile_col)
 
     #%% plot results
-    plotting.plot_notebook(gdf_URI, column=haz + 'U_SN', title=haz + ': Urban Risk Index',
+    plotting.plot_notebook(gdf_URI, column=raw_col, title=haz + ': Raw Urban Risk Index',
+                           legend='Score', cmap='Purples', type='raw')
+    plotting.plot_notebook(gdf_URI, column=score_col, title=haz + ': Urban Risk Index Score',
                            legend='Score', cmap='Purples', type='score')
 
     #%% save in Tract

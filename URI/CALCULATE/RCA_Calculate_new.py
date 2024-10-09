@@ -15,7 +15,7 @@ utils.set_home()
 
 #%% calculate RCA
 def calculate_RCA(haz):
-    if haz == 'RCA':
+    if haz == 'COR':
         resilience_df_path = PATHNAMES.community_resilience_path
     else:
         resilience_df_path = PATHNAMES.hazard_resilience_path 
@@ -30,67 +30,32 @@ def calculate_RCA(haz):
     ### Load hazard specipic only rows where weight > 0
     applicable_to_haz_df = resilience_df[resilience_df[haz] > 0]
     applicable_to_haz_df['source_column_name'] = applicable_to_haz_df.apply(
-        lambda row: 'Score_{}'.format(haz) if row['Specific'] else 'Score', 
+        lambda row: f'Score_{haz}' if row['Specific'] else 'Score', 
         axis=1)
-    applicable_to_haz_df['target_column_name'] = applicable_to_haz_df['Subcomponent']+'_'+applicable_to_haz_df['Factor']
+    applicable_to_haz_df['target_column_name'] = applicable_to_haz_df['Subcomponent'] + '_' + applicable_to_haz_df['Factor']
     
     # add all valid codes into gdf
     for index, row in applicable_to_haz_df.iterrows():
-        path_score = getattr(PATHNAMES, 'RCA_{}_{}_score'.format(row['Subcomponent'], row['Factor']))
+        path_score = getattr(PATHNAMES, f'RCA_{row["Subcomponent"]}_{row["Factor"]}_score')
         gdf_score = gpd.read_file(path_score)
         gdf_tract = gdf_tract.merge(gdf_score[['BCT_txt', row['source_column_name']]], on='BCT_txt', how='left' )
         gdf_tract.rename(columns={row['source_column_name']:row['target_column_name']}, inplace=True)
         list_col_keep.append(row['target_column_name'])
 
-    # calculate subcomponents
+    # # calculate subcomponents
     list_component_uniq =  resilience_df['Subcomponent'].unique().tolist()
 
-    for component in list_component_uniq:
-        if component in applicable_to_haz_df['Subcomponent'].tolist():
-            condition = applicable_to_haz_df['Subcomponent'] == component
-            this_code = applicable_to_haz_df[condition]['target_column_name'].tolist()
-            this_code_weight = applicable_to_haz_df[condition][haz].tolist()
-            gdf_tract['{}'.format(component)] = np.average(gdf_tract.loc[:, this_code], weights=this_code_weight, axis=1)        
-            
-        else:
-            gdf_tract['{}'.format(component)] = np.zeros(len(gdf_tract))
-
-        list_col_keep.append('{}'.format(component))
-
     #calculate final RCA
-    #CHANGE TO divede by 4.0 when RC data is available
-    gdf_tract['RCA'] = gdf_tract.loc[:, list_component_uniq].sum(axis=1)/len(np.unique(applicable_to_haz_df['Subcomponent'].tolist()))
-    list_col_keep.append('RCA')
-
-    #%% rename columns
-    gdf_tract = gdf_tract[list_col_keep].copy()
-    for col in gdf_tract.columns:
-        if len(col)==2:
-            gdf_tract.rename(columns={col:haz+'R_R'+col + 'TT'}, inplace=True)
-        elif len(col)==3:
-            gdf_tract.rename(columns={col: haz + 'R_R' + 'TTTT'}, inplace=True)
-        elif len(col)==5:
-            gdf_tract.rename(columns={col: haz + 'R_R' + col.replace('_', '')}, inplace=True)
-
-    #%% calculate score and percentile
-    list_R_col = [col for col in gdf_tract.columns if 'R_R' in col]
-    for col in list_R_col:
-        score_col = col[0:5] + 'S' + col[6:]
-        #gdf_tract = utils.calculate_kmeans(gdf_tract, data_column=col, score_column=score_col)
-        gdf_tract[score_col] = [np.round(x, 0) for x in gdf_tract[col]]
-        percentile_col = col[0:5] + 'P' + col[6:]
-        gdf_tract = utils.calculate_percentile(gdf_tract, data_column=col, score_column=percentile_col)
+    average_col = haz + 'R_RTTTT'
+    score_col = haz + 'R_STTTT'
+    gdf_tract[average_col] = gdf_tract[applicable_to_haz_df['target_column_name'].values].mean(axis=1)
+    list_col_keep.append(average_col)
+    gdf_tract = utils.calculate_kmeans(gdf_tract, data_column=average_col, score_column=score_col)
 
     #%% plot in notebook
-
-    list_component_name_uniq = list(dict.fromkeys(resilience_df['Subcomponent'].values))
-    dct_component = {list_component_uniq[x]: list_component_name_uniq[x] for x in range(len(list_component_uniq))}
-
-    for code in dct_component.keys():
-        name = dct_component[code]
-        plotting.plot_notebook(gdf_tract, column=haz+'R_S'+code+'TT', title=haz + ': ' + name,
-                               legend='Score', cmap='Blues', type='score')
-    plotting.plot_notebook(gdf_tract, column=haz + 'R_S' + 'TTTT', title=haz + ': Total Resilience Capacity',
+    plotting.plot_notebook(gdf_tract, column=average_col, title=haz + ': Average Resilience Capacity',
+                           legend='Score', cmap='Blues', type='raw')
+    plotting.plot_notebook(gdf_tract, column=score_col, title=haz + ': Total Resilience Capacity',
                            legend='Score', cmap='Blues', type='score')
 
     #%%
