@@ -57,12 +57,17 @@ def calculate_ESL(haz):
             lambda row: utils.divide_zero(row[raw_col], row[receptor_field]), axis=1)
         
         gdf_ESL = utils.calculate_kmeans(gdf_ESL, data_column=normalized_col, score_column=score_col)
+        ## JUST FOR TESTING - CLEAN UP
+        gdf_ESL = utils.calculate_kmeans(gdf_ESL, data_column=raw_col, score_column='raw_score')
 
-        plotting.plot_notebook(gdf_ESL, column=raw_col, title=haz + ': ' + this_path,
+
+        plotting.plot_notebook(gdf_ESL, column=raw_col, title=haz + ' Raw Value: ' + this_path,
                                legend='Loss USD', cmap='Greens', type='raw')
-        plotting.plot_notebook(gdf_ESL, column=normalized_col, title=haz + ' Normalized: ' + this_path,
+        plotting.plot_notebook(gdf_ESL, column=normalized_col, title=haz + ' Normalized Value: ' + this_path,
                         legend='Normalized Value', cmap='Greens', type='raw')
-        plotting.plot_notebook(gdf_ESL, column=score_col, title=haz + ' Score: ' + this_path,
+        plotting.plot_notebook(gdf_ESL, column=score_col, title=haz + ' Normalzied Score: ' + this_path,
+                        legend='Score', cmap='Greens', type='score')
+        plotting.plot_notebook(gdf_ESL, column='raw_score', title=haz + ' Raw Score: ' + this_path,
                         legend='Score', cmap='Greens', type='score')
     # rename the columns in new Boundary tract file.    
     list_all_col = df_cons["Raw_col"].to_list() + df_cons['Normalized_col'].to_list() + df_cons['Score_col'].to_list() + ['BCT_txt', 'geometry', 'borocode', 'nta2020', 'cdta2020']

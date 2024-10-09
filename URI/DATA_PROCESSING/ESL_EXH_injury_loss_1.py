@@ -36,7 +36,13 @@ df_ecostress = pd.read_csv(path_ecostress)
 gdf_tract['BCT_txt'] = gdf_tract['BCT_txt'].astype(int)
 gdf_tract = gdf_tract.merge(df_ecostress[['boroct2020', 'PCT90']], 
                             left_on='BCT_txt', right_on='boroct2020', how='inner')
-gdf_tract['Weighting_Factor'] = gdf_tract['PCT90'] * gdf_tract['pop_2020']
+
+gdf_tract['ecostress_rank'] = utils.normalize_rank_percentile(
+    gdf_tract['PCT90'].values,
+    list_input_null_values=[-999],
+    output_null_value=-999)
+
+gdf_tract['Weighting_Factor'] = gdf_tract['ecostress_rank'] * gdf_tract['pop_2020']
 
 #%% load hospitalizations.  These are the most severe injuries
 # keep only the borough estimates

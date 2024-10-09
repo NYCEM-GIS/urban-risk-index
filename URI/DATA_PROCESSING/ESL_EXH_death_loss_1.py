@@ -98,7 +98,11 @@ gdf_events_per_year = gdf_events_per_year.merge(df_ecostress[['boroct2020', 'PCT
                                                 left_on='BCT_txt', right_on='boroct2020', how='inner')
 
 #%% Calculate Weighting Factor using Ecostress PCT90
-gdf_events_per_year['Weighting_Factor'] = gdf_events_per_year['PCT90'] * gdf_events_per_year['Pop2020']
+gdf_events_per_year['ecostress_rank'] = utils.normalize_rank_percentile(
+    gdf_events_per_year['PCT90'].values,
+    list_input_null_values=[-999],
+    output_null_value=-999)
+gdf_events_per_year['Weighting_Factor'] = gdf_events_per_year['ecostress_rank'] * gdf_events_per_year['Pop2020']
 
 #%% Recalculate number of deaths per heat event with weighting factor
 gdf_deaths_per_event['deaths_per_event_weighted'] = gdf_deaths_per_event['deaths_per_event'] * gdf_events_per_year['Weighting_Factor']
