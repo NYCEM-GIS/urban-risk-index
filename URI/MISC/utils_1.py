@@ -87,7 +87,7 @@ def calculate_kmeans(df, data_column, score_column='Score', n_cluster=5, reverse
             # assign score to each cluster
             df_result = df.merge(df_label[['Cluster_ID', score_column]], on='Cluster_ID', how='left')
             df_result.drop(columns={'Cluster_ID'}, inplace=True)
-            df_result.loc[zero_scores, score_column] = 0
+            df_result.loc[zero_scores.values, score_column] = 0
         
         
         return df_result
@@ -101,11 +101,16 @@ def calculate_quantile(df, data_column, score_column='Score_QT', n_cluster=5):
 #%%
 def calculate_percentile(df, data_column, score_column='Percentile'):
     if score_column in df.columns:
-        print("warning: kmeans score already exists.")
+        print("warning: percentile already exists.")
         pass
     else:
-        percentile = np.round([stats.percentileofscore(df[data_column].values, x, kind='rank') for x in np.round(df[data_column].values, 6)], 2)
-        df[score_column] = percentile
+        row_idx = df[data_column] > 0
+        filtered_data = df[row_idx][data_column]
+
+        percentile = np.round([stats.percentileofscore(filtered_data.values, x, kind='rank') for x in np.round(filtered_data.values, 6)], 2)
+        df.loc[row_idx, score_column] = percentile
+        df.loc[~row_idx, score_column] = 0
+        # df[score_column] = percentile
         return df
 
 #%% calculate equal interval score 1 to 5

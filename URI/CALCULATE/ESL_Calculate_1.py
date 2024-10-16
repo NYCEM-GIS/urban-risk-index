@@ -34,6 +34,7 @@ def calculate_ESL(haz):
     df_cons["Raw_col"] = haz + 'E_RN' + df_cons['Subcomponent'] + df_cons['Factor']
     df_cons['Normalized_col'] = haz + 'E_R' + df_cons['Receptor'] + df_cons['Subcomponent'] + df_cons['Factor']
     df_cons['Score_col'] = df_cons["Normalized_col"].str.replace('E_R', 'E_S')
+    df_cons['Percentile_col'] = df_cons["Normalized_col"].str.replace('E_R', 'E_P')
     for idx in df_cons.index:
         this_abbrv = df_cons.at[idx, 'Factor']
         this_receptor = df_cons.at[idx, 'Receptor']
@@ -43,6 +44,7 @@ def calculate_ESL(haz):
         raw_col = df_cons.at[idx, 'Raw_col']
         normalized_col = df_cons.at[idx, 'Normalized_col']
         score_col = df_cons.at[idx, 'Score_col']
+        percentile_col = df_cons.at[idx, 'Percentile_col']
         print("..........Abbreviation:  {}".format(this_abbrv))
         print("..........Receptor:  {}".format(this_receptor))
         print("..........Category:  {}".format(this_subcomponent_abbrv))
@@ -55,26 +57,23 @@ def calculate_ESL(haz):
         gdf_ESL = gdf_ESL.fillna(0)
         gdf_ESL[normalized_col] = gdf_ESL.apply(
             lambda row: utils.divide_zero(row[raw_col], row[receptor_field]), axis=1)
-        
+        gdf_ESL = utils.calculate_percentile(gdf_ESL, data_column=normalized_col, score_column=percentile_col)
         gdf_ESL = utils.calculate_kmeans(gdf_ESL, data_column=normalized_col, score_column=score_col)
-        ## JUST FOR TESTING - CLEAN UP
-        gdf_ESL = utils.calculate_kmeans(gdf_ESL, data_column=raw_col, score_column='raw_score')
-
 
         plotting.plot_notebook(gdf_ESL, column=raw_col, title=haz + ' Raw Value: ' + this_path,
                                legend='Loss USD', cmap='Greens', type='raw')
         plotting.plot_notebook(gdf_ESL, column=normalized_col, title=haz + ' Normalized Value: ' + this_path,
                         legend='Normalized Value', cmap='Greens', type='raw')
-        plotting.plot_notebook(gdf_ESL, column=score_col, title=haz + ' Normalzied Score: ' + this_path,
-                        legend='Score', cmap='Greens', type='score')
-        plotting.plot_notebook(gdf_ESL, column='raw_score', title=haz + ' Raw Score: ' + this_path,
+        plotting.plot_notebook(gdf_ESL, column=percentile_col, title=haz + ' Percentile: ' + this_path,
+                        legend='Percentile', cmap='Greens', type='raw')
+        plotting.plot_notebook(gdf_ESL, column=score_col, title=haz + ' Normalized Score: ' + this_path,
                         legend='Score', cmap='Greens', type='score')
     # rename the columns in new Boundary tract file.    
-    list_all_col = df_cons["Raw_col"].to_list() + df_cons['Normalized_col'].to_list() + df_cons['Score_col'].to_list() + ['BCT_txt', 'geometry', 'borocode', 'nta2020', 'cdta2020']
+    list_all_col = df_cons["Raw_col"].to_list() + df_cons['Normalized_col'].to_list() + df_cons['Score_col'].to_list()  + df_cons['Percentile_col'].to_list() + ['BCT_txt', 'geometry', 'borocode', 'nta2020', 'cdta2020']
     gdf_ESL = gdf_ESL[list_all_col]
 
     #%% get total sum
-    score_sum_col = haz + 'E_SXXT'
+    score_sum_col = haz + 'E_RXXT'
     gdf_ESL[score_sum_col] = gdf_ESL[df_cons["Score_col"].to_list()].sum(axis=1)
     # Fill na wil 0 in gdf_ESL
     gdf_ESL = gdf_ESL.fillna(0)
