@@ -45,7 +45,7 @@ def calculate_URI(haz):
     #%% calculate URI
     raw_col = haz + 'U_RN'
     score_col = haz + 'U_SN'
-    gdf_URI[raw_col] = gdf_URI[haz+'E_RXXT'] / gdf_URI[haz+'R_RTTTT'] * gdf_URI['S_R'] / gdf_URI['CORR_RTTTT']
+    gdf_URI[raw_col] = gdf_URI[haz+'E_RXXT'] / gdf_URI[haz+'R_RTTTT'] * gdf_URI['S_R'] # / gdf_URI['CORR_RTTTT']
     gdf_URI = gdf_URI.fillna(0)
     gdf_URI = utils.calculate_kmeans(gdf_URI, data_column=raw_col, score_column=score_col)
 

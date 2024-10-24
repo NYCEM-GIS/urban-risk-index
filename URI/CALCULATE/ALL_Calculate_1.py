@@ -33,8 +33,7 @@ def calculate_ALL(list_abbrev_haz):
 
     #%% calcualte all hazard URI
     list_col_URI = [col for col in gdf_all.columns if 'U_RN' in col]
-    gdf_all['ALLU_RN_SUM'] = gdf_all[list_col_URI].sum(axis=1)
-    gdf_all['ALLU_RN_RECALC'] = gdf_all['ALLE_RXXT'] / gdf_all['ALLR_RTTTT'] * gdf_all['S_R'] / gdf_all['CORR_RTTTT']
+    gdf_all['ALLU_RN'] = gdf_all[list_col_URI].sum(axis=1)
 
     # %% calculate scores
     list_col = [col for col in gdf_all if 'ALL' in col]
@@ -49,10 +48,9 @@ def calculate_ALL(list_abbrev_haz):
                            legend='Score', cmap='Greens', type='score')
     plotting.plot_notebook(gdf_all, column='ALLR_STTTT', title= 'All Hazard: Total Resilience Capacity',
                            legend='Score', cmap='Blues', type='score')
-    plotting.plot_notebook(gdf_all, column='ALLU_SN_SUM', title= 'All Hazard: Urban Risk Index - SUM',
+    plotting.plot_notebook(gdf_all, column='ALLU_SN', title= 'All Hazard: Urban Risk Index',
                            legend='Score', cmap='Purples', type='score')
-    plotting.plot_notebook(gdf_all, column='ALLU_SN_RECALC', title= 'All Hazard: Urban Risk Index - RECALC',
-                           legend='Score', cmap='Purples', type='score')
+
 
     #%% save
     list_col_keep = gdf_all.columns
