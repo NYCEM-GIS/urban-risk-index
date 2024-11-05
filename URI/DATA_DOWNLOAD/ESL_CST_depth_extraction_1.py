@@ -1,15 +1,11 @@
 """ estimate cost of dislocated residents from coastal storms """
 
 #%% read packages
-import sys
-sys.path.extend(r'C:\Users\hsprague\miniconda\URI_Calculator_v1_1\4_CODE')
 import numpy as np
 import geopandas as gpd
 import os
 from rasterstats import zonal_stats
-import URI.MISC.params_1 as params
 import URI.MISC.utils_1 as utils
-from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
 import time
 utils.set_home()
@@ -27,9 +23,6 @@ print('reading footprints...')
 gdf_footprint = gpd.read_file(path_footprint)
 print('projecting footprints...')
 gdf_depths = utils.project_gdf(gdf_footprint)
-# save footprint file to temp location
-path_temp = os.path.join(folder_scratch, 'temp.shp')
-gdf_depths.to_file(path_temp)
 
 # loop through 4 cat types
 for cat in np.arange(1, 5):
@@ -38,7 +31,7 @@ for cat in np.arange(1, 5):
     # get path to depth raster
     path_C = getattr(PATHNAMES,'ESL_CST_SLOSH_C{}'.format(cat))
     # perform zonal stats
-    dict_c = zonal_stats(path_temp, path_C, stats="max")
+    dict_c = zonal_stats(path_footprint, path_C, stats="max")
     # join results to footprint
     gdf_depths['C{}_depth'.format(cat)] = [x['max'] for x in dict_c]
     t2 = time.time()
