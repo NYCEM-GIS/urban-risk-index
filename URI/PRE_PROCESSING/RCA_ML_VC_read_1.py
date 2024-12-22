@@ -13,7 +13,7 @@ utils.set_home()
 #%% EXTRACT PARAMETERS
 # Input paths
 path_veg = PATHNAMES.RCA_ML_VC_table
-path_nta = PATHNAMES.BOUNDARY_neighborhood
+path_nta = PATHNAMES.BOUNDARY_nta
 # Output paths
 path_output = PATHNAMES.RCA_ML_VC_score
 

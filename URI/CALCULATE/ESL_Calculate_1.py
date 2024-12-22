@@ -75,6 +75,12 @@ def calculate_ESL(haz):
     #%% get total sum
     score_sum_col = haz + 'E_RXXT'
     gdf_ESL[score_sum_col] = gdf_ESL[df_cons["Score_col"].to_list()].sum(axis=1)
+
+    percentile_sum_col = haz + 'E_PXXT'
+    final_percentile_col = haz + 'E_PXXP'
+    gdf_ESL[percentile_sum_col] = gdf_ESL[df_cons["Percentile_col"].to_list()].sum(axis=1)
+    gdf_ESL = utils.calculate_percentile(gdf_ESL, data_column=percentile_sum_col, score_column=final_percentile_col)
+
     # Fill na wil 0 in gdf_ESL
     gdf_ESL = gdf_ESL.fillna(0)
     final_score_col = haz + 'E_SXXS'
@@ -83,6 +89,12 @@ def calculate_ESL(haz):
 
     plotting.plot_notebook(gdf_ESL, column=final_score_col, title=haz + ': Total Loss Score',
                            legend='Score', cmap='Greens', type='score')
+
+    plotting.plot_notebook(gdf_ESL, column=percentile_sum_col, title=haz + ': Percentile Sum',
+                           legend='Score', cmap='Greens', type='raw')
+    
+    plotting.plot_notebook(gdf_ESL, column=final_percentile_col, title=haz + ': Final Percentile',
+                           legend='Score', cmap='Greens', type='raw')
 
 
     #%%

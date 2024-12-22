@@ -5,12 +5,8 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import matplotlib.pyplot as plt
-from shapely.ops import nearest_points
-import requests
 import URI.MISC.plotting_1 as plotting
 import URI.MISC.utils_1 as utils
-from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
@@ -52,9 +48,7 @@ def calculate_UPSCALE(haz):
         list_geo_keep.append(geo_id)
 
         #%% get new dissolved shapefile with only geo_id
-        # HMS: DON'T NEED TO DO THIS FOR EACH HAZARD. COULD JUST REPLACE WITH PATH TO FILE AND LOAD 
         gdf_new = gdf_uri.copy()
-        # gdf_new.geometry = gdf_new.buffer(0)  # HMS: This doesn't seem to be doing anything
         gdf_new  = gdf_new[list_geo_keep + ['geometry']].dissolve(by=geo_id)
         gdf_new[geo_id] = gdf_new.index
         gdf_new.index.name = 'Index'
@@ -72,34 +66,32 @@ def calculate_UPSCALE(haz):
         list_col_keep = [geo_id] + list_col_loss + list_col_uri
         df_sum = gdf_uri[list_col_keep].groupby(by=geo_id).sum()
         gdf_new = gdf_new.merge(df_sum, left_on=geo_id, right_index=True, how='left')
-        gdf_new = utils.calculate_kmeans(gdf_new, data_column=haz+'U_RN', score_column=haz+'U_SN')
-        
-        #%% get pop weighted average of ESL, SOV and RCA raw scores, merge
+
+        #%% get pop weighted average of SOV and RCA raw scores, merge
         gdf_uri.index = np.arange(len(gdf_uri))
         wm = lambda x: weight_ave(x, weights=gdf_uri.loc[x.index, "POP"])
         list_col_wm = [geo_id, 'S_R'] + [col for col in gdf_uri.columns if 'R_RTTTT' in col] + [col for col in gdf_uri.columns if 'E_RXXT' in col]
         df_wm = gdf_uri[list_col_wm].groupby(by=geo_id).agg(wm)
         gdf_new = gdf_new.merge(df_wm, left_on=geo_id, right_index=True, how='left')
 
-        # # %% calculate scores
-        # list_col = ['S_R'] + [col for col in gdf_new.columns if haz in col[0:3]]
-        # for col in list_col:
-        #     if col == 'S_R':
-        #         score_col = 'S_S'
-        #         percentile_col = 'S_P'
-        #         gdf_new[score_col] = [np.round(x, 0) for x in gdf_new[col]]
-        #         gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
-        #     elif col[3:5]=='R_':
-        #         score_col = col[0:5] + 'S' + col[6:]
-        #         percentile_col = col[0:5] + 'P' + col[6:]
-        #         gdf_new[score_col] = [np.round(x, 0) for x in gdf_new[col]]
-        #         gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
-        #     else:
-        #         score_col = col[0:5] + 'S' + col[6:]
-        #         percentile_col = col[0:5] + 'P' + col[6:]
-        #         gdf_new = utils.calculate_kmeans(gdf_new, data_column=col, score_column=score_col)
-        #         gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
-
+        # %% calculate scores
+        list_col = ['S_R'] + [col for col in gdf_new.columns if haz in col[0:3]]
+        for col in list_col:
+            if col == 'S_R':
+                score_col = 'S_S'
+                percentile_col = 'S_P'
+                gdf_new[score_col] = [np.round(x, 0) for x in gdf_new[col]]
+                gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
+            elif col[3:5]=='R_':
+                score_col = col[0:5] + 'S' + col[6:]
+                percentile_col = col[0:5] + 'P' + col[6:]
+                gdf_new = utils.calculate_kmeans(gdf_new, data_column=col, score_column=score_col)
+                gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
+            else:
+                score_col = col[0:5] + 'S' + col[6:]
+                percentile_col = col[0:5] + 'P' + col[6:]
+                gdf_new = utils.calculate_kmeans(gdf_new, data_column=col, score_column=score_col)
+                gdf_new = utils.calculate_percentile(gdf_new, data_column=col, score_column=percentile_col)
 
         #%% save in Tract
         path_output = PATHNAMES.OUTPUTS_folder + r'\URI\\{}\\URI_{}_{}.shp'.format(geo_name, haz, geo_name)

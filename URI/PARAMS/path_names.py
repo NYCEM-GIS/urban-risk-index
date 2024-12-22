@@ -3,6 +3,8 @@ home = r'C:\Users\HSprague\vscode\URI_Calculator_v1_1_TEMPLATE'
 # Utility Files
 Borough_to_FIP = r'.\1_RAW_INPUTS\BOUNDARY_BOROUGH_FIPS\Borough_FIPS_1.xlsx'
 BOUNDARY_tract = r'.\1_RAW_INPUTS\BOUNDARY_CENSUS_TRACT\CSCL_CensusTract2020.shp'
+BOUNDARY_nta = r'.\1_RAW_INPUTS\BOUNDARY_NEIGHBORHOOD\2020 Neighborhood Tabulation Areas (NTAs) - Tabular_20240219\geo_export_38927ec6-986f-49b7-8c14-dc0d005c904c.shp'
+BOUNDARY_zcta = r'.\1_RAW_INPUTS\BOUNDARY_MODZCTA\Modified Zip Code Tabulation Areas (MODZCTA)_20240219\geo_export_aa48aecc-01c6-4716-aa5f-d1164dd631c8.shp'
 CPI_table = r'.\1_RAW_INPUTS\OTH_CPI\CPIAUCNS.xls'
 population_by_tract = r'.\1_RAW_INPUTS\OTH_POPULATION_BY_TRACT\t_pl_p5_ct_update.xlsx'
 # CER - Coastal Erosion
@@ -27,7 +29,6 @@ ESL_EXH_hosp_2016 = r'.\1_RAW_INPUTS\EXH_INJURIES\Heat Stress Hospitalizations.c
 ESL_EXH_hosp_data = r'.\1_RAW_INPUTS\EXH_INJURIES\Trends in Heat Stress Hospitalizations - Age-Adjusted Rate.csv'
 ESL_EXH_ecostress_2020 = r'.\1_RAW_INPUTS\EXH_INJURIES\ZonalStats_Ecostress_CT.csv'
 # RES - Respiratory Disease
-BOUNDARY_zcta = r'.\1_RAW_INPUTS\BOUNDARY_MODZCTA\Modified Zip Code Tabulation Areas (MODZCTA)_20240219\geo_export_aa48aecc-01c6-4716-aa5f-d1164dd631c8.shp'
 ESL_RES_COVID_deaths = r'.\1_RAW_INPUTS\RES_COVID_DEATHS\covid_cases_backup.csv'
 ESL_RES_PVI = r'.\1_RAW_INPUTS\RES_PVI\PIVI_20190627.gdb\PIVI_20190627'
 # WIW - Winter Weather
@@ -65,7 +66,6 @@ RCA_ML_MI_table = r'.\1_RAW_INPUTS\RCA_MITIGATION_INVESTMENT\NYC_HMP_Projects_Cl
 RCA_ML_NS_shoreline = r'.\1_RAW_INPUTS\RCA_NATURAL_SHORELINE\DCP_Shoreline_Piers.gdb\DCP_Shoreline_Piers'
 RCA_ML_PWF_raw = r'.\1_RAW_INPUTS\RCA_PARKS_WATER_FEATURES\NYC_SprayShowers.shp'
 RCA_ML_VC_table = r'.\1_RAW_INPUTS\RCA_VEGETATIVE_COVER\NYC_VegetativeCover.xlsx'
-BOUNDARY_neighborhood = r'.\1_RAW_INPUTS\BOUNDARY_NEIGHBORHOOD\2020 Neighborhood Tabulation Areas (NTAs) - Tabular_20240219\geo_export_38927ec6-986f-49b7-8c14-dc0d005c904c.shp'
 RCA_RC_BI_bikescore_csv = r'.\1_RAW_INPUTS\RCA_WALKSCORE\walkscore_1.csv'
 RCA_RC_TR_transitscore_csv = r'.\1_RAW_INPUTS\RCA_WALKSCORE\walkscore_1.csv'
 RCA_RC_WA_walkscore_csv = r'.\1_RAW_INPUTS\RCA_WALKSCORE\walkscore_1.csv'
@@ -122,12 +122,6 @@ OTH_normalize_values = r'.\2_PROCESSED_INPUTS\9998_OTH\gdf_tract_normalize_value
 
 # ----- OUTPUTS -----------------------------------------------------------------------------------------------------------
 OUTPUTS_folder = r'.\3_OUTPUTS'
-TBL_Borough_shp = r'.\3_OUTPUTS\TABLEAU\Tableau_URI_BORO_shapefile.shp'
-TBL_CDTA_shp = r'.\3_OUTPUTS\TABLEAU\Tableau_URI_PUMA_shapefile.shp'
-TBL_CITYWIDE_shp = r'.\3_OUTPUTS\TABLEAU\Tableau_URI_CITYWIDE_shapefile.shp'
-TBL_MASTER_shp = r'.\3_OUTPUTS\TABLEAU\Tableau_URI_Master_shapefile.shp'
-TBL_NTA_shp = r'.\3_OUTPUTS\TABLEAU\Tableau_URI_Neighborhood_shapefile.shp'
-TBL_output_csv = r'.\3_OUTPUTS\TABLEAU\\'
 
 # ----- PARAMS -------------------------------------------------------------------------------------------------------------
 community_resilience_path = r'.\4_CODE\URI\PARAMS\resilience_capacity.csv'

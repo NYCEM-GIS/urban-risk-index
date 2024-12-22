@@ -29,25 +29,21 @@ def calculate_URI(haz):
 
     path_RCA = PATHNAMES.OUTPUTS_folder + r'\RCA\Tract\\RCA_{}_tract.shp'.format(haz)
     df_RCA = gpd.read_file(path_RCA)
-    df_RCA.drop(columns=['geometry'], inplace=True)
-
-    path_COR = PATHNAMES.OUTPUTS_folder + r'\RCA\Tract\\RCA_COR_tract.shp'
-    df_COR = gpd.read_file(path_COR)
-    df_COR.drop(columns=['geometry'], inplace=True)
-
+    df_RCA.drop(columns=['geometry','borocode', 'cdta2020', 'nta2020'], inplace=True)
 
     #%% assemble into single file and calculate URI
     gdf_URI = gdf_ESL.copy()
     gdf_URI = gdf_URI.merge(df_RCA, on='BCT_txt', how='left')
     gdf_URI = gdf_URI.merge(df_SOV, on='BCT_txt', how='left')
-    gdf_URI = gdf_URI.merge(df_COR, on='BCT_txt', how='left')
 
     #%% calculate URI
     raw_col = haz + 'U_RN'
     score_col = haz + 'U_SN'
-    gdf_URI[raw_col] = gdf_URI[haz+'E_RXXT'] / gdf_URI[haz+'R_RTTTT'] * gdf_URI['S_R'] # / gdf_URI['CORR_RTTTT']
+    percentile_col = haz + 'U_PN'
+    gdf_URI[raw_col] = gdf_URI[haz+'E_RXXT'] / gdf_URI[haz+'R_RTTTT'] * gdf_URI['S_R'] 
     gdf_URI = gdf_URI.fillna(0)
     gdf_URI = utils.calculate_kmeans(gdf_URI, data_column=raw_col, score_column=score_col)
+    gdf_URI = utils.calculate_percentile(gdf_URI, data_column=raw_col, score_column=percentile_col)
 
 
     #%% plot results

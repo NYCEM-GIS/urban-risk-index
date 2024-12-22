@@ -18,9 +18,9 @@ def calculate_ALL(list_abbrev_haz):
             len_check = len(gdf_all.columns)
         else:
             gdf_haz = gpd.read_file(path_haz)
+            gdf_haz = gdf_haz.set_index('BCT_txt')
             list_col_keep = [col for col in gdf_haz.columns if haz in col]
-            list_col_keep.append('BCT_txt')
-            gdf_all = gdf_all.merge(gdf_haz[list_col_keep], on='BCT_txt', how='left')
+            gdf_all = gdf_all.merge(gdf_haz[list_col_keep], left_on='BCT_txt', right_index=True, how='left')
             len_check += len(gdf_haz[list_col_keep].columns)
 
     #%% calculate ESL sum total all hazards

@@ -48,9 +48,12 @@ def calculate_RCA(haz):
     #calculate final RCA
     average_col = haz + 'R_RTTTT'
     score_col = haz + 'R_STTTT'
+    percentile_col = haz + 'R_PTTTT'
     gdf_tract[average_col] = gdf_tract[applicable_to_haz_df['target_column_name'].values].mean(axis=1)
     list_col_keep.append(average_col)
     gdf_tract = utils.calculate_kmeans(gdf_tract, data_column=average_col, score_column=score_col)
+    gdf_tract = utils.calculate_percentile(gdf_tract, data_column=average_col, score_column=percentile_col)
+
 
     #%% plot in notebook
     plotting.plot_notebook(gdf_tract, column=average_col, title=haz + ': Average Resilience Capacity',
