@@ -6,10 +6,11 @@ calculate the total economic loss due to deaths from extreme heat (EXH)
 import numpy as np
 import pandas as pd
 import os
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
+import URI.PARAMS.hardcoded as HARDCODED
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
@@ -19,8 +20,8 @@ path_stormeventsboroughs = PATHNAMES.stormeventsboroughs_table
 path_population_tract = PATHNAMES.population_by_tract
 path_ecostress = PATHNAMES.ESL_EXH_ecostress_2020
 # Hard-coded
-start_date = PARAMS['heat_event_count_start_date'].value
-end_date = PARAMS['heat_event_count_end_date'].value
+start_date = HARDCODED.heat_event_count_start_date
+end_date = HARDCODED.heat_event_count_end_date
 # Params
 deaths_year = PARAMS['EXH_deaths_per_year'].value
 value_life = PARAMS['value_of_stat_life'].value

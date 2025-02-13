@@ -1,0 +1,50 @@
+abbreviation,definition,category,status
+OTH,Other or combination,Data Type,Active
+D,Mortality Loss,Expected Loss Factor,Active
+E,Environmental Loss,Expected Loss Factor,Active
+I,Indirect Cost,Expected Loss Factor,Active
+J,Morbidity Loss,Expected Loss Factor,Active
+P,Property Loss,Expected Loss Factor,Active
+R,Response Cost,Expected Loss Factor,Active
+CER,Coastal Erosion,Hazard,Active
+CRN,CBRN,Hazard,Deprecated
+CST,Coastal Storm,Hazard,Deprecated
+CSW,Coastal Storm Winds,Hazard,Active
+CSF,Coastal Flooding,Hazard,Active
+CYB,Cyber Threats,Hazard,Deprecated
+EMG,Emerging Disease Epidemic,Hazard,Deprecated
+ERQ,Earthquake,Hazard,Active
+EXH,Extreme Heat,Hazard,Active
+FLD,Flooding,Hazard,Pending
+HIW,High Winds,Hazard,Deprecated
+RES,Respiratory Disease Pandemic,Hazard,Deprecated
+WIW,Winter Weather,Hazard,Active
+CC,Cooling Centers,Resilience Capacity Factor,Active
+ML,Mitigation Landscape,Resilience Capacity Component,Active
+RC,Response Capacity,Resilience Capacity Component,Active
+RR,Recovery Resources,Resilience Capacity Component,Active
+AC,Air Conditioning in the Home,Resilience Capacity Factor,Active
+BI,Bikability,Resilience Capacity Factor,Active
+CI,Community Infrastructure,Resilience Capacity Factor,Active
+EM,Emergency Medical Access,Resilience Capacity Factor,Active
+EO,Education and Outreach,Resilience Capacity Factor,Active
+EP,Evacuation Potential,Resilience Capacity Factor,Active
+FP,Flood Insurance Coverage,Resilience Capacity Factor,Active
+GI,Green Infrastructure,Resilience Capacity Factor,Active
+HI,Health Insurance Coverage,Resilience Capacity Factor,Deprecated
+HO,Home Ownership,Resilience Capacity Factor,Deprecated
+IE,Income Equality,Resilience Capacity Factor,Deprecated
+IN,Institutional Experience,Resilience Capacity Factor,Active
+MH,Median Household Income,Resilience Capacity Factor,Deprecated
+MI,Mitigation Investments,Resilience Capacity Factor,Active
+NS,Presence of Natural Shorelines,Resilience Capacity Factor,Deprecated
+PA,Place Attachment,Resilience Capacity Factor,Active
+PE,Political Engagement,Resilience Capacity Factor,Active
+PW,Parks with Water Feature,Resilience Capacity Factor,Active
+SC,Shelter Capacity,Resilience Capacity Factor,Active
+TR,Transit,Resilience Capacity Factor,Active
+VC,Vegetative Cover,Resilience Capacity Factor,Active
+WA,Walkability,Resilience Capacity Factor,Active
+ESL,Estimated Loss,URI Component,Active
+RCA,Resilience Capacity,URI Component,Active
+SOV,Social Vulnerability,URI Component,Active

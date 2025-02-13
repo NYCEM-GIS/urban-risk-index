@@ -4,10 +4,10 @@
 import numpy as np
 import geopandas as gpd
 import os
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
-from URI.PARAMS.params import PARAMS 
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 import URI.PARAMS.path_names as PATHNAMES
+import URI.PARAMS.hardcoded as HARDCODED
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
@@ -16,7 +16,7 @@ path_shoreline = PATHNAMES.RCA_ML_NS_shoreline
 # Output paths
 path_output = PATHNAMES.RCA_ML_NS_score
 # Params
-buffer = PARAMS['search_buffer_for_natural_shoreline_ft'].value
+buffer = HARDCODED.search_buffer_for_natural_shoreline_ft
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract()

@@ -3,9 +3,9 @@ CER,E,A,E,ESL_CER_ecosystem_loss
 CSF,C,P,I,ESL_CST_dislocation_loss
 CSF,B,A,R,ESL_CST_loss_dot
 CSF,F,F,P,ESL_FLD_hazus_loss
-CSW,H,F,P,ESL_CST_hazus_loss
+CSW,F,F,P,ESL_CST_hazus_loss
 CSW,R,A,R,ESL_CST_loss_tree
-ERQ,B,F,P,ESL_ERQ_hazus_loss
+ERQ,F,F,P,ESL_ERQ_hazus_loss
 EXH,D,O,D,EXH_ESL_deaths_per_year_tract
 EXH,I,O,J,ESL_EXT_loss_injury
 EXH,P,O,I,ESL_EXH_loss_power

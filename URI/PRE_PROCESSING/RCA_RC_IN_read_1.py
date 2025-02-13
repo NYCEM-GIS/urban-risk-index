@@ -3,8 +3,8 @@
 import numpy as np
 import pandas as pd
 import os
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 from URI.PARAMS.params import  PARAMS, ABBREVIATIONS
 import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
