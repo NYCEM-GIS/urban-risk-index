@@ -1,11 +1,11 @@
 abbreviation,definition,category,status
 OTH,Other or combination,Data Type,Active
-D,Mortality Loss,Expected Loss Factor,Active
-E,Environmental Loss,Expected Loss Factor,Active
-I,Indirect Cost,Expected Loss Factor,Active
-J,Morbidity Loss,Expected Loss Factor,Active
-P,Property Loss,Expected Loss Factor,Active
-R,Response Cost,Expected Loss Factor,Active
+D,Mortality Loss,Expected Loss Subcomponent,Active
+E,Environmental Loss,Expected Loss Subcomponent,Active
+I,Indirect Cost,Expected Loss Subcomponent,Active
+J,Morbidity Loss,Expected Loss Subcomponent,Active
+P,Property Loss,Expected Loss Subcomponent,Active
+R,Response Cost,Expected Loss Subcomponent,Active
 CER,Coastal Erosion,Hazard,Active
 CRN,CBRN,Hazard,Deprecated
 CST,Coastal Storm,Hazard,Deprecated
@@ -48,3 +48,18 @@ WA,Walkability,Resilience Capacity Factor,Active
 ESL,Estimated Loss,URI Component,Active
 RCA,Resilience Capacity,URI Component,Active
 SOV,Social Vulnerability,URI Component,Active
+P,Percentile,Metric Type,Active
+R,Raw,Metric Type,Active
+S,Score,Metric Type,Active
+D,Death Loss,Expected Loss Factor,Active
+E,Ecosystem Loss,Expected Loss Factor,Active
+C,Dislocation Loss,Expected Loss Factor,Active
+P,Power Loss,Expected Loss Factor,Active
+I,Injury Loss,Expected Loss Factor,Active
+F,Building Damage,Expected Loss Factor,Active
+B,Transportation Cost,Expected Loss Factor,Active
+R,Tree Service Cost,Expected Loss Factor,Active
+S,Snow Removal Cost,Expected Loss Factor,Active
+X,Aggregated,Multiple uses,Active
+T,Total,Multiple uses,Active
+TT,Overall Component Score,Resilience Capacity Factor,Active
