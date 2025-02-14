@@ -3,15 +3,15 @@
 #%% read packages
 import pandas as pd
 import os
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
-path_bike_score = PATHNAMES.RCA_RC_BI_bikescore_csv
+path_bike_score = PATHNAMES.RCA_RC_WA_walkscore_csv
 # Output paths
 path_output = PATHNAMES.RCA_RC_BI_score
 

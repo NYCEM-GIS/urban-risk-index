@@ -5,10 +5,11 @@
 import pandas as pd
 import geopandas as gpd
 import os
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
+import URI.PARAMS.hardcoded as HARDCODED
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
@@ -20,8 +21,8 @@ path_FLD_loss = PATHNAMES.ESL_FLD_hazus_loss
 path_HIW_loss = PATHNAMES.ESL_CST_hazus_loss
 path_population_tract = PATHNAMES.population_by_tract
 # Hard-coded
-start_date = PARAMS['hhc_event_count_start_date'].value
-end_date = PARAMS['hhc_event_count_end_date'].value
+start_date = HARDCODED.hhc_event_count_start_date
+end_date = HARDCODED.hhc_event_count_end_date
 n_years = (end_date - start_date).days / 365.25
 # Output paths
 path_output = PATHNAMES.ESL_CST_deaths_loss

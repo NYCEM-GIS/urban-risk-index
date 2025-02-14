@@ -3,10 +3,10 @@ import pandas as pd
 import geopandas as gpd
 import os
 import datetime
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
-from URI.PARAMS.params import PARAMS 
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 import URI.PARAMS.path_names as PATHNAMES
+import URI.PARAMS.hardcoded as HARDCODED
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
@@ -16,7 +16,7 @@ path_Events = PATHNAMES.stormevents_table
 path_EventTypes = PATHNAMES.HHC_eventtypes
 path_StormEventTypes = PATHNAMES.HHC_stormeventtypes
 # Params
-service_buffer = PARAMS['buffer_period_tree_servicing_days'].value
+service_buffer = HARDCODED.buffer_period_tree_servicing_days
 # Output paths
 path_results = PATHNAMES.ESL_WIW_loss_tree
 

@@ -1,6 +1,6 @@
 import numpy as np
 import requests
-import URI.MISC.utils_1 as utils
+import URI.UTILITY.utils_1 as utils
 import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()
 

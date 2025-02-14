@@ -4,8 +4,8 @@
 import geopandas as gpd
 import os
 from shapely.ops import nearest_points
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
 utils.set_home()

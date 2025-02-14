@@ -5,10 +5,11 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import os
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
+import URI.PARAMS.hardcoded as HARDCODED
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
@@ -16,9 +17,9 @@ utils.set_home()
 path_footprint_depths = PATHNAMES.ESL_CST_building_footprints_depth
 
 # Params
-floor_height = PARAMS['building_floor_height_ft'].value  # assume floor dislocated every 10 ft
-flood_disp_height = PARAMS['building_floor_height_flood_threshold_ft'].value  # assume displacement after 1 ft flooding
-ave_displacement_days = PARAMS['average_duration_CST_displacement_days'].value
+floor_height = HARDCODED.building_floor_height_ft  # assume floor dislocated every 10 ft
+flood_disp_height = HARDCODED.building_floor_height_flood_threshold_ft  # assume displacement after 1 ft flooding
+ave_displacement_days = HARDCODED.average_duration_CST_displacement_days
 P_C1 = 1./PARAMS['RI_of_category_1_storm_yr'].value
 P_C3 = 1./PARAMS['RI_of_category_3_storm_yr'].value
 val_nyc_night_lodging = PARAMS['cost_nyc_night_lodging'].value

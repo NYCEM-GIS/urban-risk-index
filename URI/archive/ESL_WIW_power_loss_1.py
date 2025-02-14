@@ -4,17 +4,18 @@ import numpy as np
 import pandas as pd
 import os
 import datetime
-import URI.MISC.utils_1 as utils
-import URI.MISC.plotting_1 as plotting
+import URI.UTILITY.utils_1 as utils
+import URI.UTILITY.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
+import URI.PARAMS.hardcoded as HARDCODED
 utils.set_home()
 
 #%% EXTRACT PARAMETERS
 # Input paths
 path_outages = PATHNAMES.ESL_CST_outages_data
 # Params
-outage_buffer  = PARAMS['buffer_period_power_outage_days'].value
+outage_buffer  = HARDCODED.buffer_period_power_outage_days
 USD_per_hr_power_out = PARAMS['loss_day_power'].value / 24.
 # Output paths
 path_results = PATHNAMES.ESL_WIW_loss_power
