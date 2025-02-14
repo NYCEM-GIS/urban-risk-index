@@ -4,7 +4,6 @@
 import geopandas as gpd
 import URI.UTILITY.plotting_1 as plotting
 import URI.UTILITY.utils_1 as utils
-from URI.PARAMS.params import PARAMS 
 import URI.PARAMS.path_names as PATHNAMES
 
 utils.set_home()
@@ -12,7 +11,7 @@ utils.set_home()
 def calculate_ALL(list_abbrev_haz):
     #%% open and merge all URI shapefiles
     for i, haz in enumerate(list_abbrev_haz):
-        path_haz = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_{}_tract.shp'.format(haz, haz)
+        path_haz = PATHNAMES.OUTPUTS_folder + r'\URI\Tract\URI_{}_tract.shp'.format(haz)
         if i==0:
             gdf_all = gpd.read_file(path_haz)
             len_check = len(gdf_all.columns)

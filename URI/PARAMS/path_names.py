@@ -1,4 +1,5 @@
-home = r'C:\Users\HSprague\vscode\URI_Calculator_v1_1_TEMPLATE'
+from pathlib import Path
+home = Path(__file__).parent.parent.parent.parent 
 # ----- RAW INPUTS ----------------------------------------------------------------------------------------------------------------
 # Utility Files
 Borough_to_FIP = r'.\1_RAW_INPUTS\BOUNDARY_BOROUGH_FIPS\Borough_FIPS_1.xlsx'
