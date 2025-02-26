@@ -44,6 +44,7 @@ df_bor = df_hosp[['Bor_ID', 'Y Value']].groupby('Bor_ID').mean()
 
 #%% distribute deaths using rate as weight
 df_bor['N_deaths_yr'] = N_deaths_year_NYC * df_bor['Y Value'] / df_bor['Y Value'].sum()
+total_nyc_pop = gdf_tract.loc[:, 'pop_2020'].sum()
 
 
 #%% distribute deaths by population within each borough
@@ -51,9 +52,8 @@ def calc_tract_deaths(BCT_txt):
     idx = gdf_tract.index[gdf_tract.BCT_txt == BCT_txt][0]
     this_bor = gdf_tract.at[idx, 'borocode']
     this_pop = gdf_tract.at[idx, 'pop_2020']
-    this_bor_pop = gdf_tract.loc[gdf_tract.borocode == this_bor, 'pop_2020'].sum()
     this_N_deaths = df_bor.at[int(this_bor), 'N_deaths_yr']
-    return this_N_deaths * this_pop / this_bor_pop
+    return this_N_deaths * this_pop / total_nyc_pop
 
 
 gdf_tract['N_deaths'] = gdf_tract.apply(lambda x: calc_tract_deaths(x['BCT_txt']), axis=1)
