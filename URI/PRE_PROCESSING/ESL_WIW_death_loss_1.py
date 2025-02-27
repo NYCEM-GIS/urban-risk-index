@@ -1,10 +1,6 @@
 """ deaths due to winter storms"""
 
 #%% read packages
-# import sys
-# from pathlib import Path
-# sys.path.append(r'c:/Users/HSprague/vscode/URI_Calculator_v2_1_TEMPLATE/4_CODE')
-# print(sys.path)
 import pandas as pd
 import os
 import URI.UTILITY.utils_1 as utils
