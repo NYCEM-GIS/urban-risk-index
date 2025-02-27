@@ -60,10 +60,9 @@ for abbrv in list_abbrv:
 #%% save as output
 gdf_tract.to_file(path_output)
 
-#%% plot
-for haz in list_abbrv:
-    plotting.plot_notebook(gdf_tract, column='Score_'+haz, title='RCA_RC_IN: Institutional Experience ({})'.format(haz),
-                           legend='Score', cmap='Blues', type='score')
+#%% print scores
+print(df_count)
+
 
 #%%  document result with readme
 try:
