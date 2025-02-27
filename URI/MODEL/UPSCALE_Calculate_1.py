@@ -15,7 +15,7 @@ def weight_ave(x, weights):
     if weights.sum() != 0:
         result = np.average(x, weights=weights)
     else:
-        result = 3  # HMS: Should this be lowest value rather than mid value?
+        result = np.average(x)  # return non-population weighted average rather than value of 3
     return result
 
 def calculate_UPSCALE(haz):
