@@ -20,7 +20,7 @@ path_cst_loss = PATHNAMES.ESL_FLD_hazus_loss
 # Settings
 ref_year = SETTINGS.target_year
 # Output paths
-path_output = PATHNAMES.ESL_CST_loss_dot
+path_output = PATHNAMES.ESL_CST_loss_transportation
 
 #%% LOAD DATA
 gdf_tract = utils.get_blank_tract(add_pop=True)
@@ -42,7 +42,7 @@ gdf_tract['Loss_USD'] = dot_loss_ave * gdf_tract['weight'] / gdf_tract['weight']
 gdf_tract.to_file(path_output)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CSF: DOT Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CSF: Transportation Loss',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme
@@ -57,4 +57,4 @@ except:
     pass
 
 #%% output complete message
-print("Finished calculating CST DOT loss.")
+print("Finished calculating CST Transportation loss.")

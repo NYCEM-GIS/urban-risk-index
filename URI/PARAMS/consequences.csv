@@ -1,7 +1,7 @@
 Hazard,Factor,Receptor,Subcomponent,Path_Name
 CER,E,A,E,ESL_CER_ecosystem_loss
 CSF,C,P,I,ESL_CST_dislocation_loss
-CSF,B,A,R,ESL_CST_loss_dot
+CSF,B,A,R,ESL_CST_loss_transportation
 CSF,F,F,P,ESL_FLD_hazus_loss
 CSW,F,F,P,ESL_CST_hazus_loss
 CSW,R,A,R,ESL_CST_loss_tree
