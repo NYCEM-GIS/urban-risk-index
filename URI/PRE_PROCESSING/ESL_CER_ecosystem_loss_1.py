@@ -54,7 +54,7 @@ gdf_tract['Loss_USD'] = gdf_tract['shoreline_value_lost'] / 100.
 gdf_tract.to_file(path_output)
 
 #%% plot
-plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CER: Ecosystem Loss',
+plotting.plot_notebook(gdf_tract, column='Loss_USD', title='CER: Coastal Erosion Loss',
                        legend='Loss USD', cmap='Greens', type='raw')
 
 #%%  document result with readme
