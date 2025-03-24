@@ -118,7 +118,7 @@ Urban Risk Index calculation is done with a series Jupyter Notebooks.
 
  
 
-`2_PRECALC_RCA_1.ipynb` calculates the Resiliency Capacity subcomponent. Refer to slide 12 in [documentation]() for what Resiliency Capacity subcomponent is applied to what types of hazard.   
+`2_PRECALC_RCA_1.ipynb` calculates the Resiliency Capacity subcomponent. Refer to slide 12 in [documentation](https://github.com/NYCEM-GIS/urban-risk-index/tree/main/docs/URI%20Public%20Facing%20Methodology_20250310.pdf) for what Resiliency Capacity subcomponent is applied to what types of hazard.   
 
  
 
