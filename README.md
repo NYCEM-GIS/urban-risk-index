@@ -10,7 +10,6 @@
 - [Components](#Components) 
 - [Getting Started](#Getting_Started)
 - [Contribution](#Contribution)
-- [Getting Started](#This_Repository) 
 - [License](#license) 
 
  
@@ -23,9 +22,6 @@ The [NYC Urban Risk Index](https://uri.nychazardmitigation.com) (URI) is a hazar
 
 The URI is designed to provide a relative comparison of vulnerability between NYC neighborhoods to natural hazards. The URI is an informational tool to raise awareness about hazard exposure in NYC and to direct users to other sources, like the [NYC Hazard Mitigation Plan](https://nychazardmitigation.com), to learn more about the hazards and steps to reduce risk. Although the URI was built using the best-available data, given this is a city-wide index, the URI may have some inaccuracies, particularly for hazards where limited data was available. As such, the URI is not intended to inform hazard mitigation investments or response planning, nor should it supersede guidance provided by NYC or emergency management officials or agencies. 
 
-### This Repository
-This repo holds scripts functions and Jupyter Notebooks that are used to perform pre-processing of over fifty datasets and  sub-components including Estimated Loss, Resilience Capacity, and Social Vulnerability that are required to calculate the risk score on census tract level. Please note this repo is currently not operational as source datasets required are not provided. The purpose of the repo is to publish the methodology so that the open data community and the public will have a chance to look behind the curtain to see how a risk index calculation is performed and facilitate conversation around risk indexing for hazards in New York City.  
- 
 
 ![Alt Text – A Screenshot of the Front-end of the NYC Urban Risk Index]( https://nychazardmitigation.com/wp-content/uploads/2025/03/Screenshot-2025-03-13-155611.png) 
 
@@ -50,32 +46,56 @@ Provides a user-friendly interface where users can interact with the data visual
  
 
 ## Getting Started 
- 
+
+> [!IMPORTANT]
+> NYCEM internal members running and maintaining URI will need to first acquire the zip folder with source data and data directory setup before steps outlined below.
+> 
+> for NYCEM members who are trying to run this repo on agency issued desktop or laptopso make sure your user privilege is set by running following command in PowerShell before activating virtual environment or running any scripts 
+``` PowerShell
+PS C:\> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser 
+``` 
+
 
 ### Dependency 
-
-- [Python 3.11.8](https://www.python.org/downloads/release/python-3118/) for running python code
-
-- [git](https://git-scm.com/downloads) for cloning repo
-
-`4_POSTPROCESS_GIS.ipynb` use arcpy which can be acquired with ArcPro installation from GIS team. 
-
-
-
-### Installation 
-
 > [!IMPORTANT]
 > For City employees, installing software on work computers can be difficult due to a lack of administrative access. But you may be able to install software "only for me" rather than "anyone who uses this computer".
 >
 > All of these prerequisites can be (and by default are) installed only for the user rather than system-wide.
 > 
-> for NYCEM members who are trying to run this repo on agency issued desktop or laptopso make sure your user privilege is set by running following command in PowerShell before activating virtual environment or running any scripts 
+- [Python 3.11.8](https://www.python.org/downloads/release/python-3118/) for running python code
 
-``` 
-PS C:\> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser 
-``` 
+- [git](https://git-scm.com/downloads) for cloning repo
 
-Python dependencies are specified in the requirements.txt files. It's recommended to use `venv`and pip installation for the package required
+- [ArcPy](https://pro.arcgis.com/en/pro-app/latest/arcpy/get-started/what-is-arcpy-.htm) `4_POSTPROCESS_GIS.ipynb` requires arcpy. Ask NYCEM GIS team for ArcPro installation. 
+
+
+
+### Installation 
+
+Read project setup notes above and unzip the files into your project directory. Then change directory into the unzipped folder e.g.
+
+```bash shell
+cd .\URI_Calculator_v2_1_TEMPLATE_v2\
+ls 
+```
+should return following
+
+```
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+dar--l         2/19/2025   9:32 AM                .venv
+dar--l         2/14/2025   2:15 PM                1_RAW_INPUTS
+dar--l         2/14/2025   2:20 PM                2_PROCESSED_INPUTS
+dar--l         2/14/2025   2:20 PM                3_OUTPUTS
+dar--l         3/24/2025  10:15 AM                4_CODE
+```
+now change directory into the `4_CODE` and clone the repository from Github
+
+```shell
+cd .\4_CODE\
+git clone https://github.com/NYCEM-GIS/urban-risk-index.git
+```
+If the `git clone` command was successful, you should now have be able to install Python pendencies which are specified in the requirements.txt files. It's recommended to use `venv`and pip installation for the package required
 
 ```shell 
 python -m venv .venv 
@@ -91,11 +111,8 @@ pip install -r requirements.txt
 
 ### Usage
 
- 
+Urban Risk Index calculation is done with a series Jupyter Notebooks.  
 
-Index calculation is done with a series Jupyter Notebooks.  
-
- 
 
 `1_PRECALC_ESL_1.ipynb` calculates the loss factors for each of hazards URI considers. After loss factors are calculated, they are then normalized by their respective normalization factors. Then they are written out to a tract-level results as shapefiles.   
 
