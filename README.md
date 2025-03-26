@@ -13,6 +13,8 @@ The [NYC Urban Risk Index](https://uri.nychazardmitigation.com) (URI) is a hazar
 
 The URI is designed to provide a relative comparison of vulnerability between NYC neighborhoods to natural hazards. The URI is an informational tool to raise awareness about hazard exposure in NYC and to direct users to other sources, like the [NYC Hazard Mitigation Plan](https://nychazardmitigation.com), to learn more about the hazards and steps to reduce risk. Although the URI was built using the best-available data, given this is a city-wide index, the URI may have some inaccuracies, particularly for hazards where limited data was available. As such, the URI is not intended to inform hazard mitigation investments or response planning, nor should it supersede guidance provided by NYC or emergency management officials or agencies.
 
+This repository contains scripts, primarily developed with Python, and Jupyter Notebooks that handle data processing and calculations to produce the risk assessment scores. It reflects the latest URI methodology, but the raw datasets are NOT included due to their size and confidentiality.
+ 
 If you are interested in the URI 2.1 neighborhood-level results and subcomponents, visit our [ESRI-based platform](https://www.uri.nychazardmitigation.com).
 ![Alt Text – A Screenshot of the Front-end of the NYC Urban Risk Index](https://nychazardmitigation.com/wp-content/uploads/2025/03/Screenshot-2025-03-13-155611.png)
 
