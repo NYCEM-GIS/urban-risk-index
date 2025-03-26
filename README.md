@@ -84,7 +84,7 @@ Urban Risk Index calculation is done with a series of Jupyter Notebooks.
 
 `3_CALC_URI_1.ipynb` calculates Social Vulnerability and calculates the risk score for each hazard and the overall hazard risk score.
 
-`4_POSTPROCESS_GIS.ipynb` handles the process of cleaning the field names and exporting the final risk results as a geodatabase which is then imported into the URI platform.
+`4_POSTPROCESS_GIS.ipynb` handles the process of cleaning the field names and exporting the final risk results as a geodatabase which is then imported into the [URI platform](https://www.uri.nychazardmitigation.com).
 
 ## Contribution
 
