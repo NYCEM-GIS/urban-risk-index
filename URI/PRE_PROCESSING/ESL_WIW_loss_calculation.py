@@ -68,7 +68,24 @@ class WIW_ESL:
         # ...existing code from ESL_WIW_snow_loss_1.py...
         # Replace direct file paths with self.path_* attributes
         # Save results to self.path_output_snow
-        pass
+        #%% tracts 
+        gdf_tract = utils.get_blank_tract()
+
+        #%%get costs based on 2018 dollars
+        self.df_snow.index = np.arange(2007, 2024)
+        self.df_snow['Snow Remove Cost'] = [utils.convert_USD(self.df_snow.at[idx, 'Snow Removal Cost'], idx) for idx in self.df_snow.index]
+        ave_cost_year = self.df_snow['Snow Remove Cost'].mean() * 1000000
+
+        #%% get length of road in each tract
+        self.df_road.index = np.arange(len(self.df_road))
+        self.df_road['BCT_txt'] = [str(self.df_road.at[idx, 'BCT_txt']) for idx in self.df_road.index]
+        gdf_tract = gdf_tract.merge(self.df_road, on='BCT_txt', how='left')
+
+
+        #%% distribute based on critical snow route length
+        gdf_tract['Loss_USD'] = ave_cost_year * gdf_tract['Critical_Route_Length'] / gdf_tract['Critical_Route_Length'].sum()
+        
+        return
 
     def calculate_injury_loss(self):
         # ...existing code from ESL_WIW_injury_loss_1.py...
@@ -78,6 +95,43 @@ class WIW_ESL:
         pass
 
     def calculate_death_loss(self):
+        #%% get average number per year across NYC of load deaths
+        N_deaths_year_NYC = self.df_deaths['Y Value'].mean()
+
+        #%% load hospitalizations.
+        # Assume that deaths are by borough same as the age-adjusted hospitalization rate
+        # note it would be better to use unadjusted hospitalization rate, but that is available for only one year
+        # so may be too noisy
+
+        # remove NYC-level data
+        df_hosp = self.df_hosp.loc[self.df_hosp['Geography Name'] != 'New York City', :]
+
+        #%% add borough code to hosp data
+        df_hosp['Bor_ID'] = [self.df_borid.loc[self.df_borid.Borough==x, 'Bor_ID'].iloc[0] for x in df_hosp['Geography Name']]
+
+        #%% get borough specific average
+        df_hosp_mean = df_hosp.groupby('Bor_ID')['Y Value'].mean()  # average number of hospitilizations per year per 100,000 people for each borough
+        bor_pop = self.gdf_tract.groupby('borocode')['pop_2020'].sum()  # total population of each borough
+        bor_pop.index.name = 'Bor_ID'
+        bor_pop.index = bor_pop.index.astype(int)
+        hosp_rate = df_hosp_mean / 100000 * bor_pop  # total number of hospitalizations per year for each borough
+        hosp_rate = hosp_rate / hosp_rate.sum()  # normalize to sum to 1 to get proportion of hospitalizations in each borough
+        df_bor = N_deaths_year_NYC * hosp_rate / bor_pop  # death per person per year for each borough
+
+        #  make a copy for gdf_tract
+        gdf_tract = self.gdf_tract.copy()
+
+        gdf_tract['N_deaths'] = self.gdf_tract.apply(lambda x: utils.calc_tract_deaths(
+            gdf_tract=gdf_tract, 
+            df_bor=df_bor,
+            BCT_txt=x['BCT_txt'],
+            ), 
+        axis=1)
+
+        #%% convert to loss
+        loss_deaths_total = utils.convert_USD(self.loss_per_death, 2022)
+        gdf_tract['Loss_USD'] = gdf_tract['N_deaths'] * loss_deaths_total
+
         # ...existing code from ESL_WIW_death_loss_1.py...
         # Replace direct file paths with self.path_* attributes
         # Replace hardcoded parameters with self.loss_per_death

@@ -178,6 +178,13 @@ def get_blank_tract(add_pop=False):
         gdf_tract = gdf_tract.merge(df_pop[['BCT_txt', 'pop_2020']], on='BCT_txt', how='left')
     return gdf_tract
 
+def calc_tract_deaths(gdf_tract, df_bor, BCT_txt):
+    idx = gdf_tract.index[gdf_tract.BCT_txt == BCT_txt][0]
+    this_bor = gdf_tract.at[idx, 'borocode']
+    this_pop = gdf_tract.at[idx, 'pop_2020']
+    this_N_deaths = df_bor.at[int(this_bor)]
+    return this_N_deaths * this_pop 
+
 #%% divide by zero and set to 0 if denominator is 0
 def divide_zero(x, y):
     if y == 0:
