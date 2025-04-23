@@ -60,43 +60,48 @@ class WIW_ESL:
         # Load blank tract GeoDataFrame
         self.gdf_tract = utils.get_blank_tract(add_pop=True)
 
-    def calculate_tree_loss(self):
+    
+    def _preprocess_tree_data(self):
         #%%  get hazard type id
-        type_name = 'Winter Weather'
-        type_id = self.df_event_types.loc[self.df_event_types.Name == type_name, 'Id'].values[0]
+        # type_name = 'Winter Weather'
+        type_id = self.df_event_types.loc[self.df_event_types.Name == 'Winter Weather', 'Id'].values[0]
 
         #%% get all storm events ids with this hazard type
-        df_EventsIds = self.df_events.copy()
-        df_EventIds =self.df_storm_event_types.loc[self.df_storm_event_types.EventTypeId==type_id,:]
+        # df_EventsIds = self.df_events.copy()
+        df_EventIds = self.df_storm_event_types.loc[self.df_storm_event_types.EventTypeId==type_id,:]
         df_EventIds.index = df_EventIds.StormEventId
 
         #%% get storm events with this id after 2000
         self.df_events.index = self.df_events.Id
         self.df_events['StartDate'] = pd.to_datetime(self.df_events['StartDate'])
         self.df_events['EndDate'] = pd.to_datetime(self.df_events['EndDate'])
-        self.df_events = self.df_events.loc[df_EventIds.index, :]
-        self.df_events = self.df_events.loc[self.df_events.StartDate >= datetime.datetime(year=2014, month=1, day=1), :]
-        self.df_events = self.df_events.loc[self.df_events.EndDate < datetime.datetime(year=2024, month=1, day=1), :]
+        df_events = self.df_events.loc[df_EventIds.index, :]
+        df_events = df_events.loc[(df_events.StartDate >= datetime.datetime(year=2014, month=1, day=1)) & (df_events.EndDate < datetime.datetime(year=2024, month=1, day=1))]
+        # df_events = df_events.loc[df_events.EndDate < datetime.datetime(year=2024, month=1, day=1), :]
 
         #%% get tree service calls in this range
         self.df_tree['Is_Event'] = np.zeros(len(self.df_tree))
         self.df_tree['DateInitiated'] = pd.to_datetime(self.df_tree['DateInitiated'])
-        for i, idx in enumerate(self.df_events.index):
+        for idx in self.df_events.index:
             start_date = self.df_events.at[idx, 'StartDate']
             end_date = self.df_events.at[idx, 'EndDate'] + datetime.timedelta(days=self.service_buffer)
             self.df_tree.loc[((self.df_tree.DateInitiated >= start_date) & (self.df_tree.DateInitiated <= end_date)), 'Is_Event'] = 1
 
-        #%%
-        df_tree_1 = self.df_tree.loc[self.df_tree.Is_Event == 1,:]
+        self.df_tree_filtered = self.df_tree.loc[((self.df_tree.Is_Event == 1) & (self.df_tree.HHCImportType != 0) & (self.df_tree.HHCImportType != 8))]
 
-        #%% only consider work orders
-        df_tree_2 = df_tree_1.loc[((df_tree_1.HHCImportType != 0) & (df_tree_1.HHCImportType != 8)), :]
+        return self.df_tree_filtered
+
+
+    def calculate_tree_loss(self):
+
+        #%% get tree data
+        # self._preprocess_tree_data()
 
         #%% assume all work orders are 3500
-        Loss_USD = len(df_tree_2) * 3500 / 10
+        Loss_USD = len(self.df_tree_filtered) * 3500 / 10
 
         #%% plot distribution of tree services
-        gdf_tree = gpd.GeoDataFrame(df_tree_2, geometry=gpd.points_from_xy(df_tree_2.Long, df_tree_2.Lat))
+        gdf_tree = gpd.GeoDataFrame(self.df_tree_filtered, geometry=gpd.points_from_xy(self.df_tree_filtered.Long, self.df_tree_filtered.Lat))
         gdf_tree = gdf_tree.loc[gdf_tree.Lat !=0, :]
         gdf_tree = gdf_tree.loc[gdf_tree.Long !=0, :]
         gdf_tree.crs = "EPSG:4326"
@@ -106,7 +111,7 @@ class WIW_ESL:
         gdf_join = gpd.sjoin(gdf_tree, self.gdf_tract, how='left', predicate='within')
         gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
         df_count = gdf_join.pivot_table(index='BCT_txt', values=['Lat'], aggfunc=len)
-        gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
+        gdf_tract = self.gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
         gdf_tract.fillna(value={'Lat': 0}, inplace=True)
         gdf_tract.rename(columns={"Lat":"Tree_Service_Count"}, inplace=True)
 
