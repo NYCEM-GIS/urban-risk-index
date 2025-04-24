@@ -29,8 +29,6 @@ class RCA_RC:
             result = current_percent + (new_count / pop) * 100.0
         return min(result, 100)
 
-
-
     def calculate_ac(self):
         """
         Calculate air conditioning response capacity.
@@ -69,16 +67,6 @@ class RCA_RC:
             gdf_tract['ac_per_post'].values,
             list_input_null_values=[-999],
             output_null_value=-999
-        )
-        gdf_tract = self.calculate_kmeans(gdf_tract, data_column='ac_per_rnk')
-
-        # Save results
-        self.export_results(gdf_tract, self.path_results_ac, key='ac')
-
-        # Plot results
-        self.plot_notebook(
-            gdf_tract, column='Score', title='RCA_RC_AC: Air Conditioning',
-            legend='Score', cmap='Blues', plot_type='score'
         )
 
         print("Finished calculating RC factor AC: air conditioning.")
