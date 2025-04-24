@@ -1,6 +1,9 @@
 import geopandas as gpd
 import pandas as pd
+import numpy as np
 import os
+from shapely.ops import nearest_points
+
 import URI.UTILITY.utils_1 as utils
 import URI.UTILITY.plotting_1 as plotting
 from URI.PARAMS.params import PARAMS
@@ -18,6 +21,10 @@ class RCA_RC:
         self.path_results_bike = PATHNAMES.RCA_RC_BI_score
         self.path_layer_cc = PATHNAMES.RCA_RC_CC_layer
         self.path_results_cooling = PATHNAMES.RCA_RC_CC_score
+        # Input paths
+        self.path_hospital = PATHNAMES.RCA_RC_EMA_raw
+        # Output paths
+        self.path_results_emergency_medical_facility = PATHNAMES.RCA_RC_EM_score
 
     def _update_ac_percentage(self, current_percent, pop, new_count):
         """
@@ -128,6 +135,68 @@ class RCA_RC:
 
         return gdf_tract
     
+    def calculate_emergency_medical_facility(self):
+        #%% LOAD DATA
+        gdf_hospital = gpd.read_file(path_hospital)
+        gdf_tract = utils.get_blank_tract()
+
+        #%% modify data
+        gdf_hospital = utils.project_gdf(gdf_hospital)
+        gdf_hospital['OBJECTID'] = np.arange(len(gdf_hospital))
+
+        #%%get centroid
+        gdf_centroid = gdf_tract.copy()
+        gdf_centroid['geometry'] = gdf_tract['geometry'].centroid
+
+        #%% get for each pt get the nearest hospital for winter weather (has specialty for treating hypothermia)
+        gdf_hospital_subset = gdf_hospital.loc[gdf_hospital['HYPOTHERMI'] == 1, :]
+        pts3 = gdf_hospital_subset.geometry.unary_union
+
+
+        def near(point, pts=pts3):
+            # find the nearest point and return the corresponding Place value
+            nearest = gdf_hospital_subset.geometry == nearest_points(point, pts)[1]
+            distance = point.distance(gdf_hospital_subset[nearest]['geometry'].iloc[0])
+            return distance
+
+
+        gdf_tract['Distance_HYPO'] = gdf_centroid.apply(lambda row: near(row.geometry), axis=1)
+
+        #%% repeat for distance to trauma
+        gdf_hospital_subset = gdf_hospital.loc[gdf_hospital['TRAUMA'] == 1, :]
+        pts3 = gdf_hospital_subset.geometry.unary_union
+
+
+        def near(point, pts=pts3):
+            # find the nearest point and return the corresponding Place value
+            nearest = gdf_hospital_subset.geometry == nearest_points(point, pts)[1]
+            distance = point.distance(gdf_hospital_subset[nearest]['geometry'].iloc[0])
+            return distance
+
+
+        gdf_tract['Distance_TRAUMA'] = gdf_centroid.apply(lambda row: near(row.geometry), axis=1)
+
+        #%% repeat for distance to RECEIVING
+        gdf_hospital_subset = gdf_hospital.loc[gdf_hospital['RECEIVING'] == 1, :]
+        pts3 = gdf_hospital_subset.geometry.unary_union
+
+
+        def near(point, pts=pts3):
+            # find the nearest point and return the corresponding Place value
+            nearest = gdf_hospital_subset.geometry == nearest_points(point, pts)[1]
+            distance = point.distance(gdf_hospital_subset[nearest]['geometry'].iloc[0])
+            return distance
+
+
+        gdf_tract['Distance_RECEIVING'] = gdf_centroid.apply(lambda row: near(row.geometry), axis=1)
+
+        #%% write scores.  Set reverse=True because low distance values are better
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_HYPO', score_column='Score_WIW', reverse=True)
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_RECEIVING', score_column='Score_EXH', reverse=True)
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Distance_TRAUMA', score_column='Score_CSW', reverse=True)
+        gdf_tract['Score_ERQ'] = gdf_tract['Score_CSW']  # Distance to Trauma faciltiy
+        gdf_tract['Score_CSF'] = gdf_tract['Score_CSW']  # Distance to Trauma faciltiy
+
     def calculate_kmeans(self, gdf, data_column):
         """
         Apply k-means clustering to a GeoDataFrame column.
