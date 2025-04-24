@@ -16,6 +16,8 @@ class RCA_RC:
         self.path_results_ac = PATHNAMES.RCA_RC_AC_score
         self.path_bike_score = PATHNAMES.RCA_RC_WA_walkscore_csv
         self.path_results_bike = PATHNAMES.RCA_RC_BI_score
+        self.path_layer_cc = PATHNAMES.RCA_RC_CC_layer
+        self.path_results_cooling = PATHNAMES.RCA_RC_CC_score
 
     def _update_ac_percentage(self, current_percent, pop, new_count):
         """
@@ -91,6 +93,41 @@ class RCA_RC:
 
         print("Finished calculating RCA factor: bikability.")
 
+    def calculate_cooling_centers(self):
+        #%% LOAD DATA
+        gdf_tract = utils.get_blank_tract()
+        gdf_cc = gpd.read_file(self.path_layer_cc)
+
+        #%% modify tract
+        gdf_tract['area_ft2'] = gdf_tract.geometry.area
+
+        #%%  add 1/2 mile buffer
+        gdf_cc_buffer = gdf_cc.copy()
+        gdf_cc_buffer['geometry'] = gdf_cc['geometry'].buffer(distance=5280/2.)
+
+        #%% create empty df to fill
+        df_fill = pd.DataFrame(columns=['BCT_txt', 'Fraction_Covered'])
+
+        #%% loop through each buffer, and add BCT_txt and area filled to list
+        for i, idx in enumerate(gdf_cc_buffer.index):
+            this_buffer = gdf_cc_buffer.loc[[idx]]
+            # take intersection
+            this_intersect = gpd.overlay(gdf_tract, this_buffer[['NYCEM_ID', 'geometry']], how='intersection')
+            this_intersect['area_intersect_ft2'] = this_intersect['geometry'].area
+            this_intersect['Fraction_Covered'] = np.minimum(this_intersect['area_intersect_ft2'] / this_intersect['area_ft2'], 1.0)
+            # add to df_fill
+            df_fill = pd.concat([df_fill, this_intersect[['BCT_txt', 'Fraction_Covered']]])
+
+
+        #%% get the sum  by tract and join
+        df_sum = df_fill.groupby(by='BCT_txt').sum()
+        gdf_tract = gdf_tract.merge(df_sum, on='BCT_txt', how='left')
+
+        # fill nan with value 0
+        gdf_tract.fillna(0, inplace=True)
+
+        return gdf_tract
+    
     def calculate_kmeans(self, gdf, data_column):
         """
         Apply k-means clustering to a GeoDataFrame column.
