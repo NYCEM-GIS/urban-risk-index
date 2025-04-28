@@ -27,7 +27,9 @@ class RCA_RC:
         self.path_evacauation_zone = PATHNAMES.RCA_RC_EP_evac_zones
         self.path_activation = PATHNAMES.RCA_RC_IE_activation
         self.path_layer_sc = PATHNAMES.RCA_RC_SC_layer
-        self.path_transit_score = PATHNAMES.RCA_RC_WA_walkscore_csv
+        self.path_walk_score = PATHNAMES.RCA_RC_WA_walkscore_csv
+        self.path_fp = PATHNAMES.RCA_RC_FP_raw
+        self.path_footprint = PATHNAMES.ESL_CST_building_footprints
         # Output paths
         self.path_results_ac = PATHNAMES.RCA_RC_AC_score
         self.path_results_bikability = PATHNAMES.RCA_RC_BI_score
@@ -37,6 +39,8 @@ class RCA_RC:
         self.path_results_instituion_experience = PATHNAMES.RCA_RC_IN_score
         self.path_results_shelter_capacity = PATHNAMES.RCA_RC_SC_score
         self.path_results_transit_score = PATHNAMES.RCA_RC_TR_score
+        self.path_results_walk_score = PATHNAMES.RCA_RC_WA_score
+        self.path_results_fp = PATHNAMES.RCA_RC_FP_score
 
 
     def _update_ac_percentage(self, current_percent, pop, new_count):
@@ -331,7 +335,7 @@ class RCA_RC:
     
     def calculate_transit_score(self):
         #%% LOAD DATA
-        df_transit_score = pd.read_csv(self.path_transit_score)
+        df_transit_score = pd.read_csv(self.pateh_walk_score)
         gdf_tract = utils.get_blank_tract()
 
         #%% modify walkscore and merge to tract shapefile
@@ -345,7 +349,23 @@ class RCA_RC:
         gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='transitscore')
         return gdf_tract
     
+    def calculate_walk_score(self):
+        #%% LOAD DATA
+        df_walk_score = pd.read_csv(self.path_walk_score)
+        gdf_tract = utils.get_blank_tract()
 
+        #%% modify walkscore and merge to tract shapefile
+        temp = df_walk_score['BCT_txt']
+        df_walk_score['BCT_txt'] = [str(x) for x in temp]
+        gdf_tract = gdf_tract.merge(df_walk_score[['BCT_txt', 'walkscore']], on='BCT_txt', how='left')
+
+        gdf_tract.fillna(gdf_tract['walkscore'].median(), inplace=True)
+
+        #%% calculate score
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='walkscore')
+        return gdf_tract
+
+    
     def calculate_kmeans(self, gdf, data_column):
         """
         Apply k-means clustering to a GeoDataFrame column.
