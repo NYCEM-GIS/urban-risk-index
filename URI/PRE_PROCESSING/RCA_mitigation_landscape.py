@@ -11,6 +11,8 @@ utils.set_home()
 
 class RCA_ML:
     def __init__(self):
+        #%% EXTRACT PARAMETERS
+        self.gdf_buffer = gpd.GeoDataFrame()
         # Input paths
         self.path_gi = PATHNAMES.RCA_ML_GI_raw
         self.path_mi_gdb = PATHNAMES.RCA_ML_MI_gdb
@@ -21,7 +23,7 @@ class RCA_ML:
         # Output paths
         self.path_results_green_infrastructure = PATHNAMES.RCA_ML_GI_score
         self.path_results_mitigation_investment = PATHNAMES.RCA_ML_MI_score
-        self.path_results_parks_water_features = PATHNAMES.RCA_ML_PWF_score
+        self.path_results_parks_water_features = PATHNAMES.RCA_ML_PW_score
         self.path_results_vegetative_cover = PATHNAMES.RCA_ML_VC_score
     
     def calculate_green_infrastructure(self):
@@ -52,7 +54,7 @@ class RCA_ML:
 
         return gdf_merge
     
-    def calculate_mitigation_investment(self):
+    def _create_mi_buffer(self):  
         #%% LOAD DATA
         gdf_points = gpd.read_file(self.path_mi_gdb, driver='FileGDB', layer='Mitigation_action_points_update_20211027')
         gdf_lines = gpd.read_file(self.path_mi_gdb, driver='FileGDB', layer='Mitigation_action_lines_update_20211027')
@@ -103,7 +105,11 @@ class RCA_ML:
         )
 
         # combine into one
-        gdf_buffer = pd.concat([gdf_points_valid, gdf_lines_valid, gdf_polygons_valid]).reset_index(drop=True)
+        self.gdf_buffer = pd.concat([gdf_points_valid, gdf_lines_valid, gdf_polygons_valid]).reset_index(drop=True)
+
+        return self.gdf_buffer
+    
+    def calculate_mitigation_investment(self):
 
         #%% load the tract dataset
         gdf_tract = utils.get_blank_tract()
@@ -120,7 +126,7 @@ class RCA_ML:
         print("Calculating investment per hazard...", end='')
 
         # Perform intersection for all buffers at once
-        gdf_intersections = gpd.overlay(gdf_tract, gdf_buffer, how='intersection')
+        gdf_intersections = gpd.overlay(gdf_tract, self.gdf_buffer, how='intersection')
         gdf_intersections['area_intersect_ft2'] = gdf_intersections['geometry'].area
         gdf_intersections['fraction_share'] = gdf_intersections['area_intersect_ft2'] / gdf_intersections.groupby('HMP_Index_1')['area_intersect_ft2'].transform('sum')
 
@@ -163,4 +169,36 @@ class RCA_ML:
             gdf_tract = utils.calculate_kmeans(gdf_tract, data_column=abbrev, score_column='Score_'+abbrev)
         
         return gdf_tract
+    
+    def calculate_parks_water_features(self):
+        #%% LOAD DATA
+        gdf_pwf = gpd.read_file(self.path_pwf)
+
+        #%% modify 
+        gdf_pwf = utils.project_gdf(gdf_pwf)
+        gdf_pwf['OBJECTID'] = np.arange(len(gdf_pwf))
+
+        #%% calculate radial count, 1/2 mile
+        gdf_tract = utils.calculate_radial_count(gdf_pwf, column_key='OBJECTID', buffer_distance_ft=2640)
+
+        #%% xconvert to score 1-5
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Fraction_Covered', score_column='Score', n_cluster=5)
+
+        return gdf_tract
+    
+    def calculate_vegetative_cover(self):
+        #%% LOAD DATA
+        df_veg = pd.read_csv(self.path_veg)
+        gdf_tract = utils.get_blank_tract()
+
+        #%% Join vegetative data to tracts
+        df_veg['geoid'] = df_veg['geoid'].astype(str)
+        gdf_tract = gdf_tract.merge(df_veg, left_on='geoid', right_on='geoid', how='left')
+
+        #%% xconvert to score 1-5
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='pct_veg', score_column='Score', n_cluster=5)
+
+        return gdf_tract
+    
+    
 
