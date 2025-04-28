@@ -6,29 +6,38 @@ from shapely.ops import nearest_points
 
 import URI.UTILITY.utils_1 as utils
 import URI.UTILITY.plotting_1 as plotting
-from URI.PARAMS.params import PARAMS
+from URI.PARAMS.params import PARAMS, ABBREVIATIONS
 import URI.PARAMS.path_names as PATHNAMES
+import URI.PARAMS.hardcoded as HARDCODED
 utils.set_home()
 
 class RCA_RC:
     def __init__(self):
         self.results = {}
         # Extract parameters
+        self.list_abbrv = [x.abbreviation for x in ABBREVIATIONS.values() if (x.category == "Hazard") and  (x.status == 'Active')] # all active hazards
+        self.buffer_radius = HARDCODED.search_buffer_for_shelter_capacity_ft  # in feet
+        # Input paths
         self.path_ac = PATHNAMES.RCA_RC_ACH_raw
         self.path_ac_taskforce = PATHNAMES.RCA_RC_AC_ac_taskforce
-        self.path_results_ac = PATHNAMES.RCA_RC_AC_score
         self.path_bike_score = PATHNAMES.RCA_RC_WA_walkscore_csv
-        self.path_results_bike = PATHNAMES.RCA_RC_BI_score
         self.path_layer_cc = PATHNAMES.RCA_RC_CC_layer
-        self.path_results_cooling = PATHNAMES.RCA_RC_CC_score
-        # Input paths
         self.path_hospital = PATHNAMES.RCA_RC_EMA_raw
-        # Output paths
-        self.path_results_emergency_medical_facility = PATHNAMES.RCA_RC_EM_score
         self.path_evacuation_centers = PATHNAMES.RCA_RC_EP_raw
         self.path_evacauation_zone = PATHNAMES.RCA_RC_EP_evac_zones
+        self.path_activation = PATHNAMES.RCA_RC_IE_activation
+        self.path_layer_sc = PATHNAMES.RCA_RC_SC_layer
+        self.path_transit_score = PATHNAMES.RCA_RC_WA_walkscore_csv
         # Output paths
-        self.path_evacuation_potential = PATHNAMES.RCA_RC_EP_score
+        self.path_results_ac = PATHNAMES.RCA_RC_AC_score
+        self.path_results_bikability = PATHNAMES.RCA_RC_BI_score
+        self.path_results_cooling = PATHNAMES.RCA_RC_CC_score
+        self.path_results_emergency_medical_facility = PATHNAMES.RCA_RC_EM_score
+        self.path_results_evacuation_potential = PATHNAMES.RCA_RC_EP_score
+        self.path_results_instituion_experience = PATHNAMES.RCA_RC_IN_score
+        self.path_results_shelter_capacity = PATHNAMES.RCA_RC_SC_score
+        self.path_results_transit_score = PATHNAMES.RCA_RC_TR_score
+
 
     def _update_ac_percentage(self, current_percent, pop, new_count):
         """
@@ -229,8 +238,114 @@ class RCA_RC:
         gdf_tract = gdf_tract.merge(gdf_tract_sjoin[['BCT_txt', 'Is_inland']], how='left', on='BCT_txt')
         gdf_tract.loc[gdf_tract.Is_inland == 1, 'Score'] = 5
 
+        return gdf_tract   
+    
+    def calculate_institution_experience(self):
+
+        #%% LOAD DATA
+        df_activation = pd.read_excel(self.path_activation, sheet_name='Summary')
+        gdf_tract = utils.get_blank_tract()
+
+        #%% open EOC activation spreadsheet
+        print(df_activation.shape)
+
+        #%% Get list of hazards and EOC activation keyword
+        list_hazards = {'EXH': ['Heat'],
+                        'WIW': ['Winter Weather'], 
+                        'CSW': ['Coastal Storm'],  
+                        'CSF': ['Coastal Storm', 'Flooding']}
+
+        #%% Data preprocessing: Take only rows where CIMS TYPE is not na.
+        df_activation = df_activation[df_activation['CIMS TYPE'].notna()]
+
+        #%%
+        df_count = pd.DataFrame(index=np.arange(len(self.list_abbrv)),
+                                data={'abbrv': self.list_abbrv,
+                                    'count_events': np.zeros(len(self.list_abbrv)),
+                                    'count_days': np.zeros(len(self.list_abbrv))})
+
+        #%% loop through each hazard to get count
+
+        for abbrev in list_hazards.keys():
+            keyword_list = list_hazards[abbrev]
+            df_activation[abbrev] = df_activation['CIMS TYPE'].str.contains('|'.join(keyword_list))
+            subset = df_activation[df_activation[abbrev]].copy()
+            df_count.loc[df_count.abbrv == abbrev, 'count_events'] = len(subset)
+            df_count.loc[df_count.abbrv == abbrev, 'count_days'] = subset.DURATION.sum()
+
+
+        #%% calculate k-means cluster score
+        df_count = utils.calculate_kmeans(df_count, 'count_days')
+
+        #%% add results as score
+        for abbrv in self.list_abbrv:
+            gdf_tract['Score_{}'.format(abbrv)] = np.repeat(df_count.loc[df_count.abbrv == abbrv, 'Score'].values[0], len(gdf_tract))
+
+        return gdf_tract
+
+    def calculate_shelter_capacity(self):
+        # Relevant input field names
+        fn_long_term_capacity = 'Long_term_'  # URI 1.0 - "Long_term_capacity"
+
+        #%% LOAD DATA
+        gdf_tract = utils.get_blank_tract(add_pop=True)
+        gdf_sc = gpd.read_file(self.path_layer_sc)
+        gdf_sc = utils.project_gdf(gdf_sc)
+
+        #%% modify tract
+        gdf_tract['area_ft2'] = gdf_tract.geometry.area
+        gdf_tract['pop_2020_density'] = gdf_tract['pop_2020'] / gdf_tract['area_ft2']
+
+        # convert null to 0 values
+        gdf_sc.fillna(value={fn_long_term_capacity: 0}, inplace=True)
+
+        #%% allocate shelter beds to tracts based on population.
+        #add column to count allocated shelter beds
+        gdf_tract['LT_capacity_count'] = np.zeros(len(gdf_tract))
+        #loop through each shelter and assign capacity to tracts
+        for i, idx in enumerate(gdf_sc.index):
+            this_shelter = gdf_sc.loc[idx:idx, :].copy()
+            this_capacity = this_shelter.at[idx, fn_long_term_capacity]
+            this_shelter.loc[idx, 'geometry'] = this_shelter.loc[idx, 'geometry'].buffer(distance=self.buffer_radius)
+            this_shelter.loc[idx, 'geometry'] = this_shelter.loc[idx, 'geometry']
+            #get intersecting tracts
+            gdf_intersect = gpd.overlay(gdf_tract, this_shelter, how='intersection')
+            #get_intersection_areas
+            gdf_intersect['area_ft2'] = gdf_intersect.geometry.area
+            gdf_intersect['population'] = gdf_intersect['area_ft2'] * gdf_intersect['pop_2020_density']
+            gdf_intersect['capacity_allocation'] = this_capacity * gdf_intersect['population'] / gdf_intersect['population'].sum()
+            #loop through and add allocation to each tract
+            for j, jdx in enumerate(gdf_intersect.index):
+                this_Stfid = gdf_intersect.at[jdx, 'geoid']
+                gdf_tract.loc[gdf_tract['geoid'] == this_Stfid, 'LT_capacity_count'] += gdf_intersect.at[jdx, 'capacity_allocation']
+
+        #%% calculate capacity per 1000
+        gdf_tract['capacity_allocation_per_1000'] = gdf_tract['LT_capacity_count'] * 1000. / gdf_tract['pop_2020']
+        #set null values (with 0 population ) to 0
+        gdf_tract.fillna(value={'capacity_allocation_per_1000': 0}, inplace=True)
+
+        #%% calculate score
+        #need to handle missing data
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='capacity_allocation_per_1000')
         return gdf_tract
     
+    def calculate_transit_score(self):
+        #%% LOAD DATA
+        df_transit_score = pd.read_csv(self.path_transit_score)
+        gdf_tract = utils.get_blank_tract()
+
+        #%% modify walkscore and merge to tract shapefile
+        temp = df_transit_score['BCT_txt']
+        df_transit_score['BCT_txt'] = [str(x) for x in temp]
+        gdf_tract = gdf_tract.merge(df_transit_score[['BCT_txt', 'transitscore']], on='BCT_txt', how='left')
+
+        gdf_tract.fillna(gdf_tract['transitscore'].median(), inplace=True)
+
+        #%% calculate score
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='transitscore')
+        return gdf_tract
+    
+
     def calculate_kmeans(self, gdf, data_column):
         """
         Apply k-means clustering to a GeoDataFrame column.
