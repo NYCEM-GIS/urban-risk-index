@@ -28,7 +28,6 @@ class RCA_RC:
         self.path_activation = PATHNAMES.RCA_RC_IE_activation
         self.path_layer_sc = PATHNAMES.RCA_RC_SC_layer
         self.path_walk_score = PATHNAMES.RCA_RC_WA_walkscore_csv
-        self.path_fp = PATHNAMES.RCA_RC_FP_raw
         self.path_footprint = PATHNAMES.ESL_CST_building_footprints
         # Output paths
         self.path_results_ac = PATHNAMES.RCA_RC_AC_score
@@ -40,8 +39,6 @@ class RCA_RC:
         self.path_results_shelter_capacity = PATHNAMES.RCA_RC_SC_score
         self.path_results_transit_score = PATHNAMES.RCA_RC_TR_score
         self.path_results_walk_score = PATHNAMES.RCA_RC_WA_score
-        self.path_results_fp = PATHNAMES.RCA_RC_FP_score
-
 
     def _update_ac_percentage(self, current_percent, pop, new_count):
         """
@@ -119,37 +116,19 @@ class RCA_RC:
 
     def calculate_cooling_centers(self):
         #%% LOAD DATA
-        gdf_tract = utils.get_blank_tract()
         gdf_cc = gpd.read_file(self.path_layer_cc)
 
-        #%% modify tract
-        gdf_tract['area_ft2'] = gdf_tract.geometry.area
-
-        #%%  add 1/2 mile buffer
-        gdf_cc_buffer = gdf_cc.copy()
-        gdf_cc_buffer['geometry'] = gdf_cc['geometry'].buffer(distance=5280/2.)
-
-        #%% create empty df to fill
-        df_fill = pd.DataFrame(columns=['BCT_txt', 'Fraction_Covered'])
-
-        #%% loop through each buffer, and add BCT_txt and area filled to list
-        for i, idx in enumerate(gdf_cc_buffer.index):
-            this_buffer = gdf_cc_buffer.loc[[idx]]
-            # take intersection
-            this_intersect = gpd.overlay(gdf_tract, this_buffer[['NYCEM_ID', 'geometry']], how='intersection')
-            this_intersect['area_intersect_ft2'] = this_intersect['geometry'].area
-            this_intersect['Fraction_Covered'] = np.minimum(this_intersect['area_intersect_ft2'] / this_intersect['area_ft2'], 1.0)
-            # add to df_fill
-            df_fill = pd.concat([df_fill, this_intersect[['BCT_txt', 'Fraction_Covered']]])
-
-
-        #%% get the sum  by tract and join
-        df_sum = df_fill.groupby(by='BCT_txt').sum()
-        gdf_tract = gdf_tract.merge(df_sum, on='BCT_txt', how='left')
+        #%% calculate radial count using utility function
+        gdf_tract = utils.calculate_radial_count(
+            gdf_data=gdf_cc,
+            column_key='NYCEM_ID',
+            buffer_distance_ft=2640,  # 1/2 mile buffer
+        )
 
         # fill nan with value 0
         gdf_tract.fillna(0, inplace=True)
-
+        #%% calculate score
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Fraction_Covered')
         return gdf_tract
     
     def _distance_to_nearest(self, point, target_union):
@@ -307,21 +286,28 @@ class RCA_RC:
         #add column to count allocated shelter beds
         gdf_tract['LT_capacity_count'] = np.zeros(len(gdf_tract))
         #loop through each shelter and assign capacity to tracts
-        for i, idx in enumerate(gdf_sc.index):
+        for idx in gdf_sc.index:
             this_shelter = gdf_sc.loc[idx:idx, :].copy()
             this_capacity = this_shelter.at[idx, fn_long_term_capacity]
-            this_shelter.loc[idx, 'geometry'] = this_shelter.loc[idx, 'geometry'].buffer(distance=self.buffer_radius)
-            this_shelter.loc[idx, 'geometry'] = this_shelter.loc[idx, 'geometry']
-            #get intersecting tracts
+
+            # Buffer the shelter geometry
+            this_shelter['geometry'] = this_shelter['geometry'].buffer(distance=self.buffer_radius)
+
+            # Get intersecting tracts
             gdf_intersect = gpd.overlay(gdf_tract, this_shelter, how='intersection')
-            #get_intersection_areas
+
+            # Calculate intersection areas and population
             gdf_intersect['area_ft2'] = gdf_intersect.geometry.area
             gdf_intersect['population'] = gdf_intersect['area_ft2'] * gdf_intersect['pop_2020_density']
-            gdf_intersect['capacity_allocation'] = this_capacity * gdf_intersect['population'] / gdf_intersect['population'].sum()
-            #loop through and add allocation to each tract
-            for j, jdx in enumerate(gdf_intersect.index):
-                this_Stfid = gdf_intersect.at[jdx, 'geoid']
-                gdf_tract.loc[gdf_tract['geoid'] == this_Stfid, 'LT_capacity_count'] += gdf_intersect.at[jdx, 'capacity_allocation']
+
+            # Calculate capacity allocation for each intersecting tract
+            gdf_intersect['capacity_allocation'] = (
+                this_capacity * gdf_intersect['population'] / gdf_intersect['population'].sum()
+            )
+
+            # Aggregate capacity allocation by geoid and update the LT_capacity_count column in gdf_tract
+            capacity_allocation_map = gdf_intersect.groupby('geoid')['capacity_allocation'].sum()
+            gdf_tract['LT_capacity_count'] += gdf_tract['geoid'].map(capacity_allocation_map).fillna(0)
 
         #%% calculate capacity per 1000
         gdf_tract['capacity_allocation_per_1000'] = gdf_tract['LT_capacity_count'] * 1000. / gdf_tract['pop_2020']

@@ -24,7 +24,20 @@ def write_readme(path_readme, readme_text):
     f.write(readme_text)
     f.close()
 
-
+def get_borough_code(boro_name):
+    # convert borough name to borough code
+    if boro_name == 'Manhattan':
+        return 1
+    elif boro_name == 'Bronx':
+        return 2
+    elif boro_name == 'Brooklyn':
+        return 3
+    elif boro_name == 'Queens':
+        return 4
+    elif boro_name == 'Staten Island':
+        return 5
+    else:
+        raise ValueError(f"Unknown borough name: {boro_name}.")
 #%% normalize score to scale of 0 to 1 (exclusive)
 # values should be numpy array
 def normalize_rank_percentile(values, list_input_null_values=None, output_null_value=-999):
@@ -121,32 +134,31 @@ def calculate_equal_interval(df, data_column, score_column='Score_EI', n_cluster
 #%% count number of points (or fraction of) within 1/2 mile of tract
 #gdf_data is point layer, column_key is unique id for each point
 def calculate_radial_count(gdf_data, column_key, buffer_distance_ft=2640):
-    #load gdf_tract
+    # Load gdf_tract
     gdf_data = project_gdf(gdf_data)
     gdf_tract = get_blank_tract()
     gdf_tract['area_ft2'] = gdf_tract['geometry'].area
-    #make shapefile with 1/2 mile radius
+
+    # Create buffer for all points at once
     gdf_buffer = gdf_data.copy()
     gdf_buffer['geometry'] = gdf_data['geometry'].buffer(distance=buffer_distance_ft)
-    #create empty df to fill
-    df_fill = pd.DataFrame(columns=['BCT_txt', 'Fraction_Covered'])
-    # loop through each buffer, and add BCT_txt and area filled to list
-    print("Calculating.", end='')
-    for i, idx in enumerate(gdf_buffer.index):
-        this_buffer = gdf_buffer.loc[[idx]]
-        this_intersect = gpd.overlay(gdf_tract, this_buffer[[column_key, 'geometry']], how='intersection')
-        this_intersect['area_intersect_ft2'] = this_intersect['geometry'].area
-        this_intersect['Fraction_Covered'] = np.minimum(this_intersect['area_intersect_ft2'] / this_intersect['area_ft2'], 1.0)
-        #add to df_fill
-        df_fill = pd.concat([df_fill, this_intersect[['BCT_txt', 'Fraction_Covered']]])
-        if i % 500 == 0:
-            print(".", end=''),
-    print('Done')
-    #get the sum  by tract and join
-    df_sum = df_fill.groupby(by='BCT_txt').sum()
+
+    # Perform spatial join to find intersections between buffers and tracts
+    gdf_intersect = gpd.overlay(gdf_tract, gdf_buffer[[column_key, 'geometry']], how='intersection')
+    gdf_intersect['area_intersect_ft2'] = gdf_intersect['geometry'].area
+    gdf_intersect['Fraction_Covered'] = np.minimum(
+        gdf_intersect['area_intersect_ft2'] / gdf_intersect['area_ft2'], 1.0
+    )
+
+    # Aggregate results by tract
+    df_sum = gdf_intersect.groupby('BCT_txt', as_index=False)['Fraction_Covered'].sum()
+
+    # Merge results back into gdf_tract
     gdf_tract = gdf_tract.merge(df_sum, on='BCT_txt', how='left')
-    #fill nan with value 0
-    gdf_tract.fillna(0, inplace=True)
+
+    # Fill NaN values with 0
+    gdf_tract['Fraction_Covered'].fillna(0, inplace=True)
+
     return gdf_tract
 
 
@@ -184,7 +196,18 @@ def calc_tract_deaths(gdf_tract, df_bor, BCT_txt):
     this_pop = gdf_tract.at[idx, 'pop_2020']
     this_N_deaths = df_bor.at[int(this_bor)]
     return this_N_deaths * this_pop 
+#%% calculate tract metric rate
+def calc_tract_rate(gdf_tract:gpd.GeoDataFrame,df_bor: pd.DataFrame, BCT_txt:str, metric: str) -> float:
+    idx = gdf_tract.index[gdf_tract.BCT_txt==BCT_txt][0] # look up index of the tract in the gdf_tract
+    this_bor = gdf_tract.at[idx, 'borocode']
+    this_pop = gdf_tract.at[idx, 'pop_2020']
+    this_rate = df_bor.at[int(this_bor), metric]
 
+    if metric == "Hosp_per_100000":
+        return this_pop * this_rate / 100000.
+    elif metric == "Emerg_per_100000":
+        return this_pop * this_rate / 100000.
+    
 #%% divide by zero and set to 0 if denominator is 0
 def divide_zero(x, y):
     if y == 0:
