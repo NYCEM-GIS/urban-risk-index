@@ -15,6 +15,8 @@ class ESL_EXH:
         # Consolidated constants
         self.path_population_tract = PATHNAMES.population_by_tract
         self.path_ecostress = PATHNAMES.ESL_EXH_ecostress_2020
+        self.path_stormevents = PATHNAMES.stormevents_table
+        self.path_stormeventsboroughs = PATHNAMES.stormeventsboroughs_table
         self.value_life = PARAMS['value_of_stat_life'].value
         self.yearly_outage = PARAMS['EXH_outage_person_hrs_per_year'].value
         self.loss_outage_hr = PARAMS['loss_day_power'].value / 24.
@@ -108,55 +110,71 @@ class ESL_EXH:
         return gdf_tract
 
     def calculate_death_loss(self):
-        df_stormevents = pd.read_excel(PATHNAMES.stormevents_table)
-        df_stormeventsboroughs = pd.read_excel(PATHNAMES.stormeventsboroughs_table)
-        df_population = pd.read_excel(self.path_population_tract, skiprows=5)
+        df_stormevents = pd.read_excel(self.path_stormevents)
+        df_stormeventsboroughs = pd.read_excel(self.path_stormeventsboroughs)
         gdf_tract = utils.get_blank_tract(add_pop=True)
-
-        heat_events_bool = ['Heat' in x for x in df_stormevents['Name']]
-        df_stormevents = df_stormevents.loc[heat_events_bool, :]
+        # Filter storm events for heat events within the date range
         df_stormevents['StartDate'] = pd.to_datetime(df_stormevents['StartDate'])
         df_stormevents['EndDate'] = pd.to_datetime(df_stormevents['EndDate'])
-        df_stormevents = df_stormevents.loc[df_stormevents['StartDate'] > self.start_date]
-        df_stormevents = df_stormevents.loc[df_stormevents['EndDate'] < self.end_date]
+        df_stormevents = df_stormevents[
+            (df_stormevents['StartDate'] > self.start_date) &
+            (df_stormevents['EndDate'] < self.end_date) &
+            (df_stormevents['Name'].str.contains('Heat'))
+        ]
 
-        df_borcount = pd.DataFrame(index=[1, 2, 3, 4, 5],
-                                   data={'Heat_Events_Per_Year': np.zeros(5)})
-        for idx in df_stormeventsboroughs.index:
-            this_stormeventid = df_stormeventsboroughs.at[idx, 'StormEventId']
-            if this_stormeventid in df_stormevents['Id'].values:
-                this_borid = int(df_stormeventsboroughs.at[idx, 'BoroughId'])
-                df_borcount.at[this_borid, 'Heat_Events_Per_Year'] += 1
+        # Count heat events per borough directly using groupby
+        df_borcount = (
+            df_stormeventsboroughs[df_stormeventsboroughs['StormEventId'].isin(df_stormevents['Id'])]
+            .groupby('BoroughId')
+            .size()
+            .reindex(range(1, 6), fill_value=0)
+            .to_frame(name='Heat_Events_Per_Year')
+        )
 
         n_years = (self.end_date - self.start_date).days / 365.25
         df_borrate = df_borcount / n_years
         df_borrate.index = [str(x) for x in df_borrate.index]
 
         gdf_events_per_year = pd.merge(gdf_tract, df_borrate, left_on='borocode', right_index=True, how='inner')
-        df_population.dropna(inplace=True, subset=['2020 DCP Borough Code', '2020 Census Tract'])
-        df_population_borough = df_population.groupby('2020 DCP Borough Code').sum()[2020]
 
-        x = df_population_borough.values
-        y = df_borrate['Heat_Events_Per_Year'].values
-        numerator = self.deaths_year
-        denominator = np.array([x[i] * y[i] for i in np.arange(len(x))]).sum() / 1000.
-        m = numerator / denominator
 
-        df_population['BCT_ID'] = [str(int(df_population['2020 DCP Borough Code'].iloc[i])) +
-                                   str(int(df_population['2020 Census Tract'].iloc[i])).zfill(6) for i in np.arange(len(df_population))]
+        # Calculate borough population proportions
+        df_population_borough = gdf_tract.groupby('borocode')['pop_2020'].sum()
+        citywide_population = df_population_borough.sum()
+        df_population_borough_proportion = df_population_borough / citywide_population
 
-        gdf_deaths_per_event = gdf_tract.merge(df_population[[2020, 'BCT_ID']], left_on='BCT_txt', right_on='BCT_ID', how='inner')
-        gdf_deaths_per_event['deaths_per_event'] = [m * x / 1000. for x in gdf_deaths_per_event[2020]]
-        gdf_deaths_per_event.rename(columns={2020: 'Pop2020'}, inplace=True)
+        # Allocate deaths per year to boroughs based on population proportion
+        df_borrate['deaths_year_borough'] = self.deaths_year * df_population_borough_proportion
 
-        gdf_events_per_year['BCT_txt'] = gdf_events_per_year['BCT_txt'].astype(str)
+        # Merge borough death rates with tract data
+        gdf_events_per_year = gdf_events_per_year.merge(
+            df_borrate[['deaths_year_borough']],
+            left_on='borocode',
+            right_index=True,
+            how='left'
+        )
 
-        # bring in ecostress data
-        gdf_deaths_per_event = self._join_ecostress(gdf_deaths_per_event, 'Pop2020')
+        # Calculate deaths per event for each borough
+        gdf_events_per_year['deaths_per_event_boro'] = (
+            gdf_events_per_year['deaths_year_borough'] / gdf_events_per_year['Heat_Events_Per_Year']
+        )
+
+        # Calculate deaths per event for each tract
+        # Calculate tract to borough population proportion
+        gdf_events_per_year['tract_to_borough_pop_proportion'] = (
+            gdf_events_per_year['pop_2020'] / gdf_events_per_year.groupby('borocode')['pop_2020'].transform('sum')
+        )
+
+        # Calculate deaths per event for each tract
+        gdf_events_per_year['deaths_per_event'] = (
+            gdf_events_per_year['deaths_per_event_boro'] * gdf_events_per_year['tract_to_borough_pop_proportion']
+        )
+        # # bring in ecostress data
+        gdf_deaths_per_event = self._join_ecostress(gdf_deaths_per_event, 'pop_2020')
 
         gdf_deaths_per_event['deaths_per_event_weighted'] = gdf_deaths_per_event['deaths_per_event'] * gdf_events_per_year['Weighting_Factor']
         gdf_loss = gdf_events_per_year.merge(gdf_deaths_per_event.drop(columns='geometry'), on='BCT_txt', how='left')
         gdf_loss['deaths_year'] = gdf_loss['Heat_Events_Per_Year'] * gdf_loss['deaths_per_event_weighted']
         gdf_loss['Loss_USD'] = gdf_loss['deaths_year'] * self.value_life
 
-        return gdf_loss
+        return gdf_events_per_year
