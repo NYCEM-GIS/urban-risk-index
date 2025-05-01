@@ -17,6 +17,10 @@ class ESL_EXH:
         self.path_ecostress = PATHNAMES.ESL_EXH_ecostress_2020
         self.path_stormevents = PATHNAMES.stormevents_table
         self.path_stormeventsboroughs = PATHNAMES.stormeventsboroughs_table
+        self.path_hosp = PATHNAMES.ESL_EXH_hosp_data
+        self.path_emerg = PATHNAMES.ESL_EXH_emerg_data
+        self.path_hosp_2016 = PATHNAMES.ESL_EXH_hosp_2016
+        self.path_emerg_2016 = PATHNAMES.ESL_EXH_emerg_2016
         self.value_life = PARAMS['value_of_stat_life'].value
         self.yearly_outage = PARAMS['EXH_outage_person_hrs_per_year'].value
         self.loss_outage_hr = PARAMS['loss_day_power'].value / 24.
@@ -34,7 +38,7 @@ class ESL_EXH:
     def _join_ecostress(self, gdf_tract:gpd.GeoDataFrame, pop_field: str) -> gpd.GeoDataFrame:
         # Read Ecostress data
         df_ecostress = pd.read_csv(self.path_ecostress)
-        # df_ecostress['boroct2020'] = df_ecostress['boroct2020'].astype(str)
+        df_ecostress['boroct2020'] = df_ecostress['boroct2020'].astype(str)
 
         gdf_tract = gdf_tract.merge(df_ecostress[['boroct2020', 'PCT90']], left_on='BCT_txt', right_on='boroct2020', how='inner')
 
@@ -94,18 +98,25 @@ class ESL_EXH:
 
     
     def calculate_injury_loss(self):
+        # Load hospitalization and emergency visit data
+        df_hosp = pd.read_csv(self.path_hosp, skiprows=14, skipfooter=5, engine='python')
+        df_hosp_2016 = pd.read_csv(self.path_hosp_2016, skiprows=6, skipfooter=23, engine='python')
+        df_emerg = pd.read_csv(self.path_emerg, skiprows=14, skipfooter=5, engine='python')
+        df_emerg_2016 = pd.read_csv(self.path_emerg_2016, skiprows=6, skipfooter=23, engine='python')
+
+    
         gdf_tract = utils.get_blank_tract(add_pop=True)
         gdf_tract = self._join_ecostress(gdf_tract, 'pop_2020')
 
-        gdf_tract = self._calculate_tract_injury_rate(self.df_hosp, self.df_hosp_2016, gdf_tract, 'Hosp_per_100000')
-        gdf_tract = self._calculate_tract_injury_rate(self.df_emerg, self.df_emerg_2016, gdf_tract, 'Emerg_per_100000')
+        gdf_tract = self._calculate_tract_injury_rate(df_hosp, df_hosp_2016, gdf_tract, 'Hosp_per_100000')
+        gdf_tract = self._calculate_tract_injury_rate(df_emerg, df_emerg_2016, gdf_tract, 'Emerg_per_100000')
 
         gdf_tract['N_emerg_uniq'] = gdf_tract['Emerg_per_100000'] - gdf_tract['Hosp_per_100000']  # unique emergency room visits
         gdf_tract['N_hosp'] = gdf_tract['Hosp_per_100000']  # hospitalizations
 
         loss_moderate_total = utils.convert_USD(self.loss_per_moderate_injury_2016, 2016)  # convert to 2022 dollars
         loss_serious_total = utils.convert_USD(self.loss_per_serious_injury_2016, 2016)  # convert to 2022 dollars
-        gdf_tract['Loss_USD'] = (gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_emerg_uniq'] * loss_moderate_total) * gdf_tract['Weighting Factor']  # total loss in USD
+        gdf_tract['Loss_USD'] = (gdf_tract['N_hosp'] * loss_serious_total + gdf_tract['N_emerg_uniq'] * loss_moderate_total) * gdf_tract['Weighting_Factor']  # total loss in USD
         
         return gdf_tract
 
@@ -147,7 +158,7 @@ class ESL_EXH:
         df_borrate['deaths_year_borough'] = self.deaths_year * df_population_borough_proportion
 
         # Merge borough death rates with tract data
-        gdf_events_per_year = gdf_events_per_year.merge(
+        gdf_deaths_per_event = gdf_events_per_year.merge(
             df_borrate[['deaths_year_borough']],
             left_on='borocode',
             right_index=True,
@@ -155,19 +166,19 @@ class ESL_EXH:
         )
 
         # Calculate deaths per event for each borough
-        gdf_events_per_year['deaths_per_event_boro'] = (
-            gdf_events_per_year['deaths_year_borough'] / gdf_events_per_year['Heat_Events_Per_Year']
+        gdf_deaths_per_event['deaths_per_event_boro'] = (
+            gdf_deaths_per_event['deaths_year_borough'] / gdf_deaths_per_event['Heat_Events_Per_Year']
         )
 
         # Calculate deaths per event for each tract
         # Calculate tract to borough population proportion
-        gdf_events_per_year['tract_to_borough_pop_proportion'] = (
-            gdf_events_per_year['pop_2020'] / gdf_events_per_year.groupby('borocode')['pop_2020'].transform('sum')
+        gdf_deaths_per_event['tract_to_borough_pop_proportion'] = (
+            gdf_deaths_per_event['pop_2020'] / gdf_deaths_per_event.groupby('borocode')['pop_2020'].transform('sum')
         )
 
         # Calculate deaths per event for each tract
-        gdf_events_per_year['deaths_per_event'] = (
-            gdf_events_per_year['deaths_per_event_boro'] * gdf_events_per_year['tract_to_borough_pop_proportion']
+        gdf_deaths_per_event['deaths_per_event'] = (
+            gdf_deaths_per_event['deaths_per_event_boro'] * gdf_deaths_per_event['tract_to_borough_pop_proportion']
         )
         # # bring in ecostress data
         gdf_deaths_per_event = self._join_ecostress(gdf_deaths_per_event, 'pop_2020')
