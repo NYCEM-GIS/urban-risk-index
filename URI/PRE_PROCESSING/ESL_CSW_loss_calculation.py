@@ -78,11 +78,19 @@ class ESL_CSW:
         df_events = df_events[(df_events.StartDate >= datetime.datetime(2014, 1, 1)) &
                               (df_events.EndDate < datetime.datetime(2024, 1, 1))]
 
-        # Vectorized event matching
-        df_tree['Is_Event'] = df_tree['DateInitiated'].apply(
-            lambda date: any((date >= row['StartDate']) & (date <= row['EndDate'] + datetime.timedelta(days=self.service_buffer))
-                             for _, row in df_events.iterrows())
-        )
+        # # Vectorized event matching
+        # df_tree['Is_Event'] = df_tree['DateInitiated'].apply(
+        #     lambda date: any((date >= row['StartDate']) & (date <= row['EndDate'] + datetime.timedelta(days=self.service_buffer))
+        #                      for _, row in df_events.iterrows())
+        # )
+
+        #%% get tree service calls in this range
+        df_tree['Is_Event'] = np.zeros(len(df_tree))
+        df_tree['DateInitiated'] = pd.to_datetime(df_tree['DateInitiated'])
+        for i, idx in enumerate(df_events.index):
+            start_date = df_events.at[idx, 'StartDate']
+            end_date = df_events.at[idx, 'EndDate'] + datetime.timedelta(days=self.service_buffer)
+            df_tree.loc[((df_tree.DateInitiated >= start_date) & (df_tree.DateInitiated <= end_date)), 'Is_Event'] = 1
 
         # Filter tree services
         df_tree = df_tree[(df_tree['Is_Event'] == 1) & (df_tree['HHCImportType'] != 0) & (df_tree['HHCImportType'] != 8)]
