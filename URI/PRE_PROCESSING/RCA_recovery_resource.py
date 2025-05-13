@@ -1,5 +1,6 @@
 #%% read packages
 import geopandas as gpd
+import pandas as pd
 import duckdb
 import os
 import URI.UTILITY.utils_1 as utils
@@ -34,11 +35,11 @@ class RCA_RR:
 
         return con
     
-    def _get_count_within_tract(self, con, table_name:str, uid: str) -> gpd.GeoDataFrame:
+    def _get_count_within_tract(self, con, table_name:str, uid: str) -> pd.DataFrame:
 
         """Count the number of buildings or policies within each tract."""
 
-        gdf = con.sql(
+        df = con.sql(
             f"""
                 SELECT 
                     t.BCT_txt,
@@ -48,15 +49,15 @@ class RCA_RR:
                 LEFT JOIN 
                     {table_name}
                 ON 
-                    ST_Within({table_name}.geom, ST_GeomFromText(t.geometry))
+                    ST_Within(ST_Centroid({table_name}.geom), ST_GeomFromText(t.geometry))
                 WHERE 
                     t.BCT_txt IS NOT NULL
                 GROUP BY 
                     t.BCT_txt
             """
-        )
+        ).df()
 
-        return gdf
+        return df
     
     def _calc_percent_covered(policies, buildings):
         if buildings == 0:
@@ -67,48 +68,24 @@ class RCA_RR:
         
     def calculate_flood_policies(self):
         """Perform all calculations related to flood policies and coverage."""
-        # Load data
-        # gdf_tract = utils.get_blank_tract()
         con = self._connect_to_db()
-        # gdf_tract['geometry'] = gdf_tract['geometry'].to_wkt()
-
-        # con.execute("CREATE TABLE tracts AS SELECT * FROM tracts")
-        # con.execute(f"CREATE TABLE footprints AS SELECT * FROM '{self.path_footprint}'")
-        # con.execute(f"CREATE TABLE policies AS SELECT * FROM '{self.path_fp}'")
 
         gdf_buildings = self._get_count_within_tract(con, 'footprints', 'BIN')
         gdf_policies = self._get_count_within_tract(con, 'policies', 'Policy_Num')
 
-        gdf_fp = gpd.read_file(self.path_fp)
-        gdf_footprint = gpd.read_file(self.path_footprint)
-
-        # Count buildings by tract
-        gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', predicate='within')
-        gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
-        df_count = gdf_join.pivot_table(index='BCT_txt', values=['BIN'], aggfunc=len)
-        gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
-        gdf_tract.fillna(value={'BIN': 0}, inplace=True)
-        gdf_tract.rename(columns={"BIN": "Building_Count"}, inplace=True)
-
-        # Count policies by tract
-        gdf_join = gpd.sjoin(gdf_fp, gdf_tract, how='left', predicate='within')
-        gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
-        df_count = gdf_join.pivot_table(index='BCT_txt', values=['Type'], aggfunc=len)
-        gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
-        gdf_tract.fillna(value={'Type': 0}, inplace=True)
-        gdf_tract.rename(columns={"Type": "Policy_Count"}, inplace=True)
+        gdf_final = pd.concat([gdf_buildings, gdf_policies], axis=1)
 
 
-        gdf_tract['Percent_Coverage'] = gdf_tract.apply(
+        gdf_final['Percent_Coverage'] = gdf_final.apply(
             lambda row: self._calc_percent_covered(
                 row['Policy_Count'], row['Building_Count']),
             axis=1
         )
 
         # Calculate score
-        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Percent_Coverage')
+        gdf_final = utils.calculate_kmeans(gdf_final, data_column='Percent_Coverage')
 
-        return gdf_tract
+        return gdf_final
     
     def export_results(self, gdf_tract):
 
