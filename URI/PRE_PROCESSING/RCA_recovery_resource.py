@@ -1,5 +1,6 @@
 #%% read packages
 import geopandas as gpd
+import duckdb
 import os
 import URI.UTILITY.utils_1 as utils
 import URI.UTILITY.plotting_1 as plotting
@@ -16,17 +17,68 @@ class RCA_RR:
         self.path_results = PATHNAMES.RCA_RR_FP_score
 
             # Calculate percent coverage
+
+    
+    def _connect_to_db(self):
+        """Connect to the DuckDB database and load the required extensions."""
+        con = duckdb.connect()
+        con.install_extension("spatial")
+        con.load_extension("spatial")
+
+        # Load data
+        gdf_tract = utils.get_blank_tract()
+        gdf_tract['geometry'] = gdf_tract['geometry'].to_wkt()
+        con.execute("CREATE TABLE tracts AS SELECT * FROM gdf_tract")
+        con.execute(f"CREATE TABLE footprints AS SELECT * FROM '{self.path_footprint}'")
+        con.execute(f"CREATE TABLE policies AS SELECT * FROM '{self.path_fp}'")
+
+        return con
+    
+    def _get_count_within_tract(self, con, table_name:str, uid: str) -> gpd.GeoDataFrame:
+
+        """Count the number of buildings or policies within each tract."""
+
+        gdf = con.sql(
+            f"""
+                SELECT 
+                    t.BCT_txt,
+                    COUNT({table_name}.{uid}) AS Building_Count
+                FROM 
+                    tracts t
+                LEFT JOIN 
+                    {table_name}
+                ON 
+                    ST_Within({table_name}.geom, ST_GeomFromText(t.geometry))
+                WHERE 
+                    t.BCT_txt IS NOT NULL
+                GROUP BY 
+                    t.BCT_txt
+            """
+        )
+
+        return gdf
+    
     def _calc_percent_covered(policies, buildings):
         if buildings == 0:
             result = 0
         else:
             result = 100. * policies / buildings
         return min(result, 100)
-    
+        
     def calculate_flood_policies(self):
         """Perform all calculations related to flood policies and coverage."""
         # Load data
-        gdf_tract = utils.get_blank_tract()
+        # gdf_tract = utils.get_blank_tract()
+        con = self._connect_to_db()
+        # gdf_tract['geometry'] = gdf_tract['geometry'].to_wkt()
+
+        # con.execute("CREATE TABLE tracts AS SELECT * FROM tracts")
+        # con.execute(f"CREATE TABLE footprints AS SELECT * FROM '{self.path_footprint}'")
+        # con.execute(f"CREATE TABLE policies AS SELECT * FROM '{self.path_fp}'")
+
+        gdf_buildings = self._get_count_within_tract(con, 'footprints', 'BIN')
+        gdf_policies = self._get_count_within_tract(con, 'policies', 'Policy_Num')
+
         gdf_fp = gpd.read_file(self.path_fp)
         gdf_footprint = gpd.read_file(self.path_footprint)
 
