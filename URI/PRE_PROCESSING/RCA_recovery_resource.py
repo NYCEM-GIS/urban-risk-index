@@ -59,7 +59,7 @@ class RCA_RR:
 
         return df
     
-    def _calc_percent_covered(policies, buildings):
+    def _calc_percent_covered(self, policies, buildings):
         if buildings == 0:
             result = 0
         else:
@@ -86,6 +86,40 @@ class RCA_RR:
         gdf_final = utils.calculate_kmeans(gdf_final, data_column='Percent_Coverage')
 
         return gdf_final
+    
+    def calculate_flood_policies_geopandas(self):
+
+        #%% LOAD DATA
+        gdf_tract = utils.get_blank_tract()
+        gdf_fp = gpd.read_file(self.path_fp)
+        gdf_footprint = gpd.read_file(self.path_footprint)
+
+        #%% count buildings by tract and save result in scratch
+        #spatial join to get count
+        gdf_join = gpd.sjoin(gdf_footprint, gdf_tract, how='left', predicate='within')
+        gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
+        df_count = gdf_join.pivot_table(index='BCT_txt', values=['BIN'], aggfunc=len)
+        gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
+        gdf_tract.fillna(value={'BIN': 0}, inplace=True)
+        gdf_tract.rename(columns={"BIN": "Building_Count"}, inplace=True)
+
+        #%%count number of policies by tract
+        gdf_join = gpd.sjoin(gdf_fp, gdf_tract, how='left', predicate='within')
+        gdf_join.dropna(subset={'BCT_txt'}, inplace=True)
+        df_count = gdf_join.pivot_table(index='BCT_txt', values=['Type'], aggfunc=len)
+        gdf_tract = gdf_tract.merge(df_count, left_on='BCT_txt', right_index=True, how='left')
+        gdf_tract.fillna(value={'Type': 0}, inplace=True)
+        gdf_tract.rename(columns={"Type": "Policy_Count"}, inplace=True)
+
+
+        gdf_tract['Percent_Coverage'] = gdf_tract.apply(
+            lambda row: self._calc_percent_covered(row['Policy_Count'], row['Building_Count']),
+        axis=1)
+
+        #%% calculate score
+        gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='Percent_Coverage')
+
+        return gdf_tract
     
     def export_results(self, gdf_tract):
 
@@ -114,3 +148,7 @@ class RCA_RR:
             print(f"Failed to write README: {e}")
 
         print("Finished calculating RR factor RF: flood insurance coverage.")
+
+if __name__ == "__main__":
+    rr = RCA_RR()
+    rr.calculate_flood_policies()
