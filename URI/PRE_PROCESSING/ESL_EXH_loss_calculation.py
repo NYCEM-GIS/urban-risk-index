@@ -180,12 +180,17 @@ class ESL_EXH:
         gdf_deaths_per_event['deaths_per_event'] = (
             gdf_deaths_per_event['deaths_per_event_boro'] * gdf_deaths_per_event['tract_to_borough_pop_proportion']
         )
-        # # bring in ecostress data
+        # bring in ecostress data
         gdf_deaths_per_event = self._join_ecostress(gdf_deaths_per_event, 'pop_2020')
+        # print(gdf_deaths_per_event.columns)
 
-        gdf_deaths_per_event['deaths_per_event_weighted'] = gdf_deaths_per_event['deaths_per_event'] * gdf_events_per_year['Weighting_Factor']
-        gdf_loss = gdf_events_per_year.merge(gdf_deaths_per_event.drop(columns='geometry'), on='BCT_txt', how='left')
-        gdf_loss['deaths_year'] = gdf_loss['Heat_Events_Per_Year'] * gdf_loss['deaths_per_event_weighted']
-        gdf_loss['Loss_USD'] = gdf_loss['deaths_year'] * self.value_life
+        gdf_deaths_per_event['deaths_per_event_weighted'] = gdf_deaths_per_event['deaths_per_event'] * gdf_deaths_per_event['Weighting_Factor']
+        # gdf_loss = gdf_events_per_year.merge(gdf_deaths_per_event.drop(columns='geometry'), on='BCT_txt', how='left')
+        # print(gdf_loss.columns)
 
-        return gdf_events_per_year
+        # gdf_loss['deaths_year'] = gdf_loss['Heat_Events_Per_Year'] * gdf_loss['deaths_per_event_weighted']
+        gdf_deaths_per_event['deaths_year'] = gdf_deaths_per_event['Heat_Events_Per_Year'] * gdf_deaths_per_event['deaths_per_event_weighted']
+        gdf_deaths_per_event['Loss_USD'] = gdf_deaths_per_event['deaths_year'] * self.value_life
+        # gdf_loss['Loss_USD'] = gdf_loss['deaths_year'] * self.value_life
+
+        return gdf_deaths_per_event
