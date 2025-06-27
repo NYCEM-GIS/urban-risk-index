@@ -158,20 +158,9 @@ class RCA_CC:
         gdf_tract.fillna(value=values, inplace=True)
 
         #%% reclassify to score 1-5
-        gdf_tract['Score'] = np.zeros(len(gdf_tract))
-        for i, idx in enumerate(gdf_tract.index):
-            this_value = gdf_tract.at[idx, 'Avg. Participation Score 2018']
-            if this_value <= 21.8:
-                this_score = 1
-            elif this_value <= 26.8:
-                this_score = 2
-            elif this_value <= 31.6:
-                this_score = 3
-            elif this_value <= 37.9:
-                this_score = 4
-            else:
-                this_score = 5
-            gdf_tract.at[idx, 'Score'] = this_score
+        bins = [-np.inf, 21.8, 26.8, 31.6, 37.9, np.inf]
+        labels = [1, 2, 3, 4, 5]
+        gdf_tract['Score'] = pd.cut(gdf_tract['Avg. Participation Score 2018'], bins=bins, labels=labels).astype(int)
 
         return gdf_tract[['BCT_txt', 'Score']].copy()
             
