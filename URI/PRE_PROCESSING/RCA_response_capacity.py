@@ -351,28 +351,6 @@ class RCA_RC:
         gdf_tract = utils.calculate_kmeans(gdf_tract, data_column='walkscore')
         return gdf_tract
 
-    
-    def calculate_kmeans(self, gdf, data_column):
-        """
-        Apply k-means clustering to a GeoDataFrame column.
-        """
-        return utils.calculate_kmeans(gdf, data_column=data_column)
-
-    def export_results(self, gdf, path_results, key):
-        """
-        Export GeoDataFrame results to a file and store them in the results dictionary.
-        """
-        gdf.to_file(path_results)
-        self.results[key] = gdf
-        print(f"Results for {key} saved to {path_results}")
-
-    def plot_notebook(self, gdf, column, title, legend, cmap, plot_type):
-        """
-        Plot results in a Jupyter Notebook.
-        """
-        plotting.plot_notebook(
-            gdf, column=column, title=title, legend=legend, cmap=cmap, type=plot_type
-        )
 # Example usage
 if __name__ == "__main__":
     rca = RCA_RC()
